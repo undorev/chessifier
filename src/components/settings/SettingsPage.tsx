@@ -36,7 +36,7 @@ import {
   spellCheckAtom,
   storedDocumentDirAtom,
 } from "@/state/atoms";
-import { keyMapAtom } from "@/state/keybinds";
+import { keyMapAtom } from "@/state/keybindings";
 import FileInput from "../common/FileInput";
 import BoardSelect from "./BoardSelect";
 import ColorControl from "./ColorControl";
@@ -87,8 +87,8 @@ export default function Page() {
         <Tabs.Tab value="sound" leftSection={<IconVolume size="1rem" />}>
           {t("Settings.Sound")}
         </Tabs.Tab>
-        <Tabs.Tab value="keybinds" leftSection={<IconKeyboard size="1rem" />}>
-          {t("Settings.Keybinds")}
+        <Tabs.Tab value="keybindings" leftSection={<IconKeyboard size="1rem" />}>
+          {t("Settings.Keybindings")}
         </Tabs.Tab>
         <Tabs.Tab value="directories" leftSection={<IconFolder size="1rem" />}>
           {t("Settings.Directories")}
@@ -471,10 +471,10 @@ export default function Page() {
               </Group>
             </Tabs.Panel>
 
-            <Tabs.Panel value="keybinds">
+            <Tabs.Panel value="keybindings">
               <Group>
                 <Text size="lg" fw={500} className={classes.title}>
-                  Keybinds
+                  Keybindings
                 </Text>
                 <Tooltip label="Reset">
                   <ActionIcon onClick={() => setKeyMap(RESET)}>
