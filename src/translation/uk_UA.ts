@@ -142,10 +142,8 @@ export const uk_UA = {
     "Board.Tabs.Info": "Інформація",
     "Board.Practice.Train": "Тренуватися",
     "Board.Practice.Build": "Створити",
-    "Board.Practice.NoPositionForTrain1":
-      "Немає позицій для тренування. Спочатку додайте ходи в цей файл PGN.",
-    "Board.Practice.NoPositionForTrain2":
-      "Необхідно перейти в режим аналізу, щоб додати ходи.",
+    "Board.Practice.NoPositionForTrain1": "Немає позицій для тренування. Спочатку додайте ходи в цей файл PGN.",
+    "Board.Practice.NoPositionForTrain2": "Необхідно перейти в режим аналізу, щоб додати ходи.",
     "Board.Practice.SeeAnser": "Подивитися відповідь",
     "Board.Practice.Practiced": "Відпрацьовано",
     "Board.Practice.Due": "Підлягає тренуванню",
@@ -167,14 +165,12 @@ export const uk_UA = {
     "Board.Analysis.GeneratingReport": "Створення звіту",
     "Board.Analysis.NotAnalysed": "Не проаналізовано",
     "Board.Analysis.EngineRequired": "Потрібен движок",
-    "Board.Analysis.RefDBRequired":
-      "Не вибрано базу даних. Спочатку виберіть базу даних на сторінці баз даних.",
+    "Board.Analysis.RefDBRequired": "Не вибрано базу даних. Спочатку виберіть базу даних на сторінці баз даних.",
     "Board.Analysis.Time": "Час (мс)",
     "Board.Analysis.Reversed": "Зворотний аналіз",
     "Board.Analysis.Reversed.Desc": "Аналізувати гру з останньої позиції.",
     "Board.Analysis.AnnotateNovelties": "Анотувати новинки",
-    "Board.Analysis.AnnotateNovelties.Desc":
-      "Додати коментар до першої позиції, якої немає в базі даних.",
+    "Board.Analysis.AnnotateNovelties.Desc": "Додати коментар до першої позиції, якої немає в базі даних.",
     "Board.Analysis.Analyze": "Аналізувати",
     "Board.Analysis.Advantage": "Перевага",
     "Board.Analysis.Accuracy": "Точність",
@@ -211,8 +207,7 @@ export const uk_UA = {
     "Engines.Add.Name.Autodetect": "Автовизначення",
     "Engines.Add.Elo.Desc": "Ело движка",
     "Engines.Add.ImageFile": "Файл зображення",
-    "Engines.Add.ImageFile.Desc":
-      "Натисніть для вибору файлу зображення (рекомендовано: 60x60)",
+    "Engines.Add.ImageFile.Desc": "Натисніть для вибору файлу зображення (рекомендовано: 60x60)",
     "Engines.Remove.Title": "Видалити движок",
     "Engines.Remove.Message":
       "Ви впевнені, що хочете видалити цей движок із Pawn Appétit?",
@@ -228,26 +223,22 @@ export const uk_UA = {
     "Databases.Add.Convert": "Конвертувати",
     "Databases.Settings.ReferenceDatabase": "Довідкова база даних",
     "Databases.Settings.Indexed": "Проіндексовано",
-    "Databases.Settings.Indexed.Desc":
-      "Індекси використовуються для прискорення пошуку, але займають додаткове місце.",
+    "Databases.Settings.Indexed.Desc": "Індекси використовуються для прискорення пошуку, але займають додаткове місце.",
     "Databases.Settings.Events": "Події",
     "Databases.Settings.Explore": "Досліджувати",
     "Databases.Settings.AdvancedTools": "Розширені інструменти",
     "Databases.Settings.MergePlayers": "Об'єднати гравців",
-    "Databases.Settings.MergePlayers.Desc":
-      "Заміняє всі випадки першого гравця на другого в базі даних.",
+    "Databases.Settings.MergePlayers.Desc": "Заміняє всі випадки першого гравця на другого в базі даних.",
     "Databases.Settings.Merge": "Об'єднати",
     "Databases.Settings.BatchDelete": "Масове видалення",
-    "Databases.Settings.BatchDelete.Desc":
-      "Ці дії безповоротно видалять ігри з бази даних. Використовуйте обережно.",
+    "Databases.Settings.BatchDelete.Desc": "Ці дії безповоротно видалять ігри з бази даних. Використовуйте обережно.",
     "Databases.Settings.RemoveDup": "Видалити дублікати",
     "Databases.Settings.RemoveEmpty": "Видалити порожні ігри",
     "Databases.Settings.Actions": "Дії",
     "Databases.Settings.AddGames": "Додати ігри",
     "Databases.Settings.ExportPGN": "Експортувати в PGN",
     "Databases.Delete.Title": "Видалити базу даних",
-    "Databases.Delete.Message":
-      "Ви впевнені, що хочете видалити цю базу даних?",
+    "Databases.Delete.Message": "Ви впевнені, що хочете видалити цю базу даних?",
 
     "Files.Title": "Файли",
     "Files.FileType": "Тип файлу",
@@ -273,8 +264,7 @@ export const uk_UA = {
     "Settings.Keybinds": "Гарячі клавіші",
     "Settings.Directories": "Каталоги",
 
-    "Settings.Board.Desc":
-      "Налаштувати дошку аналізу та елементи керування грою",
+    "Settings.Board.Desc": "Налаштувати дошку аналізу та елементи керування грою",
     "Settings.PieceDest": "Місця призначення фігур",
     "Settings.PieceDest.Desc": "Показати можливі ходи для кожної фігури",
     "Settings.Arrows": "Стрілки",
@@ -294,24 +284,19 @@ export const uk_UA = {
     "Settings.AutoSave": "Автозбереження",
     "Settings.AutoSave.Desc": "Автоматично зберігати після кожного ходу",
     "Settings.PreviewBoard": "Попередній перегляд дошки",
-    "Settings.PreviewBoard.Desc":
-      "Показувати дошку при наведенні курсора на хід в аналізі",
+    "Settings.PreviewBoard.Desc": "Показувати дошку при наведенні курсора на хід в аналізі",
     "Settings.ScrollThroughMoves": "Прокрутка ходів",
-    "Settings.ScrollThroughMoves.Desc":
-      "Увімкнути або вимкнути прокрутку ходів на дошці",
+    "Settings.ScrollThroughMoves.Desc": "Увімкнути або вимкнути прокрутку ходів на дошці",
     "Settings.Inputs.Desc": "Налаштувати вводи",
     "Settings.Inputs.TextInput": "Текстовий ввод",
     "Settings.Inputs.TextInput.Desc": "Вводити ходи текстом",
     "Settings.Inputs.SpellCheck": "Перевірка орфографії",
-    "Settings.Inputs.SpellCheck.Desc":
-      "Увімкнути або вимкнути перевірку орфографії при вводі тексту",
+    "Settings.Inputs.SpellCheck.Desc": "Увімкнути або вимкнути перевірку орфографії при вводі тексту",
     "Settings.OpeningReport.Desc": "Налаштувати параметри звіту по дебютах",
     "Settings.OpeningReport.PercentCoverage": "Процент покриття",
-    "Settings.OpeningReport.PercentCoverage.Desc":
-      "Процент охоплених ходів у кожній позиції",
+    "Settings.OpeningReport.PercentCoverage.Desc": "Процент охоплених ходів у кожній позиції",
     "Settings.OpeningReport.MinGames": "Мінімальна кількість ігор",
-    "Settings.OpeningReport.MinGames.Desc":
-      "Мінімальна кількість ігор для кожної позиції, щоб бути врахованою",
+    "Settings.OpeningReport.MinGames.Desc": "Мінімальна кількість ігор для кожної позиції, щоб бути врахованою",
     "Settings.Anarchy.Desc": "Веселі опції",
     "Settings.Anarchy.EnPassant": "Примусовий En Passant",
     "Settings.Anarchy.EnPassant.Desc":
@@ -322,8 +307,7 @@ export const uk_UA = {
     "Settings.Appearance.Theme.Light": "Світла",
     "Settings.Appearance.Theme.Dark": "Темна",
     "Settings.Appearance.TitleBar": "Заголовок вікна",
-    "Settings.Appearance.TitleBar.Desc":
-      "Виберіть між стандартною або настроюваною панеллю заголовка",
+    "Settings.Appearance.TitleBar.Desc": "Виберіть між стандартною або настроюваною панеллю заголовка",
     "Settings.Appearance.Language": "Мова",
     "Settings.Appearance.Language.Desc": "Мова програми",
     "Settings.Appearance.TitleBar.Native": "Стандартна",
@@ -333,8 +317,7 @@ export const uk_UA = {
     "Settings.Appearance.PieceSet": "Набір фігур",
     "Settings.Appearance.PieceSet.Desc": "Фігури, що використовуються на дошці",
     "Settings.Appearance.BoardImage": "Зображення дошки",
-    "Settings.Appearance.BoardImage.Desc":
-      "Зображення, яке використовується як фон для дошки",
+    "Settings.Appearance.BoardImage.Desc": "Зображення, яке використовується як фон для дошки",
     "Settings.Appearance.AccentColor": "Основний колір",
     "Settings.Appearance.AccentColor.Desc": "Основний колір програми",
     "Settings.Sound.Desc": "Налаштувати параметри звуку",
@@ -342,11 +325,9 @@ export const uk_UA = {
     "Settings.Sound.Volume.Desc": "Загальна гучність",
     "Settings.Sound.Collection": "Колекція звуків",
     "Settings.Sound.Collection.Desc": "Використовувана колекція звуків",
-    "Settings.Directories.Desc":
-      "Налаштувати каталоги, що використовуються програмою",
+    "Settings.Directories.Desc": "Налаштувати каталоги, що використовуються програмою",
     "Settings.Directories.Files": "Каталог для файлів",
-    "Settings.Directories.Files.Desc":
-      "Тут зберігаються ігрові файли на сторінці файлів",
+    "Settings.Directories.Files.Desc": "Тут зберігаються ігрові файли на сторінці файлів",
 
     "PgnInput.Comments": "Коментарі",
     "PgnInput.Glyphs": "Символи",
