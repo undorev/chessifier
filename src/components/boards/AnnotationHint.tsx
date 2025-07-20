@@ -1,11 +1,8 @@
-import {
-  ANNOTATION_INFO,
-  type Annotation,
-  isBasicAnnotation,
-} from "@/utils/annotation";
-import { squareToCoordinates } from "@/utils/chessops";
 import { Box } from "@mantine/core";
 import type { Color, Square } from "chessops";
+import type { JSX } from "react";
+import { ANNOTATION_INFO, type Annotation } from "@/utils/annotation";
+import { squareToCoordinates } from "@/utils/chessops";
 
 export default function AnnotationHint({
   square,
@@ -49,12 +46,7 @@ export default function AnnotationHint({
               <title>{annotation}</title>
               <defs>
                 <filter id="shadow">
-                  <feDropShadow
-                    dx="0"
-                    dy="1"
-                    floodOpacity="0.3"
-                    stdDeviation="0"
-                  />
+                  <feDropShadow dx="0" dy="1" floodOpacity="0.3" stdDeviation="0" />
                 </filter>
               </defs>
               <g>{glyphToSvg[annotation]}</g>
