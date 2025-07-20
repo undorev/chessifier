@@ -91,7 +91,7 @@ const REQUIRED_DIRS: &[(BaseDirectory, &str)] = &[
     (BaseDirectory::AppData, "presets"),
     (BaseDirectory::AppData, "puzzles"),
     (BaseDirectory::AppData, "documents"),
-    (BaseDirectory::Document, "EnCroissant"),
+    (BaseDirectory::Document, "Chessifier"),
 ];
 
 const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
@@ -179,7 +179,7 @@ fn main() {
     let log_targets = [
         TargetKind::Stdout,
         TargetKind::LogDir {
-            file_name: Some(String::from("en-croissant.log")),
+            file_name: Some(String::from("chessifier.log")),
         },
     ];
 

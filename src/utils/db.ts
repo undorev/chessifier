@@ -13,13 +13,53 @@ import {
 import type { LocalOptions } from "@/components/panels/database/DatabasePanel";
 import { appDataDir, resolve } from "@tauri-apps/api/path";
 import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
-import { fetch } from "@tauri-apps/plugin-http";
 import useSWR from "swr";
 import { unwrap } from "./unwrap";
 
 export type SuccessDatabaseInfo = Extract<DatabaseInfo, { type: "success" }>;
 
 export type Sides = "WhiteBlack" | "BlackWhite" | "Any";
+
+const DATABASES: any[] = [
+    {
+        "title": "Caissabase 2024",
+        "game_count": 5404926,
+        "player_count": 321095,
+        "storage_size": 1318744064,
+        "downloadLink": "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/caissabase_2024.db3"
+    },
+    {
+        "title": "Ajedrez Data - Correspondence",
+        "game_count": 1524027,
+        "player_count": 40547,
+        "storage_size": 328458240,
+        "downloadLink": "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/AJ-COR.db3"
+    },
+    {
+        "title": "Ajedrez Data - OTB",
+        "game_count": 4279012,
+        "player_count": 144015,
+        "storage_size": 993509376,
+        "downloadLink": "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/AJ-OTB.db3"
+    },
+    {
+        "title": "MillionBase",
+        "game_count": 3451068,
+        "player_count": 284403,
+        "storage_size": 779833344,
+        "downloadLink": "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/mb-3.db3"
+    }
+];
+
+const PUZZLE_DATABASES: any[] = [
+    {
+        "title": "Lichess Puzzles",
+        "description": "A collection of all puzzles from Lichess.org",
+        "puzzle_count": 3080529,
+        "storage_size": 339046400,
+        "downloadLink": "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/puzzles.db3"
+    }
+];
 
 export interface CompleteGame {
   game: NormalizedGame;
@@ -122,13 +162,7 @@ export function useDefaultDatabases(opened: boolean) {
   const { data, error, isLoading } = useSWR(
     opened ? "default-dbs" : null,
     async () => {
-      const data = await fetch("https://www.encroissant.org/databases", {
-        method: "GET",
-      });
-      if (!data.ok) {
-        throw new Error("Failed to fetch engines");
-      }
-      return (await data.json()) as SuccessDatabaseInfo[];
+      return DATABASES as SuccessDatabaseInfo[];
     },
   );
   return {
@@ -141,13 +175,7 @@ export function useDefaultDatabases(opened: boolean) {
 export async function getDefaultPuzzleDatabases(): Promise<
   (PuzzleDatabaseInfo & { downloadLink: string })[]
 > {
-  const data = await fetch("https://www.encroissant.org/puzzle_databases", {
-    method: "GET",
-  });
-  if (!data.ok) {
-    throw new Error("Failed to fetch puzzle databases");
-  }
-  return (await data.json()) as (PuzzleDatabaseInfo & {
+  return PUZZLE_DATABASES as (PuzzleDatabaseInfo & {
     downloadLink: string;
   })[];
 }

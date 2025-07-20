@@ -23,7 +23,7 @@
         "bundleMediaFramework": true
       }
     },
-    "publisher": "Francisco Salgueiro",
+    "publisher": "Chessifier Team",
     "shortDescription": "Ultimate Chess Toolkit",
     "longDescription": "",
     "macOS": {
@@ -43,9 +43,9 @@
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420"
   },
-  "productName": "en-croissant",
-  "mainBinaryName": "en-croissant",
-  "identifier": "org.encroissant.app",
+  "productName": "Chessifier",
+  "mainBinaryName": "chessifier",
+  "identifier": "org.chessifier.app",
   "plugins": {
     "cli": {
       "args": [
@@ -57,17 +57,15 @@
       ]
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdGOTBFNjg2MzFGM0RDODUKUldTRjNQTXhodWFRZjc2MTNVeXRONGJkRjdGUXlCeW1MSlZESUczT0U4eE5hKzBmY3M2S0U2L0oK",
-      "endpoints": [
-        "https://www.encroissant.org/updates"
-      ]
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENBQUUwNEI2OTg2RjA5QzUKUldURkNXK1l0Z1N1eW9ldFQwV29oZVBGQVc0RFR6cml2WERFWXlhRDE4di8yaW1EbjRCUUY2bHEK",
+      "endpoints": []
     }
   },
   "app": {
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "En Croissant",
+        "title": "Chessifier",
         "maximized": true,
         "visible": false,
         "decorations": true

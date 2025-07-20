@@ -229,7 +229,7 @@ export const en_US = {
       "Click to select the image file (recommended size: 60x60)",
     "Engines.Remove.Title": "Remove Engine",
     "Engines.Remove.Message":
-      "Are you sure you want to remove this engine from En Croissant?",
+      "Are you sure you want to remove this engine from Chessifier?",
 
     "Databases.Title": "Your Databases",
     "Databases.Card.Games": "Games",
@@ -356,9 +356,9 @@ export const en_US = {
     "Settings.OpeningReport.MinGames.Desc":
       "Minimum number of games in each position for it to be considered",
     "Settings.Anarchy.Desc": "Fun options",
-    "Settings.Anarchy.ForcedEnCroissant": "Forced En Croissant",
-    "Settings.Anarchy.ForcedEnCroissant.Desc":
-      "Forces you to play En Croissant, if it's a legal move.",
+    "Settings.Anarchy.ForcedChessifier": "Forced Chessifier",
+    "Settings.Anarchy.ForcedChessifier.Desc":
+      "Forces you to play Chessifier, if it's a legal move.",
     "Settings.Appearance.Desc": "Customize the look of the app",
     "Settings.Appearance.Theme": "Theme",
     "Settings.Appearance.Theme.Desc": "Overall color scheme",

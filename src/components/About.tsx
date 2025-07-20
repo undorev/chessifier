@@ -1,4 +1,4 @@
-import { Anchor, Modal, Text } from "@mantine/core";
+import { Modal, Text } from "@mantine/core";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { version as OSVersion, arch, type } from "@tauri-apps/plugin-os";
 import { useEffect, useState } from "react";
@@ -34,23 +34,13 @@ function AboutModal({
       centered
       opened={opened}
       onClose={() => setOpened(false)}
-      title="En Croissant"
+      title="Chessifier"
     >
       <Text>Version: {info?.version}</Text>
       <Text>Tauri version: {info?.tauri}</Text>
       <Text>
         OS: {info?.os} {info?.architecture} {info?.osVersion}
       </Text>
-
-      <br />
-
-      <Anchor
-        href="https://www.encroissant.org"
-        target="_blank"
-        rel="noreferrer"
-      >
-        www.encroissant.org
-      </Anchor>
     </Modal>
   );
 }

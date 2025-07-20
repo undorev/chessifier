@@ -1,57 +1,51 @@
-<br />
-<div align="center">
-  <a href="https://github.com/franciscoBSalgueiro/en-croissant">
-    <img width="115" height="115" src="https://github.com/franciscoBSalgueiro/en-croissant/blob/master/src-tauri/icons/icon.png" alt="Logo">
-  </a>
+# Chessifier
 
-<h3 align="center">En Croissant</h3>
+Chessifier is a modern, open-source, cross-platform chess GUI built for power users and enthusiasts. Designed to be intuitive, customizable, and feature-rich, it provides a seamless experience for analyzing games, training repertoires, and managing engines and databases.
 
-  <p align="center">
-    The Ultimate Chess Toolkit
-    <br />
-    <a href="https://www.encroissant.org"><strong>encroissant.org</strong></a>
-    <br />
-    <br />
-    <a href="https://discord.gg/tdYzfDbSSW">Discord Server</a>
-    ·
-    <a href="https://www.encroissant.org/download">Download</a>
-    .
-    <a href="https://www.encroissant.org/docs">Explore the docs</a>
-  </p>
-</div>
+## ✨ Features
 
-En-Croissant is an open-source, cross-platform chess GUI that aims to be powerful, customizable and easy to use.
+- 🔍 Game Analysis
+    Import and analyze games from [lichess.org](https://lichess.org) and [chess.com](https://chess.com).
+- ⚙️ Multi-Engine Support
+    Analyze with any UCI-compatible engine.
+- 🧠 Repertoire Training
+    Build and train your opening repertoire using spaced repetition.
+- 📦 Engine & Database Management
+    Install and manage engines and databases with minimal effort.
+- 🔎 Position Search
+    Search for absolute or partial positions across your game database.
 
+## 🚀 Getting Started
 
-## Features
+### Prerequisites
+Ensure you have the required tools installed for your platform:
+- [Tauri prerequisites](https://tauri.app/start/prerequisites/)
+- [pnpm package manager](https://pnpm.io/)
 
-- Store and analyze your games from [lichess.org](https://lichess.org) and [chess.com](https://chess.com)
-- Multi-engine analysis. Supports all UCI engines
-- Prepare a repertoire and train it with spaced repetition
-- Simple engine and database installation and management
-- Absolute or partial position search in the database
-
-<img src="https://github.com/franciscoBSalgueiro/encroisssant-site/blob/master/assets/showcase.webp" />
-
-## Building from source
-
-Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites) for the requirements on your platform.
-
-En-Croissant uses pnpm as the package manager for dependencies. Refer to the [pnpm install instructions](https://pnpm.io/installation) for how to install it on your platform.
+### Build Instructions
 
 ```bash
-git clone https://github.com/franciscoBSalgueiro/en-croissant
-cd en-croissant
+git clone https://github.com/Chessifier/chessifier
+cd chessifier
 pnpm install
 pnpm build
 ```
 
-The built app can be found at `src-tauri/target/release`
+The compiled application will be available at:
 
-## Donate
+```bash
+src-tauri/target/release
+```
 
-If you wish to support the development of this GUI, you can do so [here](https://encroissant.org/support). All donations are greatly appreciated!
+## 🤝 Contributing
 
-## Contributing
+We welcome contributions! Please refer to the [Contributing Guide](./CONTRIBUTING.md) for details on how to get started.
 
-For contributing to this project please refer to the [Contributing guide](./CONTRIBUTING.md).
+## 💬 Community
+
+Join our [Discord server](https://discord.gg/AseVZvWr2X) to connect with other users, get help, and contribute to discussions.
+
+## 🧱 About This Project
+
+Chessifier is a fork of [En Croissant](https://github.com/franciscoBSalgueiro/en-croissant), extended with additional features, refinements, and a focus on user experience.
+
