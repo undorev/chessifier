@@ -72,6 +72,23 @@ async getEngineLogs(engine: string, tab: string) : Promise<Result<EngineLog[], s
 async memorySize() : Promise<number> {
     return await TAURI_INVOKE("memory_size");
 },
+/**
+ * Gets a random puzzle from the database within the specified rating range
+ * 
+ * This function uses a cache to avoid repeated database queries. The cache is
+ * refreshed when it's empty, when the rating range changes, or when all puzzles
+ * in the cache have been used.
+ * 
+ * # Arguments
+ * * `file` - Path to the puzzle database
+ * * `min_rating` - Minimum puzzle rating to include
+ * * `max_rating` - Maximum puzzle rating to include
+ * 
+ * # Returns
+ * * `Ok(Puzzle)` if a puzzle was found
+ * * `Err(Error::NoPuzzles)` if no puzzles match the criteria
+ * * Other errors if there was a problem accessing the database
+ */
 async getPuzzle(file: string, minRating: number, maxRating: number) : Promise<Result<Puzzle, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_puzzle", { file, minRating, maxRating }) };
@@ -342,6 +359,23 @@ async getPlayers(file: string, query: PlayerQuery) : Promise<Result<QueryRespons
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Gets information about a puzzle database
+ * 
+ * This function retrieves metadata about a puzzle database, including:
+ * - The title (derived from the filename)
+ * - The number of puzzles in the database
+ * - The size of the database file
+ * - The full path to the database file
+ * 
+ * # Arguments
+ * * `file` - Relative path to the puzzle database within the app's data directory
+ * * `app` - Tauri app handle used to resolve the full path
+ * 
+ * # Returns
+ * * `Ok(PuzzleDatabaseInfo)` with the database information
+ * * `Err(Error)` if there was a problem accessing the database or file
+ */
 async getPuzzleDbInfo(file: string) : Promise<Result<PuzzleDatabaseInfo, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_puzzle_db_info", { file }) };
@@ -402,7 +436,31 @@ export type PlayersTime = { white: number; black: number; winc: number; binc: nu
 export type PositionQueryJs = { fen: string; type_: string }
 export type PositionStats = { move: string; white: number; draw: number; black: number }
 export type Puzzle = { id: number; fen: string; moves: string; rating: number; rating_deviation: number; popularity: number; nb_plays: number }
-export type PuzzleDatabaseInfo = { title: string; description: string; puzzleCount: number; storageSize: number; path: string }
+/**
+ * Information about a puzzle database
+ */
+export type PuzzleDatabaseInfo = { 
+/**
+ * The title of the puzzle database (derived from filename)
+ */
+title: string; 
+/**
+ * Description of the puzzle database (currently not populated)
+ * TODO: Consider adding a way to store and retrieve database descriptions
+ */
+description: string; 
+/**
+ * Number of puzzles in the database
+ */
+puzzleCount: number; 
+/**
+ * Size of the database file in bytes
+ */
+storageSize: number; 
+/**
+ * Full path to the database file
+ */
+path: string }
 export type QueryOptions<SortT> = { skipCount: boolean; page?: number | null; pageSize?: number | null; sort: SortT; direction: SortDirection }
 export type QueryResponse<T> = { data: T; count: number | null }
 export type ReportProgress = { progress: number; id: string; finished: boolean }
