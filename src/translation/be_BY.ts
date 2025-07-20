@@ -264,7 +264,7 @@ export const be_BY = {
     "Settings.Anarchy": "Анархія",
     "Settings.Appearance": "Знешні выгляд",
     "Settings.Sound": "Гук",
-    "Settings.Keybinds": "Гарачыя клавішы",
+    "Settings.Keybindings": "Гарачыя клавішы",
     "Settings.Directories": "Каталогі",
 
     "Settings.Board.Desc": "Наладзіць дошку аналізу і элементы кіравання гульнёй",

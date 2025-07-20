@@ -4,7 +4,7 @@ import { useAtomValue } from "jotai";
 import { memo, useContext } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useStore } from "zustand";
-import { keyMapAtom } from "@/state/keybinds";
+import { keyMapAtom } from "@/state/keybindings";
 import { TreeStateContext } from "./TreeStateContext";
 
 function MoveControls({ readOnly }: { readOnly?: boolean }) {
