@@ -1,3 +1,20 @@
+import { ActionIcon, Card, Group, ScrollArea, Select, Stack, Table, Tabs, Text, Tooltip } from "@mantine/core";
+import {
+  IconBook,
+  IconBrush,
+  IconChess,
+  IconFlag,
+  IconFolder,
+  IconKeyboard,
+  IconMouse,
+  IconReload,
+  IconVolume,
+} from "@tabler/icons-react";
+import { useLoaderData } from "@tanstack/react-router";
+import { open } from "@tauri-apps/plugin-dialog";
+import { useAtom } from "jotai";
+import { RESET } from "jotai/utils";
+import { useTranslation } from "react-i18next";
 import {
   autoPromoteAtom,
   autoSaveAtom,
@@ -20,34 +37,6 @@ import {
   storedDocumentDirAtom,
 } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybinds";
-import {
-  ActionIcon,
-  Card,
-  Group,
-  ScrollArea,
-  Select,
-  Stack,
-  Table,
-  Tabs,
-  Text,
-  Tooltip,
-} from "@mantine/core";
-import {
-  IconBook,
-  IconBrush,
-  IconChess,
-  IconFlag,
-  IconFolder,
-  IconKeyboard,
-  IconMouse,
-  IconReload,
-  IconVolume,
-} from "@tabler/icons-react";
-import { useLoaderData } from "@tanstack/react-router";
-import { open } from "@tauri-apps/plugin-dialog";
-import { useAtom } from "jotai";
-import { RESET } from "jotai/utils";
-import { useTranslation } from "react-i18next";
 import FileInput from "../common/FileInput";
 import BoardSelect from "./BoardSelect";
 import ColorControl from "./ColorControl";
@@ -115,12 +104,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Board.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.PieceDest")}</Text>
                   <Text size="xs" c="dimmed">
@@ -129,12 +113,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={showDestsAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Arrows")}</Text>
                   <Text size="xs" c="dimmed">
@@ -143,12 +122,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={showArrowsAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>Move notation</Text>
                   <Text size="xs" c="dimmed">
@@ -162,17 +136,10 @@ export default function Page() {
                   ]}
                   allowDeselect={false}
                   value={moveNotationType}
-                  onChange={(val) =>
-                    setMoveNotationType(val as "letters" | "symbols")
-                  }
+                  onChange={(val) => setMoveNotationType(val as "letters" | "symbols")}
                 />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>Ways to Move Pieces</Text>
                   <Text size="xs" c="dimmed">
@@ -187,18 +154,11 @@ export default function Page() {
                   ]}
                   allowDeselect={false}
                   value={moveMethod}
-                  onChange={(val) =>
-                    setMoveMethod(val as "drag" | "select" | "both")
-                  }
+                  onChange={(val) => setMoveMethod(val as "drag" | "select" | "both")}
                 />
               </Group>
 
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.SnapArrows")}</Text>
                   <Text size="xs" c="dimmed">
@@ -208,12 +168,7 @@ export default function Page() {
                 <SettingsSwitch atom={snapArrowsAtom} />
               </Group>
 
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.ConsecutiveArrows")}</Text>
                   <Text size="xs" c="dimmed">
@@ -222,12 +177,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={showConsecutiveArrowsAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.EraseDrawablesOnClick")}</Text>
                   <Text size="xs" c="dimmed">
@@ -236,12 +186,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={eraseDrawablesOnClickAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.AutoPromition")}</Text>
                   <Text size="xs" c="dimmed">
@@ -250,12 +195,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={autoPromoteAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Coordinates")}</Text>
                   <Text size="xs" c="dimmed">
@@ -264,12 +204,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={showCoordinatesAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.AutoSave")}</Text>
                   <Text size="xs" c="dimmed">
@@ -279,12 +214,7 @@ export default function Page() {
                 <SettingsSwitch atom={autoSaveAtom} />
               </Group>
 
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.PreviewBoard")}</Text>
                   <Text size="xs" c="dimmed">
@@ -293,12 +223,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={previewBoardOnHoverAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.ScrollThroughMoves")}</Text>
                   <Text size="xs" c="dimmed">
@@ -316,12 +241,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Inputs.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Inputs.TextInput")}</Text>
                   <Text size="xs" c="dimmed">
@@ -330,12 +250,7 @@ export default function Page() {
                 </div>
                 <SettingsSwitch atom={moveInputAtom} />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Inputs.SpellCheck")}</Text>
                   <Text size="xs" c="dimmed">
@@ -352,32 +267,17 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.OpeningReport.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.OpeningReport.PercentCoverage")}</Text>
                   <Text size="xs" c="dimmed">
                     {t("Settings.OpeningReport.PercentCoverage.Desc")}
                   </Text>
                 </div>
-                <SettingsNumberInput
-                  atom={percentageCoverageAtom}
-                  min={50}
-                  max={100}
-                  step={1}
-                />
+                <SettingsNumberInput atom={percentageCoverageAtom} min={50} max={100} step={1} />
               </Group>
 
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.OpeningReport.MinGames")}</Text>
                   <Text size="xs" c="dimmed">
@@ -395,12 +295,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Anarchy.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Anarchy.ForcedChessifier")}</Text>
                   <Text size="xs" c="dimmed">
@@ -418,12 +313,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Appearance.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.Theme")}</Text>
                   <Text size="xs" c="dimmed">
@@ -432,12 +322,7 @@ export default function Page() {
                 </div>
                 <ThemeButton />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.Language")}</Text>
                   <Text size="xs" c="dimmed">
@@ -503,12 +388,7 @@ export default function Page() {
                   }}
                 />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.TitleBar")}</Text>
                   <Text size="xs" c="dimmed">
@@ -524,12 +404,7 @@ export default function Page() {
                   }}
                 />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.FontSize")}</Text>
                   <Text size="xs" c="dimmed">
@@ -538,12 +413,7 @@ export default function Page() {
                 </div>
                 <FontSizeSlider />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.PieceSet")}</Text>
                   <Text size="xs" c="dimmed">
@@ -552,12 +422,7 @@ export default function Page() {
                 </div>
                 <PiecesSelect />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.BoardImage")}</Text>
                   <Text size="xs" c="dimmed">
@@ -566,12 +431,7 @@ export default function Page() {
                 </div>
                 <BoardSelect />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Appearance.AccentColor")}</Text>
                   <Text size="xs" c="dimmed">
@@ -591,12 +451,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Sound.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Sound.Volume")}</Text>
                   <Text size="xs" c="dimmed">
@@ -605,12 +460,7 @@ export default function Page() {
                 </div>
                 <VolumeSlider />
               </Group>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Sound.Collection")}</Text>
                   <Text size="xs" c="dimmed">
@@ -664,12 +514,7 @@ export default function Page() {
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Directories.Desc")}
               </Text>
-              <Group
-                justify="space-between"
-                wrap="nowrap"
-                gap="xl"
-                className={classes.item}
-              >
+              <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                 <div>
                   <Text>{t("Settings.Directories.Files")}</Text>
                   <Text size="xs" c="dimmed">

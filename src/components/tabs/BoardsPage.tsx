@@ -1,17 +1,17 @@
-import { commands } from "@/bindings";
-import { activeTabAtom, tabsAtom } from "@/state/atoms";
-import { keyMapAtom } from "@/state/keybinds";
-import { type Tab, createTab, genID } from "@/utils/tabs";
-import { unwrap } from "@/utils/unwrap";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { ActionIcon, ScrollArea, Tabs } from "@mantine/core";
 import { useHotkeys, useToggle } from "@mantine/hooks";
 import { IconPlus } from "@tabler/icons-react";
-import { atom, useAtom, useAtomValue } from "jotai";
-import { useCallback, useEffect, useTransition } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { type JSX, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Mosaic, type MosaicNode } from "react-mosaic-component";
 import { match } from "ts-pattern";
+import { commands } from "@/bindings";
+import { activeTabAtom, tabsAtom } from "@/state/atoms";
+import { keyMapAtom } from "@/state/keybinds";
+import { createTab, genID, type Tab } from "@/utils/tabs";
+import { unwrap } from "@/utils/unwrap";
 import BoardAnalysis from "../boards/BoardAnalysis";
 import BoardGame from "../boards/BoardGame";
 import { TreeStateProvider } from "../common/TreeStateContext";
@@ -155,106 +155,85 @@ export default function BoardsPage() {
   ]);
 
   return (
-    <>
-      <Tabs
-        value={activeTab}
-        onChange={(v) => setActiveTab(v)}
-        keepMounted={false}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          width: "100%",
-        }}
-      >
-        <ScrollArea h="3.75rem" px="md" pt="sm" scrollbarSize={8}>
-          <DragDropContext
-            onDragEnd={({ destination, source }) =>
-              destination?.index !== undefined &&
-              setTabs((prev) => {
-                const result = Array.from(prev);
-                const [removed] = result.splice(source.index, 1);
-                result.splice(destination.index, 0, removed);
-                return result;
-              })
-            }
-          >
-            <Droppable droppableId="droppable" direction="horizontal">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  style={{ display: "flex" }}
+    <Tabs
+      value={activeTab}
+      onChange={(v) => setActiveTab(v)}
+      keepMounted={false}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      <ScrollArea h="3.75rem" px="md" pt="sm" scrollbarSize={8}>
+        <DragDropContext
+          onDragEnd={({ destination, source }) =>
+            destination?.index !== undefined &&
+            setTabs((prev) => {
+              const result = Array.from(prev);
+              const [removed] = result.splice(source.index, 1);
+              result.splice(destination.index, 0, removed);
+              return result;
+            })
+          }
+        >
+          <Droppable droppableId="droppable" direction="horizontal">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps} style={{ display: "flex" }}>
+                {tabs.map((tab, i) => (
+                  <Draggable key={tab.value} draggableId={tab.value} index={i}>
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                        <BoardTab
+                          tab={tab}
+                          setActiveTab={setActiveTab}
+                          closeTab={closeTab}
+                          renameTab={renameTab}
+                          duplicateTab={duplicateTab}
+                          selected={activeTab === tab.value}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+                <ActionIcon
+                  variant="default"
+                  onClick={() =>
+                    createTab({
+                      tab: {
+                        name: t("Tab.NewTab"),
+                        type: "new",
+                      },
+                      setTabs,
+                      setActiveTab,
+                    })
+                  }
+                  size="lg"
+                  classNames={{
+                    root: classes.newTab,
+                  }}
                 >
-                  {tabs.map((tab, i) => (
-                    <Draggable
-                      key={tab.value}
-                      draggableId={tab.value}
-                      index={i}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <BoardTab
-                            tab={tab}
-                            setActiveTab={setActiveTab}
-                            closeTab={closeTab}
-                            renameTab={renameTab}
-                            duplicateTab={duplicateTab}
-                            selected={activeTab === tab.value}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                  <ActionIcon
-                    variant="default"
-                    onClick={() =>
-                      createTab({
-                        tab: {
-                          name: t("Tab.NewTab"),
-                          type: "new",
-                        },
-                        setTabs,
-                        setActiveTab,
-                      })
-                    }
-                    size="lg"
-                    classNames={{
-                      root: classes.newTab,
-                    }}
-                  >
-                    <IconPlus />
-                  </ActionIcon>
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </ScrollArea>
-        {tabs.map((tab) => (
-          <Tabs.Panel
-            key={tab.value}
-            value={tab.value}
-            h="100%"
-            w="100%"
-            pb="sm"
-            px="sm"
-          >
-            <TabSwitch
-              tab={tab}
-              saveModalOpened={saveModalOpened}
-              toggleSaveModal={toggleSaveModal}
-              closeTab={closeTab}
-              activeTab={activeTab}
-            />
-          </Tabs.Panel>
-        ))}
-      </Tabs>
-    </>
+                  <IconPlus />
+                </ActionIcon>
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </ScrollArea>
+      {tabs.map((tab) => (
+        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+          <TabSwitch
+            tab={tab}
+            saveModalOpened={saveModalOpened}
+            toggleSaveModal={toggleSaveModal}
+            closeTab={closeTab}
+            activeTab={activeTab}
+          />
+        </Tabs.Panel>
+      ))}
+    </Tabs>
   );
 }
 
@@ -302,6 +281,7 @@ function TabSwitch({
     .with("play", () => (
       <TreeStateProvider id={tab.value}>
         <Mosaic<ViewId>
+          // @ts-ignore
           renderTile={(id) => fullLayout[id]}
           value={windowsState.currentNode}
           onChange={(currentNode) => setWindowsState({ currentNode })}
@@ -313,6 +293,7 @@ function TabSwitch({
     .with("analysis", () => (
       <TreeStateProvider id={tab.value}>
         <Mosaic<ViewId>
+          // @ts-ignore
           renderTile={(id) => fullLayout[id]}
           value={windowsState.currentNode}
           onChange={(currentNode) => setWindowsState({ currentNode })}
@@ -329,6 +310,7 @@ function TabSwitch({
     .with("puzzles", () => (
       <TreeStateProvider id={tab.value}>
         <Mosaic<ViewId>
+          // @ts-ignore
           renderTile={(id) => fullLayout[id]}
           value={windowsState.currentNode}
           onChange={(currentNode) => setWindowsState({ currentNode })}

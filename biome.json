@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "files": {
-        "ignore": [
+        "experimentalScannerIgnores": [
             "src/bindings/generated.ts",
             "src/routeTree.gen.ts"
         ]
@@ -11,7 +11,7 @@
         "formatWithErrors": false,
         "indentStyle": "space",
         "indentWidth": 2,
-        "lineWidth": 80,
+        "lineWidth": 120,
         "lineEnding": "lf"
     },
     "linter": {
