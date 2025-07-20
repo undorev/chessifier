@@ -16,7 +16,7 @@ import {
   currentTabSelectedAtom,
   enableAllAtom,
 } from "@/state/atoms";
-import { keyMapAtom } from "@/state/keybinds";
+import { keyMapAtom } from "@/state/keybindings";
 import { defaultPGN, getVariationLine } from "@/utils/chess";
 import { saveToFile } from "@/utils/tabs";
 import GameNotation from "../common/GameNotation";

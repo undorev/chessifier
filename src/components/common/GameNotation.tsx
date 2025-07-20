@@ -19,7 +19,7 @@ import { useStore } from "zustand";
 import { Comment } from "@/components/common/Comment";
 import { TreeStateContext } from "@/components/common/TreeStateContext";
 import { currentInvisibleAtom } from "@/state/atoms";
-import { keyMapAtom } from "@/state/keybinds";
+import { keyMapAtom } from "@/state/keybindings";
 import { getNodeAtPath, type TreeNode } from "@/utils/treeReducer";
 import CompleteMoveCell from "./CompleteMoveCell";
 import * as styles from "./GameNotation.css";

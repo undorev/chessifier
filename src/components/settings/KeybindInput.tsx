@@ -5,7 +5,7 @@ import cx from "clsx";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
-import { keyMapAtom } from "@/state/keybinds";
+import { keyMapAtom } from "@/state/keybindings";
 import * as classes from "./KeybindInput.css";
 
 function KeybindInput({
