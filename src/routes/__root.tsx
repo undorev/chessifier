@@ -174,11 +174,6 @@ function RootLayout() {
         label: t("Menu.Help"),
         options: [
           {
-            label: t("Menu.Help.Documentation"),
-            id: "documentation",
-            action: () => shellOpen("https://encroissant.org/docs/"),
-          },
-          {
             label: t("Menu.Help.ClearSavedData"),
             id: "clear_saved_data",
             action: () => {
@@ -197,7 +192,7 @@ function RootLayout() {
             label: t("Menu.Help.OpenLogs"),
             id: "logs",
             action: async () => {
-              const path = await resolve(await appLogDir(), "en-croissant.log");
+              const path = await resolve(await appLogDir(), "pawn-appetit.log");
               notifications.show({
                 title: "Logs",
                 message: `Opened logs in ${path}`,

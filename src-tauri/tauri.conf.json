@@ -1,4 +1,9 @@
 {
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Pawn Appetit",
+  "version": "0.1.0",
+  "mainBinaryName": "pawn-appetit",
+  "identifier": "com.pawnappetit",
   "bundle": {
     "active": true,
     "category": "BoardGame",
@@ -23,7 +28,7 @@
         "bundleMediaFramework": true
       }
     },
-    "publisher": "Francisco Salgueiro",
+    "publisher": "ChessKitchen Team",
     "shortDescription": "Ultimate Chess Toolkit",
     "longDescription": "",
     "macOS": {
@@ -35,7 +40,7 @@
     },
     "resources": [],
     "targets": "all",
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": true
   },
   "build": {
     "beforeDevCommand": "pnpm start-vite",
@@ -43,9 +48,6 @@
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420"
   },
-  "productName": "en-croissant",
-  "mainBinaryName": "en-croissant",
-  "identifier": "org.encroissant.app",
   "plugins": {
     "cli": {
       "args": [
@@ -57,9 +59,9 @@
       ]
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdGOTBFNjg2MzFGM0RDODUKUldTRjNQTXhodWFRZjc2MTNVeXRONGJkRjdGUXlCeW1MSlZESUczT0U4eE5hKzBmY3M2S0U2L0oK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENBQUUwNEI2OTg2RjA5QzUKUldURkNXK1l0Z1N1eW9ldFQwV29oZVBGQVc0RFR6cml2WERFWXlhRDE4di8yaW1EbjRCUUY2bHEK",
       "endpoints": [
-        "https://www.encroissant.org/updates"
+        "https://github.com/ChessKitchen/pawn-appetit/releases/latest/download/latest.json"
       ]
     }
   },
@@ -67,10 +69,10 @@
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "En Croissant",
+        "title": "Pawn Appétit",
         "maximized": true,
         "visible": false,
-        "decorations": true
+        "decorations": false
       }
     ],
     "security": {

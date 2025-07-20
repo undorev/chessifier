@@ -215,7 +215,7 @@ export const be_BY = {
       "Націсніце для выбару файла выявы (рэкамендуецца: 60x60)",
     "Engines.Remove.Title": "Выдаліць рухавік",
     "Engines.Remove.Message":
-      "Вы ўпэўнены, што хочаце выдаліць гэты рухавік з En Croissant?",
+      "Вы ўпэўнены, што хочаце выдаліць гэты рухавік з Pawn Appétit?",
 
     "Databases.Title": "Базы дадзеных",
     "Databases.Card.Games": "Гульні",
@@ -313,9 +313,9 @@ export const be_BY = {
     "Settings.OpeningReport.MinGames.Desc":
       "Мінімальная колькасць гульняў для кожнай пазіцыі, каб быць улічанай",
     "Settings.Anarchy.Desc": "Вясёлыя опцыі",
-    "Settings.Anarchy.ForcedEnCroissant": "Прымусовы En Croissant",
-    "Settings.Anarchy.ForcedEnCroissant.Desc":
-      "Змушае рабіць ход En Croissant, калі гэта легальны ход.",
+    "Settings.Anarchy.EnPassant": "Прымусовы En Passant",
+    "Settings.Anarchy.EnPassant.Desc":
+      "Змушае рабіць ход En Passant, калі гэта легальны ход.",
     "Settings.Appearance.Desc": "Наладзіць знешні выгляд праграмы",
     "Settings.Appearance.Theme": "Тэма",
     "Settings.Appearance.Theme.Desc": "Агульная каляровая схема",

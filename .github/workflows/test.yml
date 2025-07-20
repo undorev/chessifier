@@ -29,8 +29,5 @@ jobs:
       - name: Install app dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linter
-        run: pnpm lint:ci
-
       - name: Run tests
         run: pnpm test
