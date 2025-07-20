@@ -58,7 +58,9 @@
     },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENBQUUwNEI2OTg2RjA5QzUKUldURkNXK1l0Z1N1eW9ldFQwV29oZVBGQVc0RFR6cml2WERFWXlhRDE4di8yaW1EbjRCUUY2bHEK",
-      "endpoints": []
+      "endpoints": [
+        "https://github.com/Chessifier/chessifier/releases/latest/download/latest.json"
+      ]
     }
   },
   "app": {
