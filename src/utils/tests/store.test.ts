@@ -55,6 +55,9 @@ const treeE4D5: () => TreeState = () => ({
     annotations: [],
     comment: "",
   },
+  report: {
+    inProgress: false,
+  },
 });
 
 const treeE4D5Nf3: () => TreeState = () => ({
@@ -122,6 +125,9 @@ const getNewState = () => {
     position: s.position,
     headers: s.headers,
     dirty: s.dirty,
+    report: {
+      inProgress: false,
+    },
   };
 };
 
