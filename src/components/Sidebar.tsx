@@ -28,7 +28,7 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
   );
 }
 
-const linksdata = [
+export const linksdata = [
   { icon: IconChess, label: "Board", url: "/" },
   { icon: IconUser, label: "User", url: "/accounts" },
   { icon: IconFiles, label: "Files", url: "/files" },

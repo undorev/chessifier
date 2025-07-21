@@ -70,7 +70,8 @@
         "title": "Chessifier",
         "maximized": true,
         "visible": false,
-        "decorations": true
+        "decorations": true,
+        "minWidth": 800
       }
     ],
     "security": {
