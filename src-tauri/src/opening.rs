@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use shakmaty::{fen::Fen, san::San, Chess, EnPassantMode, Position, Setup};
 
 use lazy_static::lazy_static;
-use specta::{Type};
+use specta::Type;
 use strsim::{jaro_winkler, sorensen_dice};
 
 use crate::error::Error;
