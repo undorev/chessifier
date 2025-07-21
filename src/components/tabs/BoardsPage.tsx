@@ -215,14 +215,15 @@ export default function BoardsPage() {
         </DragDropContext>
       </ScrollArea>
       {tabs.map((tab) => (
-        <TabSwitch
-          key={tab.value}
-          tab={tab}
-          saveModalOpened={saveModalOpened}
-          toggleSaveModal={toggleSaveModal}
-          closeTab={closeTab}
-          activeTab={activeTab}
-        />
+        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+          <TabSwitch
+            tab={tab}
+            saveModalOpened={saveModalOpened}
+            toggleSaveModal={toggleSaveModal}
+            closeTab={closeTab}
+            activeTab={activeTab}
+          />
+        </Tabs.Panel>
       ))}
     </Tabs>
   );
@@ -271,47 +272,41 @@ function TabSwitch({
     .with("new", () => <NewTabHome id={tab.value} />)
     .with("play", () => (
       <TreeStateProvider id={tab.value}>
-        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-          <Mosaic<ViewId>
-            renderTile={(id) => fullLayout[id]}
-            value={windowsState.currentNode}
-            onChange={(currentNode) => setWindowsState({ currentNode })}
-            resize={{ minimumPaneSizePercentage: 0 }}
-          />
-          <BoardGame />
-        </Tabs.Panel>
+        <Mosaic<ViewId>
+          renderTile={(id) => fullLayout[id]}
+          value={windowsState.currentNode}
+          onChange={(currentNode) => setWindowsState({ currentNode })}
+          resize={{ minimumPaneSizePercentage: 0 }}
+        />
+        <BoardGame />
       </TreeStateProvider>
     ))
     .with("analysis", () => (
       <TreeStateProvider id={tab.value}>
-          <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-            <Mosaic<ViewId>
-              renderTile={(id) => fullLayout[id]}
-              value={windowsState.currentNode}
-              onChange={(currentNode) => setWindowsState({ currentNode })}
-              resize={{ minimumPaneSizePercentage: 0 }}
-            />
-            <ReportProgressSubscriber id={`report_${tab.value}`} />
-            <BoardAnalysis />
-            <ConfirmChangesModal
-              opened={saveModalOpened}
-              toggle={toggleSaveModal}
-              closeTab={() => closeTab(activeTab, true)}
-            />
-          </Tabs.Panel>
+        <Mosaic<ViewId>
+          renderTile={(id) => fullLayout[id]}
+          value={windowsState.currentNode}
+          onChange={(currentNode) => setWindowsState({ currentNode })}
+          resize={{ minimumPaneSizePercentage: 0 }}
+        />
+        <ReportProgressSubscriber id={`report_${tab.value}`} />
+        <BoardAnalysis />
+        <ConfirmChangesModal
+          opened={saveModalOpened}
+          toggle={toggleSaveModal}
+          closeTab={() => closeTab(activeTab, true)}
+        />
       </TreeStateProvider>
     ))
     .with("puzzles", () => (
       <TreeStateProvider id={tab.value}>
-        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-          <Mosaic<ViewId>
-            renderTile={(id) => fullLayout[id]}
-            value={windowsState.currentNode}
-            onChange={(currentNode) => setWindowsState({ currentNode })}
-            resize={{ minimumPaneSizePercentage: 0 }}
-          />
-          <Puzzles id={tab.value} />
-        </Tabs.Panel>
+        <Mosaic<ViewId>
+          renderTile={(id) => fullLayout[id]}
+          value={windowsState.currentNode}
+          onChange={(currentNode) => setWindowsState({ currentNode })}
+          resize={{ minimumPaneSizePercentage: 0 }}
+        />
+        <Puzzles id={tab.value} />
       </TreeStateProvider>
     ))
     .exhaustive();
