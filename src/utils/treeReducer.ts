@@ -28,6 +28,8 @@ export interface TreeNode {
 }
 
 export interface ReportState {
+  progress: number;
+  isCompleted: boolean;
   inProgress: boolean;
 }
 
@@ -106,6 +108,8 @@ export function defaultTree(fen?: string): TreeState {
       site: "",
     },
     report: {
+      progress: 0,
+      isCompleted: false,
       inProgress: false,
     },
   };

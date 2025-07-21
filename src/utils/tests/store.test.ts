@@ -56,7 +56,9 @@ const treeE4D5: () => TreeState = () => ({
     comment: "",
   },
   report: {
+    progress: 0,
     inProgress: false,
+    isCompleted: false,
   },
 });
 
@@ -126,7 +128,9 @@ const getNewState = () => {
     headers: s.headers,
     dirty: s.dirty,
     report: {
-      inProgress: false,
+      progress: s.report.progress,
+      inProgress: s.report.inProgress,
+      isCompleted: s.report.isCompleted,
     },
   };
 };
