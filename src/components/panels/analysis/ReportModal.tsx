@@ -33,7 +33,7 @@ function ReportModal({
   is960: boolean;
   reportingMode: boolean;
   toggleReportingMode: () => void;
-  setInProgress: (value: boolean) => void;
+  setInProgress: (progress: boolean) => void;
 }) {
   const { t } = useTranslation();
 

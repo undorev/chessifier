@@ -4,12 +4,11 @@ import { IconZoomCheck } from "@tabler/icons-react";
 import cx from "clsx";
 import equal from "fast-deep-equal";
 import { useAtomValue } from "jotai";
-import React, { memo, Suspense, useContext, useMemo, useState } from "react";
+import React, { memo, Suspense, useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
-import { events } from "@/bindings";
 import EvalChart from "@/components/common/EvalChart";
-import ProgressButton from "@/components/common/ProgressButton";
+import ProgressButton from "@/components/common/ProgressButtonWithOutState";
 import { TreeStateContext } from "@/components/common/TreeStateContext";
 import { activeTabAtom } from "@/state/atoms";
 import { ANNOTATION_INFO, isBasicAnnotation } from "@/utils/annotation";
@@ -26,10 +25,12 @@ function ReportPanel() {
   const root = useStore(store, (s) => s.root);
   const headers = useStore(store, (s) => s.headers);
 
-  const [reportingMode, toggleReportingMode] = useToggle();
-
+  const progress = useStore(store, (s) => s.report.progress);
+  const isCompleted = useStore(store, (s) => s.report.isCompleted);
   const inProgress = useStore(store, (s) => s.report.inProgress);
   const setInProgress = useStore(store, (s) => s.setReportInProgress);
+
+  const [reportingMode, toggleReportingMode] = useToggle();
 
   const stats = useMemo(() => getGameStats(root), [root]);
 
@@ -57,19 +58,18 @@ function ReportPanel() {
           <div>
             <ProgressButton
               id={`report_${activeTab}`}
-              redoable
-              disabled={root.children.length === 0}
-              leftIcon={<IconZoomCheck size="0.875rem" />}
               onClick={() => toggleReportingMode()}
-              initInstalled={false}
-              progressEvent={events.reportProgress}
+              leftIcon={<IconZoomCheck size="0.875rem" />}
               labels={{
                 action: t("Board.Analysis.GenerateReport"),
                 completed: t("Board.Analysis.ReportGenerated"),
                 inProgress: t("Board.Analysis.GeneratingReport"),
               }}
+              disabled={root.children.length === 0}
+              redoable
               inProgress={inProgress}
-              setInProgress={setInProgress}
+              progress={progress}
+              completed={isCompleted}
             />
           </div>
         </Group>
