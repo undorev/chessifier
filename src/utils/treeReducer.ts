@@ -10,6 +10,7 @@ export interface TreeState {
   headers: GameHeaders;
   position: number[];
   dirty: boolean;
+  report: ReportState;
 }
 
 export interface TreeNode {
@@ -24,6 +25,10 @@ export interface TreeNode {
   annotations: Annotation[];
   comment: string;
   clock?: number;
+}
+
+export interface ReportState {
+  inProgress: boolean;
 }
 
 export type ListNode = {
@@ -99,6 +104,9 @@ export function defaultTree(fen?: string): TreeState {
       result: "*",
       event: "",
       site: "",
+    },
+    report: {
+      inProgress: false,
     },
   };
 }

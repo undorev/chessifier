@@ -5,9 +5,9 @@ import { IconDashboard, IconFileText, IconHome, IconSearch, IconSettings } from 
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import type { JSX, SVGProps } from "react";
+import { useTranslation } from "react-i18next";
 import { linksdata } from "./Sidebar";
 import * as classes from "./TopBar.css";
-import { useTranslation } from "react-i18next";
 
 const appWindow = getCurrentWebviewWindow();
 

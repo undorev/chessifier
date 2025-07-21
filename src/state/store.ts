@@ -2,7 +2,7 @@ import type { DrawShape } from "chessground/draw";
 import { isNormal, type Move } from "chessops";
 import { INITIAL_FEN, makeFen } from "chessops/fen";
 import { makeSan, parseSan } from "chessops/san";
-import { produce } from "immer";
+import { type Draft, produce } from "immer";
 import { createStore, type StateCreator } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { BestMoves, Outcome, Score } from "@/bindings";
@@ -22,12 +22,7 @@ import {
   treeIteratorMainLine,
 } from "@/utils/treeReducer";
 
-export interface TreeStoreState {
-  root: TreeNode;
-  headers: GameHeaders;
-  position: number[];
-  dirty: boolean;
-
+export interface TreeStoreState extends TreeState {
   currentNode: () => TreeNode;
 
   goToNext: () => void;
@@ -80,6 +75,8 @@ export interface TreeStoreState {
       is_sacrifice: boolean;
     }[],
   ) => void;
+
+  setReportInProgress: (value: boolean) => void;
 
   setState: (state: TreeState) => void;
   reset: () => void;
@@ -444,7 +441,13 @@ export const createTreeStore = (id?: string, initialTree?: TreeState) => {
           addAnalysis(state, analysis);
         }),
       ),
-
+    setReportInProgress: (value: boolean) => {
+      set(
+        produce((state: Draft<TreeStoreState>) => {
+          state.report.inProgress = value;
+        }),
+      );
+    },
     clearShapes: () =>
       set(
         produce((state) => {
