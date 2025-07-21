@@ -33,7 +33,7 @@ function ReportModal({
   is960: boolean;
   reportingMode: boolean;
   toggleReportingMode: () => void;
-  setInProgress: React.Dispatch<React.SetStateAction<boolean>>;
+  setInProgress: (value: boolean) => void;
 }) {
   const { t } = useTranslation();
 

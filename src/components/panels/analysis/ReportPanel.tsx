@@ -27,7 +27,9 @@ function ReportPanel() {
   const headers = useStore(store, (s) => s.headers);
 
   const [reportingMode, toggleReportingMode] = useToggle();
-  const [inProgress, setInProgress] = useState(false);
+
+  const inProgress = useStore(store, (s) => s.report.inProgress);
+  const setInProgress = useStore(store, (s) => s.setReportInProgress);
 
   const stats = useMemo(() => getGameStats(root), [root]);
 
