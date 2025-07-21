@@ -232,7 +232,7 @@ function RootLayout() {
         isNative
           ? undefined
           : {
-              height: "2.5rem",
+              height: "35px",
             }
       }
       styles={{
