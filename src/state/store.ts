@@ -76,6 +76,8 @@ export interface TreeStoreState extends TreeState {
     }[],
   ) => void;
 
+  setReportProgress: (progress: number) => void;
+  setReportCompleted: (isCompleted: boolean) => void;
   setReportInProgress: (value: boolean) => void;
 
   setState: (state: TreeState) => void;
@@ -441,6 +443,20 @@ export const createTreeStore = (id?: string, initialTree?: TreeState) => {
           addAnalysis(state, analysis);
         }),
       ),
+    setReportProgress: (value: number) => {
+      set(
+        produce((state: Draft<TreeStoreState>) => {
+          state.report.progress = value;
+        }),
+      );
+    },
+    setReportCompleted: (value: boolean) => {
+      set(
+        produce((state: Draft<TreeStoreState>) => {
+          state.report.isCompleted = value;
+        }),
+      );
+    },
     setReportInProgress: (value: boolean) => {
       set(
         produce((state: Draft<TreeStoreState>) => {

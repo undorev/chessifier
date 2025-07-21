@@ -24,6 +24,7 @@ import "react-mosaic-component/react-mosaic-component.css";
 
 import "@/styles/react-mosaic.css";
 import { atomWithStorage } from "jotai/utils";
+import ReportProgressSubscriber from "../panels/analysis/ReportProgressSubscriber";
 import * as classes from "./BoardsPage.css";
 
 export default function BoardsPage() {
@@ -214,15 +215,14 @@ export default function BoardsPage() {
         </DragDropContext>
       </ScrollArea>
       {tabs.map((tab) => (
-        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-          <TabSwitch
-            tab={tab}
-            saveModalOpened={saveModalOpened}
-            toggleSaveModal={toggleSaveModal}
-            closeTab={closeTab}
-            activeTab={activeTab}
-          />
-        </Tabs.Panel>
+        <TabSwitch
+          key={tab.value}
+          tab={tab}
+          saveModalOpened={saveModalOpened}
+          toggleSaveModal={toggleSaveModal}
+          closeTab={closeTab}
+          activeTab={activeTab}
+        />
       ))}
     </Tabs>
   );
@@ -271,43 +271,47 @@ function TabSwitch({
     .with("new", () => <NewTabHome id={tab.value} />)
     .with("play", () => (
       <TreeStateProvider id={tab.value}>
-        <Mosaic<ViewId>
-          // @ts-ignore
-          renderTile={(id) => fullLayout[id]}
-          value={windowsState.currentNode}
-          onChange={(currentNode) => setWindowsState({ currentNode })}
-          resize={{ minimumPaneSizePercentage: 0 }}
-        />
-        <BoardGame />
+        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+          <Mosaic<ViewId>
+            renderTile={(id) => fullLayout[id]}
+            value={windowsState.currentNode}
+            onChange={(currentNode) => setWindowsState({ currentNode })}
+            resize={{ minimumPaneSizePercentage: 0 }}
+          />
+          <BoardGame />
+        </Tabs.Panel>
       </TreeStateProvider>
     ))
     .with("analysis", () => (
       <TreeStateProvider id={tab.value}>
-        <Mosaic<ViewId>
-          // @ts-ignore
-          renderTile={(id) => fullLayout[id]}
-          value={windowsState.currentNode}
-          onChange={(currentNode) => setWindowsState({ currentNode })}
-          resize={{ minimumPaneSizePercentage: 0 }}
-        />
-        <BoardAnalysis />
-        <ConfirmChangesModal
-          opened={saveModalOpened}
-          toggle={toggleSaveModal}
-          closeTab={() => closeTab(activeTab, true)}
-        />
+          <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+            <Mosaic<ViewId>
+              renderTile={(id) => fullLayout[id]}
+              value={windowsState.currentNode}
+              onChange={(currentNode) => setWindowsState({ currentNode })}
+              resize={{ minimumPaneSizePercentage: 0 }}
+            />
+            <ReportProgressSubscriber id={`report_${tab.value}`} />
+            <BoardAnalysis />
+            <ConfirmChangesModal
+              opened={saveModalOpened}
+              toggle={toggleSaveModal}
+              closeTab={() => closeTab(activeTab, true)}
+            />
+          </Tabs.Panel>
       </TreeStateProvider>
     ))
     .with("puzzles", () => (
       <TreeStateProvider id={tab.value}>
-        <Mosaic<ViewId>
-          // @ts-ignore
-          renderTile={(id) => fullLayout[id]}
-          value={windowsState.currentNode}
-          onChange={(currentNode) => setWindowsState({ currentNode })}
-          resize={{ minimumPaneSizePercentage: 0 }}
-        />
-        <Puzzles id={tab.value} />
+        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+          <Mosaic<ViewId>
+            renderTile={(id) => fullLayout[id]}
+            value={windowsState.currentNode}
+            onChange={(currentNode) => setWindowsState({ currentNode })}
+            resize={{ minimumPaneSizePercentage: 0 }}
+          />
+          <Puzzles id={tab.value} />
+        </Tabs.Panel>
       </TreeStateProvider>
     ))
     .exhaustive();
