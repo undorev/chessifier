@@ -95,6 +95,10 @@ Ensure you have the required tools installed for your platform:
 
 📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## 📦 Changelog
+
+For a list of recent changes, see the [Changelog](./CHANGELOG.md).
+
 ## 🤝 Contributing
 
 We welcome contributions! Please refer to the [Contributing Guide](./CONTRIBUTING.md) for details on how to get started.
