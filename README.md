@@ -1,14 +1,32 @@
-# Pawn Appétit
+<br />
+<div align="center">
+<a href="https://github.com/ChessKitchen/pawn-appetit">
+    <img width="115" height="115" src="https://github.com/ChessKitchen/pawn-appetit/raw/main/src-tauri/icons/icon.png" alt="Logo">
+</a>
+
+<h3 align="center">Pawn Appétit</h3>
+
+<p align="center">
+    The Ultimate Chess Toolkit
+    <br />
+    <br />
+    <a href="https://pawnappetit.com/">Website</a>
+    ·
+    <a href="https://discord.gg/AseVZvWr2X">Discord Server</a>
+    ·
+    <a href="https://github.com/ChessKitchen/pawn-appetit/releases">Releases</a>
+</p>
+</div>
 
 Pawn Appétit is a modern, open-source, cross-platform chess GUI built for power users and enthusiasts. Designed to be intuitive, customizable, and feature-rich, it provides a seamless experience for analyzing games, training repertoires, and managing engines and databases.
 
 ## ✨ Features
 
-- 🔍 Game Analysis <br> Import and analyze games from [lichess.org](https://lichess.org) and [chess.com](https://chess.com).
-- ⚙️ Multi-Engine Support <br> Analyze with any UCI-compatible engine.
-- 🧠 Repertoire Training <br> Build and train your opening repertoire using spaced repetition.
-- 📦 Engine & Database Management <br> Install and manage engines and databases with minimal effort.
-- 🔎 Position Search <br> Search for absolute or partial positions across your game database.
+- 🔍 Game Analysis - Import and analyze games from [lichess.org](https://lichess.org) and [chess.com](https://chess.com).
+- ⚙️ Multi-Engine Support - Analyze with any UCI-compatible engine.
+- 🧠 Repertoire Training - Build and train your opening repertoire using spaced repetition.
+- 📦 Engine & Database Management - Install and manage engines and databases with minimal effort.
+- 🔎 Position Search - Search for absolute or partial positions across your game database.
 
 ## 🚀 Getting Started
 
@@ -19,18 +37,40 @@ Ensure you have the required tools installed for your platform:
 
 ### Build Instructions
 
-```bash
-git clone https://github.com/ChessKitchen/pawn-appetit
-cd pawn-appetit
-pnpm install
-pnpm build
-```
+1. **Clone the repository**:
 
-The compiled application will be available at:
+   ```bash
+   git clone git@github.com:ChessKitchen/pawn-appetit.git
+   cd pawn-appetit
+   ```
 
-```bash
-src-tauri/target/release
-```
+2. **Install dependencies using pnpm**:
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Run in Development Mode**:
+
+    Build and run the desktop application using Tauri:
+
+    ```bash
+    pnpm tauri dev
+    ```
+
+4. **Build for Production**:
+
+    Build the application for production:
+
+    ```bash
+    pnpm tauri build
+    ```
+
+    The compiled application will be available at:
+
+    ```bash
+    src-tauri/target/release
+    ```
 
 ## 🌍 Translations
 

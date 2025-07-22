@@ -122,7 +122,7 @@ const DateChartTooltip = ({
   payload,
   label,
   isYearSelected,
-}: TooltipProps<ValueType, NameType> & { isYearSelected: boolean }) => {
+}: TooltipProps<ValueType, NameType> & { payload?: any[]; label?: string; isYearSelected?: boolean }) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -164,6 +164,7 @@ function DateChart({ dataPerMonth }: { dataPerMonth: { name: string; count: numb
       <BarChart
         data={data}
         onClick={(e) => {
+          // @ts-ignore
           const year = Number.parseInt(e.activePayload?.[0]?.payload?.name);
           if (year) {
             setSelectedYear((prev) => (prev === year ? null : year));

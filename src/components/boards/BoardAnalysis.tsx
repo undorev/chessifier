@@ -7,7 +7,6 @@ import { useAtom, useAtomValue } from "jotai";
 import { Suspense, useCallback, useContext, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
-import { useShallow } from "zustand/react/shallow";
 import {
   allEnabledAtom,
   autoSaveAtom,
@@ -17,7 +16,7 @@ import {
   enableAllAtom,
 } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
-import { defaultPGN, getVariationLine } from "@/utils/chess";
+import { defaultPGN } from "@/utils/chess";
 import { saveToFile } from "@/utils/tabs";
 import GameNotation from "../common/GameNotation";
 import MoveControls from "../common/MoveControls";
