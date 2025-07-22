@@ -45,8 +45,8 @@ importers:
         specifier: ^3.34.1
         version: 3.34.1(react@19.1.0)
       '@tanstack/react-router':
-        specifier: ^1.129.0
-        version: 1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^1.129.2
+        version: 1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@tanstack/react-virtual':
         specifier: ^3.13.12
         version: 3.13.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -208,11 +208,11 @@ importers:
         specifier: 2.1.2
         version: 2.1.2
       '@tanstack/router-vite-plugin':
-        specifier: ^1.129.0
-        version: 1.129.0(@tanstack/react-router@1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))
+        specifier: ^1.129.2
+        version: 1.129.2(@tanstack/react-router@1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))
       '@tauri-apps/cli':
-        specifier: 2.7.0
-        version: 2.7.0
+        specifier: 2.7.1
+        version: 2.7.1
       '@types/lodash':
         specifier: ^4.17.20
         version: 4.17.20
@@ -962,8 +962,8 @@ packages:
     resolution: {integrity: sha512-YL8dGi5ZU+xvtav2boRlw4zrRghkY6hvdcmHhA0RGSJ/CBgzv+cbADW9eYJLx74XMZvIQ1pp6VMbrpXnnM5gHA==}
     engines: {node: '>=12'}
 
-  '@tanstack/react-router@1.129.0':
-    resolution: {integrity: sha512-p28j8wFVhacEJQ+qelgbaNZsMG5ab4YDVOrP09APV3vBNHP+vZAxHNkI6jNJtS6EtdUA5JaQ9pjKAvDrTH7RZQ==}
+  '@tanstack/react-router@1.129.2':
+    resolution: {integrity: sha512-ERGkvtb4qlo1ihrKUMJn2RfiC3T7rE/PpRtsATCmC0Gy0NmaO8S1+XvgriYl2bzdqTnBliwwIzqkKB9A2xPqDQ==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
@@ -981,20 +981,20 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/router-core@1.129.0':
-    resolution: {integrity: sha512-bkUgh9x8pNnzH611lqAXJ6D1zpa6J6hzSn/2ojmDR1Azsw3u/WfFcdZaBE8CvjMpCANN61lEnKGEz1VYDXpn+A==}
+  '@tanstack/router-core@1.129.2':
+    resolution: {integrity: sha512-M7OuzxbSkEFa1WWQoLOg7RtJUHzfaURMiRCLbKLEJWJkw1Cuylj7oBbzbawDAJFTHry9UUDZNPP0MSCfcXypPA==}
     engines: {node: '>=12'}
 
-  '@tanstack/router-generator@1.129.0':
-    resolution: {integrity: sha512-E49E7u1yOqQlFkI6JPxLDM8oCTxAh80wqb6/Qaq4T0AsTi6jHfHnAwtGxtEKVioB9EGNqmxsuOQnc8ucMJbUxg==}
+  '@tanstack/router-generator@1.129.2':
+    resolution: {integrity: sha512-xCZYd4sgPFdlgEten7x+uJx+0y6iUm2d8cnE3cHHzzc5COf5jO+FFh9kVRa9Ouh4h/binv5dpKRBhB33TqPRfw==}
     engines: {node: '>=12'}
 
-  '@tanstack/router-plugin@1.129.0':
-    resolution: {integrity: sha512-/WdinZwlGkzmGBwHdXZQqWC/kip6boZpfhEaY7sXu2M3TEBJGvYLdCZfMv6VvxvAjVbSug/26lQknKu4Ssubcw==}
+  '@tanstack/router-plugin@1.129.2':
+    resolution: {integrity: sha512-uchyp0fMG6MmMJMxydmp4JTyIfW0FHVE4hwGSnP9dgoncQHbqZQt3qNEYbzPIV+JRp6DKjb8Ax5DAUgL7/LVCA==}
     engines: {node: '>=12'}
     peerDependencies:
       '@rsbuild/core': '>=1.0.2'
-      '@tanstack/react-router': ^1.129.0
+      '@tanstack/react-router': ^1.129.2
       vite: '>=5.0.0 || >=6.0.0'
       vite-plugin-solid: ^2.11.2
       webpack: '>=5.92.0'
@@ -1014,8 +1014,8 @@ packages:
     resolution: {integrity: sha512-u7ubq1xPBtNiU7Fm+EOWlVWdgFLzuKOa1thhqdscVn8R4dNMUd1VoOjZ6AKmLw201VaUhFtlX+u0pjzI6szX7A==}
     engines: {node: '>=12'}
 
-  '@tanstack/router-vite-plugin@1.129.0':
-    resolution: {integrity: sha512-Pjz9fBq3wo6O21P19UydEuQSykWDXcLGDjihiwLbgzuLy+WXRadYpVFucZTgpO49+HGL930qbXT4Eho9cuIvKA==}
+  '@tanstack/router-vite-plugin@1.129.2':
+    resolution: {integrity: sha512-D1Y69ydvoXRHOChFvOsecK9/FTYB2PLUFGdRLt0+FsEcNgvbALp+ADwjcKeglKEQAcTRnYWkh+lS73wRkD1yhQ==}
     engines: {node: '>=12'}
 
   '@tanstack/store@0.7.2':
@@ -1031,74 +1031,74 @@ packages:
   '@tauri-apps/api@2.7.0':
     resolution: {integrity: sha512-v7fVE8jqBl8xJFOcBafDzXFc8FnicoH3j8o8DNNs0tHuEBmXUDqrCOAzMRX0UkfpwqZLqvrvK0GNQ45DfnoVDg==}
 
-  '@tauri-apps/cli-darwin-arm64@2.7.0':
-    resolution: {integrity: sha512-4sSrBlZuGb78UKkVQHdexzrYCamsiFQXFFuh9EI8vdq9PgTG8oXByQNIMx+p01HB594kLhaySrgozst6EFPoVQ==}
+  '@tauri-apps/cli-darwin-arm64@2.7.1':
+    resolution: {integrity: sha512-j2NXQN6+08G03xYiyKDKqbCV2Txt+hUKg0a8hYr92AmoCU8fgCjHyva/p16lGFGUG3P2Yu0xiNe1hXL9ZuRMzA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tauri-apps/cli-darwin-x64@2.7.0':
-    resolution: {integrity: sha512-Uec0pKyw5/w4UmcRLyPt/+JG4dsIKj0TeKtF3PDz4EAGOevjSBaLIgu8aC62s3wKLCtDydTdIMMQ1ENHTJgfPA==}
+  '@tauri-apps/cli-darwin-x64@2.7.1':
+    resolution: {integrity: sha512-CdYAefeM35zKsc91qIyKzbaO7FhzTyWKsE8hj7tEJ1INYpoh1NeNNyL/NSEA3Nebi5ilugioJ5tRK8ZXG8y3gw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@tauri-apps/cli-linux-arm-gnueabihf@2.7.0':
-    resolution: {integrity: sha512-ZE7y/3MW9i1DccnHyktBDbryMWVFdnIfdqQoJ40iBzQGoBIQk4DonA5zROcqw0qGRTsXfTRnVjIXnh5eLkoCzQ==}
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.7.1':
+    resolution: {integrity: sha512-dnvyJrTA1UJxJjQ8q1N/gWomjP8Twij1BUQu2fdcT3OPpqlrbOk5R1yT0oD/721xoKNjroB5BXCsmmlykllxNg==}
     engines: {node: '>= 10'}
     cpu: [arm]
     os: [linux]
 
-  '@tauri-apps/cli-linux-arm64-gnu@2.7.0':
-    resolution: {integrity: sha512-cWGl8OL+FjPWib+K8YK1S6o2Z34+f2LxnFRziTPdHwrdlVNO2xYkJmrT6X3PyHtccf/IByicxVvjkExLlpZ4+A==}
+  '@tauri-apps/cli-linux-arm64-gnu@2.7.1':
+    resolution: {integrity: sha512-FtBW6LJPNRTws3qyUc294AqCWU91l/H0SsFKq6q4Q45MSS4x6wxLxou8zB53tLDGEPx3JSoPLcDaSfPlSbyujQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@tauri-apps/cli-linux-arm64-musl@2.7.0':
-    resolution: {integrity: sha512-MftwAsMDw9dmKosbHdSHyCa0jgKjt9UslJsRpXym8dmbw+gzD3YrY41GORq0HbCYImC5rS/qQf9eELoLcqY/BQ==}
+  '@tauri-apps/cli-linux-arm64-musl@2.7.1':
+    resolution: {integrity: sha512-/HXY0t4FHkpFzjeYS5c16mlA6z0kzn5uKLWptTLTdFSnYpr8FCnOP4Sdkvm2TDQPF2ERxXtNCd+WR/jQugbGnA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@tauri-apps/cli-linux-riscv64-gnu@2.7.0':
-    resolution: {integrity: sha512-QwL4YhckgtozR7wlXOTRKijkgViz4B0OeXqhsIrhQock2HDxqCh5VqhGQ9LRJ6HsXY1JkAYZQUAFvcBj2DHUXQ==}
+  '@tauri-apps/cli-linux-riscv64-gnu@2.7.1':
+    resolution: {integrity: sha512-GeW5lVI2GhhnaYckiDzstG2j2Jwlud5d2XefRGwlOK+C/bVGLT1le8MNPYK8wgRlpeK8fG1WnJJYD6Ke7YQ8bg==}
     engines: {node: '>= 10'}
     cpu: [riscv64]
     os: [linux]
 
-  '@tauri-apps/cli-linux-x64-gnu@2.7.0':
-    resolution: {integrity: sha512-4MwN2sqUEYGKjwcs0afPp79DkiydAfkGNdBTPfvNrDUmhbT6JE95RhYyzfZLfXNinsdB4nbZmYGEPIv5NpK2KQ==}
+  '@tauri-apps/cli-linux-x64-gnu@2.7.1':
+    resolution: {integrity: sha512-DprxKQkPxIPYwUgg+cscpv2lcIUhn2nxEPlk0UeaiV9vATxCXyytxr1gLcj3xgjGyNPlM0MlJyYaPy1JmRg1cA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@tauri-apps/cli-linux-x64-musl@2.7.0':
-    resolution: {integrity: sha512-N1hygCRW0X4msCpdG3/UXb+Z8wpc4lYRqlkhbbxLOjzHwjuLS+86GYAvRLe7JIePVXVUI5BfX1HeurdbWWINTg==}
+  '@tauri-apps/cli-linux-x64-musl@2.7.1':
+    resolution: {integrity: sha512-KLlq3kOK7OUyDR757c0zQjPULpGZpLhNB0lZmZpHXvoOUcqZoCXJHh4dT/mryWZJp5ilrem5l8o9ngrDo0X1AA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@tauri-apps/cli-win32-arm64-msvc@2.7.0':
-    resolution: {integrity: sha512-sqVDkwvUsuHeUVlMXpkXPo4gWFXuOcNbme0xPQ1r07hqBxYJlqwDY9XS0sC/7XljnO6anJaSr8FJkuixnIqyUQ==}
+  '@tauri-apps/cli-win32-arm64-msvc@2.7.1':
+    resolution: {integrity: sha512-dH7KUjKkSypCeWPiainHyXoES3obS+JIZVoSwSZfKq2gWgs48FY3oT0hQNYrWveE+VR4VoR3b/F3CPGbgFvksA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@tauri-apps/cli-win32-ia32-msvc@2.7.0':
-    resolution: {integrity: sha512-2sZFAZZC8fwc65d5ACrTUgKPYbZgd3DAN5gI4WzCyTQgPqLq/7CWD25Wt7+scTV7FhT1zjL88hI10yPsEE0kkA==}
+  '@tauri-apps/cli-win32-ia32-msvc@2.7.1':
+    resolution: {integrity: sha512-1oeibfyWQPVcijOrTg709qhbXArjX3x1MPjrmA5anlygwrbByxLBcLXvotcOeULFcnH2FYUMMLLant8kgvwE5A==}
     engines: {node: '>= 10'}
     cpu: [ia32]
     os: [win32]
 
-  '@tauri-apps/cli-win32-x64-msvc@2.7.0':
-    resolution: {integrity: sha512-mGqRRpqdZ5iKLaQwP1paz89koLVrE/mUOrq6boftHDxF8K1sU/9Um/E7SLrkfeICiWbVG5yY7j2N/j8/D80blw==}
+  '@tauri-apps/cli-win32-x64-msvc@2.7.1':
+    resolution: {integrity: sha512-D7Q9kDObutuirCNLxYQ7KAg2Xxg99AjcdYz/KuMw5HvyEPbkC9Q7JL0vOrQOrHEHxIQ2lYzFOZvKKoC2yyqXcg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
 
-  '@tauri-apps/cli@2.7.0':
-    resolution: {integrity: sha512-ozyxKm5YvivvLyrgHKyl6L+6y1/TkkeoA0cppPqxDv+ldbbtYiXx7dH8/G20tINh7dE+omSimN36i9M1ClGxtQ==}
+  '@tauri-apps/cli@2.7.1':
+    resolution: {integrity: sha512-RcGWR4jOUEl92w3uvI0h61Llkfj9lwGD1iwvDRD2isMrDhOzjeeeVn9aGzeW1jubQ/kAbMYfydcA4BA0Cy733Q==}
     engines: {node: '>= 10'}
     hasBin: true
 
@@ -3609,11 +3609,11 @@ snapshots:
 
   '@tanstack/history@1.121.34': {}
 
-  '@tanstack/react-router@1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@tanstack/react-router@1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@tanstack/history': 1.121.34
       '@tanstack/react-store': 0.7.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@tanstack/router-core': 1.129.0
+      '@tanstack/router-core': 1.129.2
       isbot: 5.1.28
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -3633,7 +3633,7 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@tanstack/router-core@1.129.0':
+  '@tanstack/router-core@1.129.2':
     dependencies:
       '@tanstack/history': 1.121.34
       '@tanstack/store': 0.7.2
@@ -3643,9 +3643,9 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  '@tanstack/router-generator@1.129.0':
+  '@tanstack/router-generator@1.129.2':
     dependencies:
-      '@tanstack/router-core': 1.129.0
+      '@tanstack/router-core': 1.129.2
       '@tanstack/router-utils': 1.121.21
       '@tanstack/virtual-file-routes': 1.121.21
       prettier: 3.6.2
@@ -3656,7 +3656,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/router-plugin@1.129.0(@tanstack/react-router@1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))':
+  '@tanstack/router-plugin@1.129.2(@tanstack/react-router@1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/plugin-syntax-jsx': 7.27.1(@babel/core@7.28.0)
@@ -3664,8 +3664,8 @@ snapshots:
       '@babel/template': 7.27.2
       '@babel/traverse': 7.28.0
       '@babel/types': 7.28.1
-      '@tanstack/router-core': 1.129.0
-      '@tanstack/router-generator': 1.129.0
+      '@tanstack/router-core': 1.129.2
+      '@tanstack/router-generator': 1.129.2
       '@tanstack/router-utils': 1.121.21
       '@tanstack/virtual-file-routes': 1.121.21
       babel-dead-code-elimination: 1.0.10
@@ -3673,7 +3673,7 @@ snapshots:
       unplugin: 2.3.5
       zod: 3.25.76
     optionalDependencies:
-      '@tanstack/react-router': 1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@tanstack/react-router': 1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vite: 7.0.5(@types/node@24.0.15)(tsx@4.20.3)
     transitivePeerDependencies:
       - supports-color
@@ -3689,9 +3689,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/router-vite-plugin@1.129.0(@tanstack/react-router@1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))':
+  '@tanstack/router-vite-plugin@1.129.2(@tanstack/react-router@1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))':
     dependencies:
-      '@tanstack/router-plugin': 1.129.0(@tanstack/react-router@1.129.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))
+      '@tanstack/router-plugin': 1.129.2(@tanstack/react-router@1.129.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(vite@7.0.5(@types/node@24.0.15)(tsx@4.20.3))
     transitivePeerDependencies:
       - '@rsbuild/core'
       - '@tanstack/react-router'
@@ -3708,52 +3708,52 @@ snapshots:
 
   '@tauri-apps/api@2.7.0': {}
 
-  '@tauri-apps/cli-darwin-arm64@2.7.0':
+  '@tauri-apps/cli-darwin-arm64@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-darwin-x64@2.7.0':
+  '@tauri-apps/cli-darwin-x64@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-arm-gnueabihf@2.7.0':
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-arm64-gnu@2.7.0':
+  '@tauri-apps/cli-linux-arm64-gnu@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-arm64-musl@2.7.0':
+  '@tauri-apps/cli-linux-arm64-musl@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-riscv64-gnu@2.7.0':
+  '@tauri-apps/cli-linux-riscv64-gnu@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-x64-gnu@2.7.0':
+  '@tauri-apps/cli-linux-x64-gnu@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-linux-x64-musl@2.7.0':
+  '@tauri-apps/cli-linux-x64-musl@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-win32-arm64-msvc@2.7.0':
+  '@tauri-apps/cli-win32-arm64-msvc@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-win32-ia32-msvc@2.7.0':
+  '@tauri-apps/cli-win32-ia32-msvc@2.7.1':
     optional: true
 
-  '@tauri-apps/cli-win32-x64-msvc@2.7.0':
+  '@tauri-apps/cli-win32-x64-msvc@2.7.1':
     optional: true
 
-  '@tauri-apps/cli@2.7.0':
+  '@tauri-apps/cli@2.7.1':
     optionalDependencies:
-      '@tauri-apps/cli-darwin-arm64': 2.7.0
-      '@tauri-apps/cli-darwin-x64': 2.7.0
-      '@tauri-apps/cli-linux-arm-gnueabihf': 2.7.0
-      '@tauri-apps/cli-linux-arm64-gnu': 2.7.0
-      '@tauri-apps/cli-linux-arm64-musl': 2.7.0
-      '@tauri-apps/cli-linux-riscv64-gnu': 2.7.0
-      '@tauri-apps/cli-linux-x64-gnu': 2.7.0
-      '@tauri-apps/cli-linux-x64-musl': 2.7.0
-      '@tauri-apps/cli-win32-arm64-msvc': 2.7.0
-      '@tauri-apps/cli-win32-ia32-msvc': 2.7.0
-      '@tauri-apps/cli-win32-x64-msvc': 2.7.0
+      '@tauri-apps/cli-darwin-arm64': 2.7.1
+      '@tauri-apps/cli-darwin-x64': 2.7.1
+      '@tauri-apps/cli-linux-arm-gnueabihf': 2.7.1
+      '@tauri-apps/cli-linux-arm64-gnu': 2.7.1
+      '@tauri-apps/cli-linux-arm64-musl': 2.7.1
+      '@tauri-apps/cli-linux-riscv64-gnu': 2.7.1
+      '@tauri-apps/cli-linux-x64-gnu': 2.7.1
+      '@tauri-apps/cli-linux-x64-musl': 2.7.1
+      '@tauri-apps/cli-win32-arm64-msvc': 2.7.1
+      '@tauri-apps/cli-win32-ia32-msvc': 2.7.1
+      '@tauri-apps/cli-win32-x64-msvc': 2.7.1
 
   '@tauri-apps/plugin-cli@2.4.0':
     dependencies:

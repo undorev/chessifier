@@ -1,4 +1,4 @@
-import { ActionIcon, Card, Group, ScrollArea, Select, Stack, Table, Tabs, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Card, Group, ScrollArea, Select, Stack, Table, Tabs, Text, Title, Tooltip } from "@mantine/core";
 import {
   IconBook,
   IconBrush,
@@ -94,13 +94,13 @@ export default function Page() {
           {t("Settings.Directories")}
         </Tabs.Tab>
       </Tabs.List>
-      <Stack flex={1} px="md" pt="md">
+      <Stack flex={1}>
         <ScrollArea>
-          <Card withBorder p="lg" className={classes.card} w="100%">
+          <Card className={classes.card} w="100%" pl="lg" pr="xl">
             <Tabs.Panel value="board">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Board")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Board.Desc")}
               </Text>
@@ -235,9 +235,9 @@ export default function Page() {
             </Tabs.Panel>
 
             <Tabs.Panel value="inputs">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Inputs")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Inputs.Desc")}
               </Text>
@@ -261,9 +261,9 @@ export default function Page() {
               </Group>
             </Tabs.Panel>
             <Tabs.Panel value="report">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.OpeningReport")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.OpeningReport.Desc")}
               </Text>
@@ -289,9 +289,9 @@ export default function Page() {
             </Tabs.Panel>
 
             <Tabs.Panel value="anarchy">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Anarchy")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Anarchy.Desc")}
               </Text>
@@ -307,9 +307,9 @@ export default function Page() {
             </Tabs.Panel>
 
             <Tabs.Panel value="appearance">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Appearance")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Appearance.Desc")}
               </Text>
@@ -449,9 +449,9 @@ export default function Page() {
             </Tabs.Panel>
 
             <Tabs.Panel value="sound">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Sound")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Sound.Desc")}
               </Text>
@@ -477,9 +477,9 @@ export default function Page() {
 
             <Tabs.Panel value="keybindings">
               <Group>
-                <Text size="lg" fw={500} className={classes.title}>
+                <Title order={1} fw={500} className={classes.title}>
                   Keybindings
-                </Text>
+                </Title>
                 <Tooltip label="Reset">
                   <ActionIcon onClick={() => setKeyMap(RESET)}>
                     <IconReload size="1rem" />
@@ -512,9 +512,9 @@ export default function Page() {
             </Tabs.Panel>
 
             <Tabs.Panel value="directories">
-              <Text size="lg" fw={500} className={classes.title}>
+              <Title order={1} fw={500} className={classes.title}>
                 {t("Settings.Directories")}
-              </Text>
+              </Title>
               <Text size="xs" c="dimmed" mt={3} mb="lg">
                 {t("Settings.Directories.Desc")}
               </Text>
@@ -540,9 +540,6 @@ export default function Page() {
             </Tabs.Panel>
           </Card>
         </ScrollArea>
-        <Text size="xs" c="dimmed" ta="right">
-          Pawn Appétit v{version}
-        </Text>
       </Stack>
     </Tabs>
   );
