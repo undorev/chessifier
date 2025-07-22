@@ -33,7 +33,7 @@ export default function PieceComponent({
     );
   }
   const handleDrop = (position: { x: number; y: number }) => {
-    const boardRect = boardRef.current?.getBoundingClientRect();
+    const boardRect = boardRef?.current?.getBoundingClientRect();
     if (
       boardRect &&
       position.x > boardRect.left &&
@@ -58,6 +58,7 @@ export default function PieceComponent({
 
   return (
     <Draggable
+      nodeRef={pieceRef}
       position={{ x: 0, y: 0 }}
       onStop={(e) => {
         const { clientX, clientY } = e as MouseEvent;
