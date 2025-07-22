@@ -12,7 +12,8 @@
     "test": "vitest run",
     "lint": "tsc --noEmit && biome check ./src",
     "lint:ci": "tsc --noEmit && biome ci ./src --diagnostic-level=error",
-    "lint:fix": "npx @biomejs/biome check --write src"
+    "lint:fix": "npx @biomejs/biome check --write src",
+    "update-readme": "npx tsx scripts/readme-updater.ts"
   },
   "dependencies": {
     "@badrap/result": "^0.2.13",
