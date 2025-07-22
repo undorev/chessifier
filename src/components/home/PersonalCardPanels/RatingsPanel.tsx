@@ -61,12 +61,15 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
   useEffect(() => {
     const newTimeRange = dateRange
       ? {
-          start: Math.max(0, dates.findIndex((date) => date >= calculateEarliestDate(dateRange, dates))),
-          end: Math.max(0, dates.length - 1)
+          start: Math.max(
+            0,
+            dates.findIndex((date) => date >= calculateEarliestDate(dateRange, dates)),
+          ),
+          end: Math.max(0, dates.length - 1),
         }
       : {
           start: 0,
-          end: Math.max(0, dates.length - 1)
+          end: Math.max(0, dates.length - 1),
         };
 
     setTimeRange(newTimeRange);
@@ -75,15 +78,16 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
   const [summary, ratingData] = useMemo(() => {
     if (!website || !timeControl) return [{ games: 0, won: 0, draw: 0, lost: 0 }, []];
 
-    const filteredGames = info.site_stats_data
-      ?.filter((games) => games.site === website)
-      .filter((games) => account === "All accounts" || games.player === account)
-      .flatMap((games) => games.data)
-      .filter((game) => getTimeControl(website, game.time_control) === timeControl)
-      .filter((game) => {
-        const gameDate = new Date(game.date).getTime();
-        return gameDate >= (dates[timeRange.start] || 0) && gameDate <= (dates[timeRange.end] || 0);
-      }) ?? [];
+    const filteredGames =
+      info.site_stats_data
+        ?.filter((games) => games.site === website)
+        .filter((games) => account === "All accounts" || games.player === account)
+        .flatMap((games) => games.data)
+        .filter((game) => getTimeControl(website, game.time_control) === timeControl)
+        .filter((game) => {
+          const gameDate = new Date(game.date).getTime();
+          return gameDate >= (dates[timeRange.start] || 0) && gameDate <= (dates[timeRange.end] || 0);
+        }) ?? [];
 
     const totalGamesCount = filteredGames.length;
     const wonCount = filteredGames.filter((game) => game.result === "Won").length;
@@ -95,18 +99,20 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
       player_elo: number;
     }
 
-    const ratingData = filteredGames.reduce<RatingDataPoint[]>((acc, game) => {
-      const date = new Date(game.date).getTime();
-      const existingPoint = acc.find(point => point.date === date);
-      
-      if (!existingPoint) {
-        acc.push({ date, player_elo: game.player_elo });
-      } else if (existingPoint.player_elo < game.player_elo) {
-        existingPoint.player_elo = game.player_elo;
-      }
-      
-      return acc;
-    }, []).sort((a, b) => a.date - b.date);
+    const ratingData = filteredGames
+      .reduce<RatingDataPoint[]>((acc, game) => {
+        const date = new Date(game.date).getTime();
+        const existingPoint = acc.find((point) => point.date === date);
+
+        if (!existingPoint) {
+          acc.push({ date, player_elo: game.player_elo });
+        } else if (existingPoint.player_elo < game.player_elo) {
+          existingPoint.player_elo = game.player_elo;
+        }
+
+        return acc;
+      }, [])
+      .sort((a, b) => a.date - b.date);
 
     return [
       {
@@ -121,19 +127,13 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
 
   const playerEloDomain = useMemo(() => {
     if (ratingData.length === 0) return null;
-    
+
     const [minElo, maxElo] = ratingData.reduce<[number, number]>(
-      ([min, max], { player_elo }) => [
-        Math.min(min, player_elo),
-        Math.max(max, player_elo)
-      ],
-      [Infinity, -Infinity]
+      ([min, max], { player_elo }) => [Math.min(min, player_elo), Math.max(max, player_elo)],
+      [Infinity, -Infinity],
     );
 
-    return [
-      Math.floor(minElo / 50) * 50,
-      Math.ceil(maxElo / 50) * 50
-    ];
+    return [Math.floor(minElo / 50) * 50, Math.ceil(maxElo / 50) * 50];
   }, [ratingData]);
 
   return (
@@ -145,9 +145,12 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
         allowAll={false}
       />
       <TimeControlSelector onTimeControlChange={setTimeControl} website={website} allowAll={false} />
-      <DateRangeTabs timeRange={dateRange} onTimeRangeChange={(value: string | null) => {
-        setDateRange(value as DateRange | null)
-      }} />
+      <DateRangeTabs
+        timeRange={dateRange}
+        onTimeRangeChange={(value: string | null) => {
+          setDateRange(value as DateRange | null);
+        }}
+      />
       <Text pt="md" fw="bold" fz="lg" ta="center">
         {summary.games} Games
       </Text>
@@ -170,18 +173,18 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
                 tickFormatter={(date) => new Date(date).toLocaleDateString()}
                 type="number"
                 stroke="var(--mantine-color-gray-7)"
-                tick={{ fill: 'var(--mantine-color-gray-7)' }}
+                tick={{ fill: "var(--mantine-color-gray-7)" }}
               />
               <YAxis
                 domain={playerEloDomain ?? undefined}
                 stroke="var(--mantine-color-gray-7)"
-                tick={{ fill: 'var(--mantine-color-gray-7)' }}
+                tick={{ fill: "var(--mantine-color-gray-7)" }}
               />
               <Tooltip
                 contentStyle={tooltipContentStyle}
                 cursor={tooltipCursorStyle}
                 labelFormatter={(label) => new Date(label).toLocaleDateString()}
-                formatter={(value: number) => [value, 'Rating']}
+                formatter={(value: number) => [value, "Rating"]}
               />
               <Area
                 name="Rating"
