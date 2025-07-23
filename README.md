@@ -12,7 +12,7 @@
     <br />
     <a href="https://chessifier.github.io/">Website</a>
     ·
-    <a href="https://discord.gg/AseVZvWr2X">Discord Server</a>
+    <a href="https://discord.gg/8hk49G8ZbX">Discord Server</a>
     ·
     <a href="https://github.com/Chessifier/chessifier/releases">Releases</a>
 </p>
@@ -105,7 +105,7 @@ We welcome contributions! Please refer to the [Contributing Guide](./CONTRIBUTIN
 
 ## 💬 Community
 
-Join our [Discord server](https://discord.gg/AseVZvWr2X) to connect with other users, get help, and contribute to discussions.
+Join our [Discord server](https://discord.gg/8hk49G8ZbX) to connect with other users, get help, and contribute to discussions.
 
 ## 🧱 About This Project
 

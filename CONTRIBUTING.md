@@ -16,7 +16,7 @@ your contribution.
 
 Before you start working on a contribution, please check the issues page. It's possible someone else is already working on something similar, or perhaps there is a reason that feature isn't implemented. The maintainers will point you in the right direction.
 
-> If you still have questions, please check [the Discord](https://discord.gg/AseVZvWr2X)
+> If you still have questions, please check [the Discord](https://discord.gg/8hk49G8ZbX)
 
 ## Development
 

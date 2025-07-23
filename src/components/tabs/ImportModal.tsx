@@ -235,7 +235,7 @@ export default function ImportModal({
                   id={v.value}
                   isSelected={filetype === v.value}
                   setSelected={setFiletype}
-                  Header={<Text ta="center">{v.label}</Text>}
+                  content={<Text ta="center">{v.label}</Text>}
                 />
               ))}
             </SimpleGrid>
@@ -281,21 +281,21 @@ export default function ImportModal({
           id={"PGN"}
           isSelected={importType === "PGN"}
           setSelected={setImportType}
-          Header={<Text ta="center">PGN</Text>}
+          content={<Text ta="center">PGN</Text>}
         />
 
         <GenericCard
           id={"Link"}
           isSelected={importType === "Link"}
           setSelected={setImportType}
-          Header={<Text ta="center">Online</Text>}
+          content={<Text ta="center">Online</Text>}
         />
 
         <GenericCard
           id={"FEN"}
           isSelected={importType === "FEN"}
           setSelected={setImportType}
-          Header={<Text ta="center">FEN</Text>}
+          content={<Text ta="center">FEN</Text>}
         />
       </Group>
 

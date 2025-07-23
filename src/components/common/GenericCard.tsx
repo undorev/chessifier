@@ -1,4 +1,4 @@
-import { Box, Stack, Text } from "@mantine/core";
+import { Box, Stack } from "@mantine/core";
 import cx from "clsx";
 import type { ReactNode } from "react";
 import * as classes from "./GenericCard.css";
@@ -12,11 +12,11 @@ type Props<T> = {
     label: string;
     value: string;
   }[];
-  Header: ReactNode;
+  content: ReactNode;
   onDoubleClick?: () => void;
 };
 
-export default function GenericCard<T>({ id, isSelected, setSelected, error, stats, Header, onDoubleClick }: Props<T>) {
+export default function GenericCard<T>({ id, isSelected, setSelected, error, content, onDoubleClick }: Props<T>) {
   return (
     <Box
       tabIndex={0}
@@ -31,22 +31,7 @@ export default function GenericCard<T>({ id, isSelected, setSelected, error, sta
       onDoubleClick={onDoubleClick}
     >
       <Stack h="100%" justify="space-between">
-        {Header}
-
-        {stats && (
-          <div className={classes.info}>
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <Text size="xs" c="dimmed" fw="bold" className={classes.label} mt="1rem">
-                  {stat.label}
-                </Text>
-                <Text fw={700} size="lg" style={{ lineHeight: 1 }}>
-                  {stat.value}
-                </Text>
-              </div>
-            ))}
-          </div>
-        )}
+        {content}
       </Stack>
     </Box>
   );
