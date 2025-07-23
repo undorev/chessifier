@@ -37,7 +37,7 @@ impl PuzzleCache {
             cache_size: 20, // Default cache size
         }
     }
-    
+
     /// Configure the cache size
     ///
     /// # Arguments
@@ -123,15 +123,15 @@ impl PuzzleCache {
 pub fn get_puzzle(file: String, min_rating: u16, max_rating: u16) -> Result<Puzzle, Error> {
     static PUZZLE_CACHE: Lazy<Mutex<PuzzleCache>> = Lazy::new(|| Mutex::new(PuzzleCache::new()));
 
-    let mut cache = PUZZLE_CACHE.lock().map_err(|e| {
-        Error::MutexLockFailed(format!("Failed to lock puzzle cache: {}", e))
-    })?;
+    let mut cache = PUZZLE_CACHE
+        .lock()
+        .map_err(|e| Error::MutexLockFailed(format!("Failed to lock puzzle cache: {}", e)))?;
     cache.get_puzzles(&file, min_rating, max_rating)?;
-    
+
     // Get a reference to the next puzzle and clone it only if found
     match cache.get_next_puzzle() {
         Some(puzzle) => Ok(puzzle.clone()),
-        None => Err(Error::NoPuzzles)
+        None => Err(Error::NoPuzzles),
     }
 }
 
@@ -188,11 +188,14 @@ pub async fn get_puzzle_db_info(
     let puzzle_count = puzzles::table.count().get_result::<i64>(&mut db)? as i32;
 
     let storage_size = file_path.metadata()?.len() as i32;
-    let filename = file_path.file_name()
-        .ok_or_else(|| std::io::Error::new(
-            std::io::ErrorKind::InvalidInput, 
-            "Invalid path: no filename")
-        )?
+    let filename = file_path
+        .file_name()
+        .ok_or_else(|| {
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "Invalid path: no filename",
+            )
+        })?
         .to_string_lossy();
 
     Ok(PuzzleDatabaseInfo {
