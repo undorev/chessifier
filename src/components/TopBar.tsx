@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Center, Group, Image, Kbd, Menu, Text, UnstyledButton } from "@mantine/core";
 import { useColorScheme } from "@mantine/hooks";
 import { Spotlight, type SpotlightActionData, type SpotlightActionGroupData, spotlight } from "@mantine/spotlight";
-import { IconDashboard, IconFileText, IconHome, IconSearch, IconSettings } from "@tabler/icons-react";
+import { IconSearch, IconSettings } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import type { JSX, SVGProps } from "react";

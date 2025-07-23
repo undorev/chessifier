@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import type { DatabaseInfo } from "@/bindings";
 import { commands } from "@/bindings";
+import * as classes from "@/components/common/GenericCard.css";
 import { referenceDbAtom, selectedDatabaseAtom } from "@/state/atoms";
 import { getDatabases, type SuccessDatabaseInfo } from "@/utils/db";
 import { formatBytes, formatNumber } from "@/utils/format";
@@ -124,36 +125,50 @@ export default function DatabasesPage() {
                     });
                     setStorageSelected(item);
                   }}
-                  Header={
-                    <Group wrap="nowrap" justify="space-between">
-                      <Group wrap="nowrap" miw={0}>
-                        <IconDatabase size="1.5rem" />
-                        <Box miw={0}>
-                          <Text fw={500}>{item.type === "success" ? item.title : item.error}</Text>
-                          <Text size="xs" c="dimmed" style={{ wordWrap: "break-word" }}>
-                            {item.type === "error" ? item.file : item.description}
-                          </Text>
-                        </Box>
+                  content={
+                    <>
+                      <Group wrap="nowrap" justify="space-between">
+                        <Group wrap="nowrap" miw={0}>
+                          <IconDatabase size="1.5rem" />
+                          <Box miw={0}>
+                            <Text fw={500}>{item.type === "success" ? item.title : item.error}</Text>
+                            <Text size="xs" c="dimmed" style={{ wordWrap: "break-word" }}>
+                              {item.type === "error" ? item.file : item.description}
+                            </Text>
+                          </Box>
+                        </Group>
+                        <Rating
+                          value={referenceDatabase === item.file ? 1 : 0}
+                          count={1}
+                          onChange={() => {
+                            changeReferenceDatabase(item.file);
+                          }}
+                        />
                       </Group>
-                      <Rating
-                        value={referenceDatabase === item.file ? 1 : 0}
-                        count={1}
-                        onChange={() => {
-                          changeReferenceDatabase(item.file);
-                        }}
-                      />
-                    </Group>
+
+                      <Group justify="space-between">
+                        {[
+                          {
+                            label: t("Databases.Card.Games"),
+                            value: item.type === "success" ? formatNumber(item.game_count) : "???",
+                          },
+                          {
+                            label: t("Databases.Card.Storage"),
+                            value: item.type === "success" ? formatBytes(item.storage_size ?? 0) : "???",
+                          },
+                        ]?.map((stat) => (
+                          <div key={stat.label}>
+                            <Text size="xs" c="dimmed" fw="bold" className={classes.label} mt="1rem">
+                              {stat.label}
+                            </Text>
+                            <Text fw={700} size="lg" style={{ lineHeight: 1 }}>
+                              {stat.value}
+                            </Text>
+                          </div>
+                        ))}
+                      </Group>
+                    </>
                   }
-                  stats={[
-                    {
-                      label: t("Databases.Card.Games"),
-                      value: item.type === "success" ? formatNumber(item.game_count) : "???",
-                    },
-                    {
-                      label: t("Databases.Card.Storage"),
-                      value: item.type === "success" ? formatBytes(item.storage_size ?? 0) : "???",
-                    },
-                  ]}
                 />
               ))}
             <ConvertButton setOpen={setOpen} loading={convertLoading} />

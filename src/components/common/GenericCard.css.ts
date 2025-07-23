@@ -36,11 +36,6 @@ export const label = style({
   textTransform: "uppercase",
 });
 
-export const info = style({
-  display: "flex",
-  justifyContent: "space-between",
-});
-
 export const error = style({
   borderColor: `${vars.colors.red[6]} !important`,
   borderWidth: 1,

@@ -84,7 +84,7 @@ export function CreateModal({
                 id={v.value}
                 isSelected={filetype === v.value}
                 setSelected={setFiletype}
-                Header={<Text ta="center">{t(`Files.FileType.${v.label}`)}</Text>}
+                content={<Text ta="center">{t(`Files.FileType.${v.label}`)}</Text>}
               />
             ))}
           </SimpleGrid>
@@ -184,7 +184,7 @@ export function EditModal({
                 id={v.value}
                 isSelected={filetype === v.value}
                 setSelected={setFiletype}
-                Header={<Text ta="center">{t(`Files.FileType.${v.label}`)}</Text>}
+                content={<Text ta="center">{t(`Files.FileType.${v.label}`)}</Text>}
               />
             ))}
           </SimpleGrid>
