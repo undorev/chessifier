@@ -1,6 +1,6 @@
 use std::{
     fs::create_dir_all,
-    io::{Cursor},
+    io::Cursor,
     path::{Path, PathBuf},
 };
 
@@ -46,7 +46,7 @@ pub async fn download_file(
             Ok(header_value) => {
                 header_map.insert("Authorization", header_value);
                 req = req.headers(header_map);
-            },
+            }
             Err(e) => {
                 // Log the error but continue without the Authorization header
                 info!("Failed to parse Authorization header: {}", e);
@@ -76,7 +76,7 @@ pub async fn download_file(
             // Use an indeterminate progress indicator (-1) if total size is unknown
             -1.0
         };
-        
+
         DownloadProgress {
             progress,
             id: id.clone(),

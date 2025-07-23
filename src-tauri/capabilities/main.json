@@ -40,6 +40,14 @@
                 "https://tablebase.lichess.ovh/**",
                 "https://www.chessdb.cn/**"
             ]
+        },
+        {
+            "identifier": "opener:allow-open-path",
+            "allow": [
+                {
+                    "path": "**/*"
+                }
+            ]
         }
     ]
 }
