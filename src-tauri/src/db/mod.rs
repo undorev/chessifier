@@ -1305,13 +1305,18 @@ pub async fn get_players_game_info(
                 })
             },
         )
-        .fold(|| DashMap::new(), |acc, data| {
-            acc.entry((data.site.clone(), data.player.clone()))
-                .or_insert_with(Vec::new)
-                .extend(data.data);
-            acc
-        })
-        .reduce(|| DashMap::new(), |acc1, acc2| {
+        .fold(
+            || DashMap::new(),
+            |acc, data| {
+                acc.entry((data.site.clone(), data.player.clone()))
+                    .or_insert_with(Vec::new)
+                    .extend(data.data);
+                acc
+            },
+        )
+        .reduce(
+            || DashMap::new(),
+            |acc1, acc2| {
                 for ((site, player), data) in acc2 {
                     acc1.entry((site, player))
                         .or_insert_with(Vec::new)

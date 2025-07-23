@@ -29,7 +29,7 @@ use specta_typescript::{BigIntExportBehavior, Typescript};
 use sysinfo::SystemExt;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager, Window};
-use tauri_plugin_log::{Target, TargetKind};
+use tauri_plugin_log::{};
 
 use crate::chess::{
     analyze_game, get_engine_config, get_engine_logs, kill_engine, kill_engines, stop_engine,
@@ -111,11 +111,18 @@ fn ensure_required_directories(app: &AppHandle) -> Result<(), String> {
         if let Ok(resolved_path) = app.path().resolve(path, *dir) {
             if !Path::new(&resolved_path).exists() {
                 log::info!("Creating directory {}", resolved_path.to_string_lossy());
-                create_dir_all(&resolved_path)
-                    .map_err(|e| format!("Failed to create directory {}: {}", 
-                                        resolved_path.to_string_lossy(), e))?;
+                create_dir_all(&resolved_path).map_err(|e| {
+                    format!(
+                        "Failed to create directory {}: {}",
+                        resolved_path.to_string_lossy(),
+                        e
+                    )
+                })?;
             } else {
-                log::info!("Directory already exists: {}", resolved_path.to_string_lossy());
+                log::info!(
+                    "Directory already exists: {}",
+                    resolved_path.to_string_lossy()
+                );
             }
         }
     }
@@ -133,14 +140,20 @@ fn ensure_required_directories(app: &AppHandle) -> Result<(), String> {
 fn ensure_required_files(app: &AppHandle) -> Result<(), String> {
     log::info!("Checking for required files");
     for (dir, path, contents) in REQUIRED_FILES.iter() {
-        let resolved_path = app.path().resolve(path, *dir)
+        let resolved_path = app
+            .path()
+            .resolve(path, *dir)
             .map_err(|e| format!("Failed to resolve path {}: {}", path, e))?;
-        
+
         if !Path::new(&resolved_path).exists() {
             log::info!("Creating file {}", resolved_path.to_string_lossy());
-            std::fs::write(&resolved_path, contents)
-                .map_err(|e| format!("Failed to write file {}: {}", 
-                                    resolved_path.to_string_lossy(), e))?;
+            std::fs::write(&resolved_path, contents).map_err(|e| {
+                format!(
+                    "Failed to write file {}: {}",
+                    resolved_path.to_string_lossy(),
+                    e
+                )
+            })?;
         } else {
             log::info!("File already exists: {}", resolved_path.to_string_lossy());
         }
@@ -155,11 +168,12 @@ async fn close_splashscreen(window: Window) -> Result<(), String> {
     let main_window = window
         .get_webview_window("main")
         .ok_or_else(|| String::from("No window labeled 'main' found"))?;
-    
+
     // Show the main window, propagating any errors
-    main_window.show()
+    main_window
+        .show()
         .map_err(|e| format!("Failed to show main window: {}", e))?;
-    
+
     Ok(())
 }
 
@@ -227,32 +241,24 @@ fn main() {
         )
         .expect("Failed to export types");
 
-    #[cfg(debug_assertions)]
-    let log_targets = [TargetKind::Stdout, TargetKind::Webview];
-
-    #[cfg(not(debug_assertions))]
-    let log_targets = [
-        TargetKind::Stdout,
-        TargetKind::LogDir {
-            file_name: Some(String::from("chessifier.log")),
-        },
-    ];
-
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_process::init())
-        .plugin(
-            tauri_plugin_log::Builder::default()
-                .targets(log_targets.map(Target::new))
-                .level(LevelFilter::Info)
-                .build(),
-        )
+        .plugin(tauri_plugin_log::Builder::new()
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::LogDir {
+                        file_name: Some("chessifier".to_string()),
+                    },
+                ))
+                .level(LevelFilter::Info).build())
         .invoke_handler(specta_builder.invoke_handler())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(move |app| {
             log::info!("Setting up application");
 

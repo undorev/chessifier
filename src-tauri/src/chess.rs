@@ -1,4 +1,10 @@
-use std::{fmt::Display, path::PathBuf, process::Stdio, sync::Arc, time::{Duration, Instant}};
+use std::{
+    fmt::Display,
+    path::PathBuf,
+    process::Stdio,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use derivative::Derivative;
 use governor::{Quota, RateLimiter};

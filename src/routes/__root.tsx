@@ -6,7 +6,7 @@ import { appLogDir, resolve } from "@tauri-apps/api/path";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ask, message, open } from "@tauri-apps/plugin-dialog";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
-import { open as shellOpen } from "@tauri-apps/plugin-shell";
+import { openPath } from '@tauri-apps/plugin-opener';
 import { check } from "@tauri-apps/plugin-updater";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -188,8 +188,8 @@ function RootLayout() {
               notifications.show({
                 title: "Logs",
                 message: `Opened logs in ${path}`,
-              });
-              await shellOpen(path);
+              });              
+              await openPath(path);
             },
           },
           { label: "divider" },
@@ -232,8 +232,8 @@ function RootLayout() {
         isNative
           ? undefined
           : {
-              height: "35px",
-            }
+            height: "35px",
+          }
       }
       styles={{
         main: {
