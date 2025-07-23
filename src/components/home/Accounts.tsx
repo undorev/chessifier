@@ -153,7 +153,7 @@ function AccountModal({
                 id={"lichess"}
                 isSelected={website === "lichess"}
                 setSelected={() => setWebsite("lichess")}
-                Header={
+                content={
                   <Group>
                     <LichessLogo />
                     Lichess
@@ -164,7 +164,7 @@ function AccountModal({
                 id={"chesscom"}
                 isSelected={website === "chesscom"}
                 setSelected={() => setWebsite("chesscom")}
-                Header={
+                content={
                   <Group>
                     <img width={30} height={30} src="/chesscom.png" alt="chess.com" />
                     Chess.com

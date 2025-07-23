@@ -187,7 +187,7 @@ function DatabasePanel() {
           <GamesTable games={openingData?.games || []} loading={isLoading} />
         </PanelWithError>
         <PanelWithError value="options" error={error} type={db}>
-         <ScrollArea h="100%" offsetScrollbars>
+          <ScrollArea h="100%" offsetScrollbars>
             {match(db)
               .with("local", () => <LocalOptionsPanel boardFen={debouncedFen} />)
               .with("lch_all", () => <LichessOptionsPanel />)

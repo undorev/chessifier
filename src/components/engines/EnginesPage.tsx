@@ -90,12 +90,11 @@ export default function EnginesPage() {
                   isSelected={selected === i}
                   setSelected={setSelected}
                   error={undefined}
-                  Header={<EngineName engine={item} />}
-                  stats={stats}
+                  content={<EngineName engine={item} stats={stats} />}
                 />
               );
             })}
-            <Box className={classes.card} component="button" type="button" onClick={() => setOpened(true)}>
+            <Box className={classes.card} h="177px" component="button" type="button" onClick={() => setOpened(true)}>
               <Stack gap={0} justify="center" w="100%" h="100%">
                 <Text mb={10}>{t("Common.AddNew")}</Text>
                 <Box>
@@ -526,7 +525,7 @@ function JSONModal({
   );
 }
 
-function EngineName({ engine }: { engine: Engine }) {
+function EngineName({ engine, stats }: { engine: Engine; stats?: { label: string; value: string }[] }) {
   const { data: fileExists, isLoading } = useSWRImmutable(
     ["file-exists", engine.type === "local" ? engine.path : null],
     async ([, path]) => {
@@ -540,21 +539,37 @@ function EngineName({ engine }: { engine: Engine }) {
   const hasError = engine.type === "local" && !isLoading && !fileExists;
 
   return (
-    <Group wrap="nowrap">
-      {engine.image ? (
-        <LocalImage src={engine.image} alt={engine.name} h="2.5rem" />
-      ) : engine.type !== "local" ? (
-        <IconCloud size="2.5rem" />
-      ) : (
-        <IconCpu size="2.5rem" />
-      )}
-      <Stack gap={0}>
+    <Group>
+      <Box flex="1">
+        {engine.image ? (
+          <LocalImage src={engine.image} alt={engine.name} h="135px" />
+        ) : engine.type !== "local" ? (
+          <IconCloud size="135px" />
+        ) : (
+          <IconCpu size="135px" />
+        )}
+      </Box>
+
+      <Stack flex="1" gap={0}>
         <Text fw="bold" lineClamp={1} c={hasError ? "red" : undefined}>
           {engine.name} {hasError ? "(file missing)" : ""}
         </Text>
         <Text size="xs" c="dimmed" style={{ wordWrap: "break-word" }} lineClamp={1}>
           {engine.type === "local" ? engine.path.split(/\/|\\/).slice(-1)[0] : engine.url}
         </Text>
+
+        <Group>
+          {stats?.map((stat) => (
+            <Box key={stat.label}>
+              <Text size="xs" c="dimmed" fw="bold" className={classes.label} mt="1rem">
+                {stat.label}
+              </Text>
+              <Text fw={700} size="lg" style={{ lineHeight: 1 }}>
+                {stat.value}
+              </Text>
+            </Box>
+          ))}
+        </Group>
       </Stack>
     </Group>
   );
