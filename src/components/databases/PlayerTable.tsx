@@ -1,8 +1,8 @@
 import { ActionIcon, Center, Collapse, Flex, Group, NumberInput, Text, TextInput } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import { IconDotsVertical, IconSearch } from "@tabler/icons-react";
 import { DataTable, type DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import type { Player, PlayerSort } from "@/bindings";
 import { query_players, type SuccessDatabaseInfo } from "@/utils/db";
 import GridLayout from "./GridLayout";
@@ -66,28 +66,36 @@ function PlayerTable({ database }: { database: SuccessDatabaseInfo }) {
     });
   }, [activePage, sort]);
 
-  useHotkeys("ArrowUp", () => {
-    setSelectedPlayer((prev) => {
-      if (prev === null) {
-        return null;
-      }
-      if (prev === 0) {
-        return 0;
-      }
-      return prev - 1;
-    });
-  });
-  useHotkeys("ArrowDown", () => {
-    setSelectedPlayer((prev) => {
-      if (prev === null) {
-        return 0;
-      }
-      if (prev === players.length - 1) {
-        return players.length - 1;
-      }
-      return prev + 1;
-    });
-  });
+  useHotkeys([
+    [
+      "ArrowUp",
+      () => {
+        setSelectedPlayer((prev) => {
+          if (prev === null) {
+            return null;
+          }
+          if (prev === 0) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      },
+    ],
+    [
+      "ArrowDown",
+      () => {
+        setSelectedPlayer((prev) => {
+          if (prev === null) {
+            return 0;
+          }
+          if (prev === players.length - 1) {
+            return players.length - 1;
+          }
+          return prev + 1;
+        });
+      },
+    ],
+  ]);
 
   return (
     <GridLayout

@@ -12,12 +12,11 @@ import {
   Tabs,
   Text,
 } from "@mantine/core";
-import { useToggle } from "@mantine/hooks";
+import { useHotkeys, useToggle } from "@mantine/hooks";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useContext, useEffect } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "ts-fsrs";
 import { useStore } from "zustand";
@@ -83,7 +82,7 @@ function PracticePanel() {
   const [logsOpen, setLogsOpen] = useToggle();
   const [tab, setTab] = useAtom(currentPracticeTabAtom);
 
-  useHotkeys("n", () => newPractice());
+  useHotkeys([["n", () => newPractice()]]);
 
   return (
     <>

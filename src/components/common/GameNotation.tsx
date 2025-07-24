@@ -12,7 +12,7 @@ import {
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
-import { useColorScheme, useToggle } from "@mantine/hooks";
+import { useColorScheme, useHotkeys, useToggle } from "@mantine/hooks";
 import {
   IconArrowRight,
   IconArrowsSplit,
@@ -30,7 +30,6 @@ import { INITIAL_FEN } from "chessops/fen";
 import equal from "fast-deep-equal";
 import { useAtom, useAtomValue } from "jotai";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useStore } from "zustand";
 import { Comment } from "@/components/common/Comment";
 import { TreeStateContext } from "@/components/common/TreeStateContext";
@@ -104,7 +103,7 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
   const colorScheme = useColorScheme();
   const keyMap = useAtomValue(keyMapAtom);
 
-  useHotkeys(keyMap.TOGGLE_BLUR.keys, () => setInvisible((prev: boolean) => !prev));
+  useHotkeys([[keyMap.TOGGLE_BLUR.keys, () => setInvisible((prev: boolean) => !prev)]]);
 
   useEffect(() => {
     if (viewport.current) {

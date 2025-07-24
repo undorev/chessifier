@@ -1,6 +1,14 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "@/styles/theme";
 
+export const tabItem = style({
+  paddingLeft: vars.spacing.lg,
+});
+
+export const tabLabel = style({
+  textAlign: "left",
+});
+
 export const card = style({
   [vars.lightSelector]: {
     backgroundColor: vars.colors.white,

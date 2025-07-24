@@ -2,7 +2,7 @@ import { Button, Center, Chip, Group, Input, Stack, Text, Title } from "@mantine
 import { useToggle } from "@mantine/hooks";
 import { IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { useLoaderData } from "@tanstack/react-router";
-import { BaseDirectory, type DirEntry, type FileInfo, readDir, remove } from "@tauri-apps/plugin-fs";
+import { readDir, remove } from "@tauri-apps/plugin-fs";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
@@ -23,7 +23,6 @@ const useFileDirectory = (dir: string) => {
 
     return allEntries;
   });
-  console.log(error);
   return {
     files: data,
     isLoading,
