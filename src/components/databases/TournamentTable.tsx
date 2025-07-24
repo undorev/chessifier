@@ -1,8 +1,8 @@
 import { Center, Flex, Text, TextInput } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { DataTable, type DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { commands, type DatabaseInfo, type Event, type TournamentSort } from "@/bindings";
 import { unwrap } from "@/utils/unwrap";
 import GridLayout from "./GridLayout";
@@ -68,28 +68,36 @@ function TournamentTable({ database }: { database: DatabaseInfo }) {
       });
   }, [activePage, sort]);
 
-  useHotkeys("ArrowUp", () => {
-    setSelected((prev) => {
-      if (prev === null) {
-        return null;
-      }
-      if (prev === 0) {
-        return 0;
-      }
-      return prev - 1;
-    });
-  });
-  useHotkeys("ArrowDown", () => {
-    setSelected((prev) => {
-      if (prev === null) {
-        return 0;
-      }
-      if (prev === tournaments.length - 1) {
-        return tournaments.length - 1;
-      }
-      return prev + 1;
-    });
-  });
+  useHotkeys([
+    [
+      "ArrowUp",
+      () => {
+        setSelected((prev) => {
+          if (prev === null) {
+            return null;
+          }
+          if (prev === 0) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      },
+    ],
+    [
+      "ArrowDown",
+      () => {
+        setSelected((prev) => {
+          if (prev === null) {
+            return 0;
+          }
+          if (prev === tournaments.length - 1) {
+            return tournaments.length - 1;
+          }
+          return prev + 1;
+        });
+      },
+    ],
+  ]);
 
   return (
     <GridLayout

@@ -1,10 +1,9 @@
 import { ActionIcon, Box, Group, Kbd } from "@mantine/core";
-import { useColorScheme } from "@mantine/hooks";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import cx from "clsx";
 import { useAtom } from "jotai";
 import { useState } from "react";
-import { useRecordHotkeys } from "react-hotkeys-hook";
+import useRecordHotkeys from "@/common/hooks/useRecordHotkeys";
 import { keyMapAtom } from "@/state/keybindings";
 import * as classes from "./KeybindInput.css";
 

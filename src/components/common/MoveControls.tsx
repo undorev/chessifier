@@ -1,8 +1,8 @@
 import { ActionIcon, Group } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { memo, useContext } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useStore } from "zustand";
 import { keyMapAtom } from "@/state/keybindings";
 import { TreeStateContext } from "./TreeStateContext";
@@ -22,17 +22,19 @@ function MoveControls({ readOnly }: { readOnly?: boolean }) {
   const previousBranching = useStore(store, (s) => s.previousBranching);
 
   const keyMap = useAtomValue(keyMapAtom);
-  useHotkeys(keyMap.PREVIOUS_MOVE.keys, previous);
-  useHotkeys(keyMap.NEXT_MOVE.keys, next);
-  useHotkeys(keyMap.GO_TO_START.keys, start);
-  useHotkeys(keyMap.GO_TO_END.keys, end);
-  useHotkeys(keyMap.DELETE_MOVE.keys, readOnly ? () => {} : () => deleteMove());
-  useHotkeys(keyMap.GO_TO_BRANCH_START.keys, startBranch);
-  useHotkeys(keyMap.GO_TO_BRANCH_END.keys, endBranch);
-  useHotkeys(keyMap.NEXT_BRANCH.keys, nextBranch);
-  useHotkeys(keyMap.PREVIOUS_BRANCH.keys, previousBranch);
-  useHotkeys(keyMap.NEXT_BRANCHING.keys, nextBranching);
-  useHotkeys(keyMap.PREVIOUS_BRANCHING.keys, previousBranching);
+  useHotkeys([
+    [keyMap.PREVIOUS_MOVE.keys, previous],
+    [keyMap.NEXT_MOVE.keys, next],
+    [keyMap.GO_TO_START.keys, start],
+    [keyMap.GO_TO_END.keys, end],
+    [keyMap.DELETE_MOVE.keys, readOnly ? () => {} : () => deleteMove()],
+    [keyMap.GO_TO_BRANCH_START.keys, startBranch],
+    [keyMap.GO_TO_BRANCH_END.keys, endBranch],
+    [keyMap.NEXT_BRANCH.keys, nextBranch],
+    [keyMap.PREVIOUS_BRANCH.keys, previousBranch],
+    [keyMap.NEXT_BRANCHING.keys, nextBranching],
+    [keyMap.PREVIOUS_BRANCHING.keys, previousBranching],
+  ]);
 
   return (
     <Group grow gap="xs">

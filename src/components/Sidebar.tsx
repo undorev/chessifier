@@ -1,4 +1,4 @@
-import { AppShellSection, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, AppShellSection, Menu, Stack, Tooltip } from "@mantine/core";
 import { type Icon, IconChess, IconCpu, IconDatabase, IconFiles, IconSettings, IconUser } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import cx from "clsx";
@@ -54,7 +54,27 @@ export function SideBar() {
       </AppShellSection>
       <AppShellSection>
         <Stack justify="center" gap={0}>
-          <NavbarLink icon={IconSettings} label={t("SideBar.Settings")} url="/settings" />
+          <Menu position="right-end">
+            <Menu.Target>
+              <Tooltip label="Manage" position="right" openDelay={1000}>
+                <ActionIcon
+                  className={cx(classes.link, {
+                    // [classes.active]: matcesRoute({ to: url, fuzzy: true }),
+                  })}
+                >
+                  <IconSettings size="1.5rem" stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item component={Link} to="/settings">
+                {t("SideBar.Settings")}
+              </Menu.Item>
+              <Menu.Item component={Link} to="/settings/keyboard-shortcuts">
+                {t("SideBar.KeyboardShortcuts")}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Stack>
       </AppShellSection>
     </>
