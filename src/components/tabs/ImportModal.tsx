@@ -105,7 +105,8 @@ export default function ImportModal({
         }
         const tree = await parsePGN(input);
         setCurrentTab((prev) => {
-          sessionStorage.setItem(prev.value, JSON.stringify({ version: 0, state: tree }));
+          sessionStorage.setItem(prev?.value, JSON.stringify({ version: 0, state: tree }));
+
           return {
             ...prev,
             name: getGameName(tree.headers),

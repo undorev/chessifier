@@ -1,16 +1,16 @@
 import { AppShell } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { createRootRouteWithContext, Outlet, useNavigate } from "@tanstack/react-router";
 import { Menu, MenuItem, PredefinedMenuItem, Submenu } from "@tauri-apps/api/menu";
 import { appLogDir, resolve } from "@tauri-apps/api/path";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ask, message, open } from "@tauri-apps/plugin-dialog";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
-import { openPath } from '@tauri-apps/plugin-opener';
 import { check } from "@tauri-apps/plugin-updater";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
 import { match } from "ts-pattern";
@@ -121,9 +121,54 @@ function RootLayout() {
 
   const [keyMap] = useAtom(keyMapAtom);
 
-  useHotkeys(keyMap.NEW_BOARD_TAB.keys, createNewTab);
-  useHotkeys(keyMap.OPEN_FILE.keys, openNewFile);
-  useHotkeys(keyMap.EXIT_APP.keys, () => exit(0));
+  useHotkeys([
+    [
+      keyMap.PLAY_BOARD.keys,
+      () => {
+        navigate({ to: "/" });
+        createTab({
+          tab: { name: "Play", type: "play" },
+          setTabs,
+          setActiveTab,
+        });
+      },
+    ],
+    [
+      keyMap.ANALYZE_BOARD.keys,
+      () => {
+        navigate({ to: "/" });
+        createTab({
+          tab: { name: "Analyze", type: "analysis" },
+          setTabs,
+          setActiveTab,
+        });
+      },
+    ],
+    [
+      keyMap.IMPORT_BOARD.keys,
+      () => {
+        navigate({ to: "/" });
+        createTab({
+          tab: { name: "Import", type: "play" },
+          setTabs,
+          setActiveTab,
+        });
+      },
+    ],
+    [
+      keyMap.TRAIN_BOARD.keys,
+      () => {
+        navigate({ to: "/" });
+        createTab({
+          tab: { name: "Train", type: "puzzles" },
+          setTabs,
+          setActiveTab,
+        });
+      },
+    ],
+    [keyMap.OPEN_FILE.keys, openNewFile],
+    [keyMap.EXIT_APP.keys, () => exit(0)],
+  ]);
 
   const [opened, setOpened] = useState(false);
 
@@ -132,12 +177,12 @@ function RootLayout() {
       {
         label: t("Menu.File"),
         options: [
-          {
-            label: t("Menu.File.NewTab"),
-            id: "new_tab",
-            shortcut: keyMap.NEW_BOARD_TAB.keys,
-            action: createNewTab,
-          },
+          // {
+          //   label: t("Menu.File.NewTab"),
+          //   id: "new_tab",
+          //   shortcut: keyMap.NEW_BOARD_TAB.keys,
+          //   action: createNewTab,
+          // },
           {
             label: t("Menu.File.OpenFile"),
             id: "open_file",
@@ -188,7 +233,7 @@ function RootLayout() {
               notifications.show({
                 title: "Logs",
                 message: `Opened logs in ${path}`,
-              });              
+              });
               await openPath(path);
             },
           },
@@ -206,7 +251,7 @@ function RootLayout() {
         ],
       },
     ],
-    [t, checkForUpdates, createNewTab, keyMap, openNewFile],
+    [t, checkForUpdates, keyMap, openNewFile],
   );
 
   const { data: menu } = useSWRImmutable(["menu", menuActions], () => createMenu(menuActions));
@@ -232,8 +277,8 @@ function RootLayout() {
         isNative
           ? undefined
           : {
-            height: "35px",
-          }
+              height: "35px",
+            }
       }
       styles={{
         main: {

@@ -47,22 +47,11 @@ export const enginesAtom = atomWithStorage<Engine[]>(
 const loadableEnginesAtom = loadable(enginesAtom);
 
 // Tabs
-
-const firstTab: Tab = {
-  name: "New Tab",
-  value: genID(),
-  type: "new",
-};
-
-export const tabsAtom = atomWithStorage<Tab[]>(
-  "tabs",
-  [firstTab],
-  createZodStorage(z.array(tabSchema), sessionStorage),
-);
+export const tabsAtom = atomWithStorage<Tab[]>("tabs", [], createZodStorage(z.array(tabSchema), sessionStorage));
 
 export const activeTabAtom = atomWithStorage<string | null>(
   "activeTab",
-  firstTab.value,
+  "",
   createJSONStorage(() => sessionStorage),
 );
 
@@ -159,14 +148,14 @@ function tabValue<T extends object | string | boolean | number | null | undefine
   return atom(
     (get) => {
       const tab = get(currentTabAtom);
-      if (!tab) throw new Error("No tab selected");
+      if (!tab) return { type: "new", value: genID(), name: "New Game" };
       const atom = family(tab.value);
       return get(atom);
     },
     (get, set, newValue: T | ((currentValue: T) => T)) => {
       const tab = get(currentTabAtom);
-      if (!tab) throw new Error("No tab selected");
-      const nextValue = typeof newValue === "function" ? newValue(get(tabValue(family))) : newValue;
+      if (!tab) return { type: "new", value: genID(), name: "New Game" };
+      const nextValue = typeof newValue === "function" ? newValue(get(tabValue(family)) as T) : newValue;
       const atom = family(tab.value);
       set(atom, nextValue);
     },

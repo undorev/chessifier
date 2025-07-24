@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { getVersion } from "@tauri-apps/api/app";
-import SettingsPage from "@/components/settings/SettingsPage";
+
+const RouteComponent = () => <Outlet />;
 
 export const Route = createFileRoute("/settings")({
-  component: SettingsPage,
+  component: RouteComponent,
   loader: async ({ context: { loadDirs } }) => ({
     dirs: await loadDirs(),
     version: await getVersion(),

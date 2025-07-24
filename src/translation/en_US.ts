@@ -119,12 +119,13 @@ export const en_US = {
     "SideBar.Databases": "Databases",
     "SideBar.Engines": "Engines",
     "SideBar.Settings": "Settings",
+    "SideBar.KeyboardShortcuts": "Keyboard Shortcuts",
 
     "Tab.NewTab": "New Tab",
 
     "Home.Card.PlayChess.Title": "Play Chess",
     "Home.Card.PlayChess.Desc": "Play against an engine or a friend",
-    "Home.Card.PlayChess.Button": "Play",
+    "Home.Card.PlayChess.Button": "Play Now",
     "Home.Card.AnalysisBoard.Title": "Analysis Board",
     "Home.Card.AnalysisBoard.Desc": "Analyze a game or position",
     "Home.Card.AnalysisBoard.Button": "Open",

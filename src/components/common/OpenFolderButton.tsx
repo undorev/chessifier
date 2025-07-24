@@ -1,7 +1,7 @@
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconFolder } from "@tabler/icons-react";
 import { appDataDir, resolve } from "@tauri-apps/api/path";
-import { openPath } from '@tauri-apps/plugin-opener';
+import { openPath } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 
 function OpenFolderButton({ base, folder }: { base?: "AppDir" | "Document"; folder: string }) {

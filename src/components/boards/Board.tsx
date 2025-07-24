@@ -1,4 +1,5 @@
 import { ActionIcon, Box, Center, Group, Menu, Text, Tooltip, useMantineTheme } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowBack,
@@ -27,7 +28,6 @@ import domtoimage from "dom-to-image";
 import { useAtom, useAtomValue } from "jotai";
 import { memo, useCallback, useContext, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
-import { useHotkeys } from "react-hotkeys-hook";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 import { useStore } from "zustand";
@@ -190,7 +190,7 @@ function Board({
   };
 
   const keyMap = useAtomValue(keyMapAtom);
-  useHotkeys(keyMap.SWAP_ORIENTATION.keys, () => toggleOrientation());
+  useHotkeys([[keyMap.SWAP_ORIENTATION.keys, () => toggleOrientation()]]);
   const [currentTab, setCurrentTab] = useAtom(currentTabAtom);
   const [evalOpen, setEvalOpen] = useAtom(currentEvalOpenAtom);
 
@@ -440,7 +440,7 @@ function Board({
     [editingMode, currentNode, setFen],
   );
 
-  useHotkeys(keyMap.TOGGLE_EVAL_BAR.keys, () => setEvalOpen((e) => !e));
+  useHotkeys([[keyMap.TOGGLE_EVAL_BAR.keys, () => setEvalOpen((e) => !e)]]);
 
   const square = match(currentNode)
     .with({ san: "O-O" }, ({ halfMoves }) => parseSquare(halfMoves % 2 === 1 ? "g1" : "g8"))
