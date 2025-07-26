@@ -71,7 +71,6 @@ const keys = {
   NEXT_GAME: { name: "Next game", keys: "pagedown" },
 };
 
-
 export const keyMapAtom = atomWithStorage("keybindings", keys, defaultStorage(keys, localStorage));
 
 function defaultStorage<T>(keys: T, storage: SyncStringStorage): SyncStorage<T> {

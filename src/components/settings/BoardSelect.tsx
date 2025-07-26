@@ -45,7 +45,7 @@ function SelectOption({ label }: { label: string }) {
           height: "32px",
           backgroundImage: `url(/board/${image})`,
           flexShrink: 0,
-          backgroundSize: label.endsWith(".svg") ? "256px" : undefined
+          backgroundSize: label.endsWith(".svg") ? "256px" : undefined,
         }}
       />
       <Text fz="sm" fw={500}>
