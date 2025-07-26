@@ -114,7 +114,7 @@ export const nb_NO = {
     "Menu.Help.About": "Om Chessifier",
 
     "SideBar.Board": "Brett",
-    "SideBar.User": "Bruker",
+    "SideBar.Accounts": "Bruker",
     "SideBar.Files": "Filer",
     "SideBar.Databases": "Databaser",
     "SideBar.Engines": "Computerene",

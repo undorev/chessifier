@@ -114,7 +114,7 @@ export const en_US = {
     "Menu.Help.About": "About",
 
     "SideBar.Board": "Board",
-    "SideBar.User": "User",
+    "SideBar.Accounts": "Accounts",
     "SideBar.Files": "Files",
     "SideBar.Databases": "Databases",
     "SideBar.Engines": "Engines",

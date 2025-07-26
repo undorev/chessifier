@@ -114,7 +114,7 @@ export const zh_CN = {
     "Menu.Help.About": "关于",
 
     "SideBar.Board": "棋盘",
-    "SideBar.User": "用户",
+    "SideBar.Accounts": "用户",
     "SideBar.Files": "文件",
     "SideBar.Databases": "数据库",
     "SideBar.Engines": "引擎",

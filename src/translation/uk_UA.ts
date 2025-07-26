@@ -114,7 +114,7 @@ export const uk_UA = {
     "Menu.Help.About": "Про програму",
 
     "SideBar.Board": "Дошка",
-    "SideBar.User": "Користувач",
+    "SideBar.Accounts": "Користувач",
     "SideBar.Files": "Файли",
     "SideBar.Databases": "Бази даних",
     "SideBar.Engines": "Движки",

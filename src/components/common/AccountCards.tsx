@@ -1,7 +1,5 @@
-import { Accordion, ActionIcon, Divider, Group, Paper, ScrollArea, Stack, Text, TextInput } from "@mantine/core";
-import { IconCheck, IconEdit, IconX } from "@tabler/icons-react";
+import { Accordion, Paper, ScrollArea, Stack } from "@mantine/core";
 import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useRef, useState } from "react";
 import type { DatabaseInfo } from "@/bindings";
 import { sessionsAtom } from "@/state/atoms";
 import { getChessComAccount, getStats } from "@/utils/chess.com/api";
@@ -55,86 +53,14 @@ function PlayerSession({
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
 }) {
   const [, setSessions] = useAtom(sessionsAtom);
-  const [edit, setEdit] = useState(false);
-  const [text, setText] = useState(name);
-  useEffect(() => {
-    setText(name);
-  }, [name]);
-  const ref = useRef(null);
 
   return (
     <Paper withBorder>
-      <Group justify="space-between" py="xs" px="md">
-        {edit ? (
-          <TextInput
-            ref={ref}
-            variant="unstyled"
-            fw="bold"
-            value={text}
-            onChange={(e) => setText(e.currentTarget.value)}
-            styles={{
-              input: {
-                fontSize: "1.1rem",
-                textDecoration: "underline",
-              },
-            }}
-            autoFocus
-          />
-        ) : (
-          <Text fz="lg" fw="bold">
-            {name}
-          </Text>
-        )}
-        <Group>
-          {edit ? (
-            <ActionIcon
-              size="sm"
-              onClick={() => {
-                setEdit(false);
-                setSessions((prev) =>
-                  prev.map((s) => {
-                    if (sessions.includes(s)) {
-                      return {
-                        ...s,
-                        player: text,
-                      };
-                    }
-                    return s;
-                  }),
-                );
-              }}
-            >
-              <IconCheck />
-            </ActionIcon>
-          ) : (
-            <ActionIcon
-              size="sm"
-              onClick={() => {
-                setEdit(true);
-              }}
-            >
-              <IconEdit />
-            </ActionIcon>
-          )}
-          <ActionIcon
-            size="sm"
-            onClick={() =>
-              setSessions((sessions) =>
-                sessions.filter(
-                  (s) => s.player !== name && s.lichess?.username !== name && s.chessCom?.username !== name,
-                ),
-              )
-            }
-          >
-            <IconX />
-          </ActionIcon>
-        </Group>
-      </Group>
-      <Divider />
-      <Accordion multiple chevronSize={0}>
+      <Accordion multiple chevronSize={14} chevronPosition="left">
         {sessions.map((session, i) => (
           <LichessOrChessCom
             key={i}
+            name={name}
             session={session}
             databases={databases}
             setDatabases={setDatabases}
@@ -147,11 +73,13 @@ function PlayerSession({
 }
 
 function LichessOrChessCom({
+  name,
   session,
   databases,
   setDatabases,
   setSessions,
 }: {
+  name: string;
   session: Session;
   databases: DatabaseInfo[];
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
@@ -187,12 +115,14 @@ function LichessOrChessCom({
     return (
       <AccountCard
         key={account.id}
+        name={name}
         token={lichessSession.accessToken}
         type="lichess"
         database={databases.find((db) => db.filename === `${account.username}_lichess.db3`) ?? null}
         title={account.username}
         updatedAt={session.updatedAt}
         total={totalGames}
+        setSessions={setSessions}
         logout={() => {
           setSessions((sessions) => sessions.filter((s) => s.lichess?.account.id !== account.id));
         }}
@@ -207,14 +137,14 @@ function LichessOrChessCom({
             sessions.map((s) =>
               s.lichess?.account.id === account.id
                 ? {
-                    ...s,
-                    lichess: {
-                      account: account,
-                      username: lichessSession.username,
-                      accessToken: lichessSession.accessToken,
-                    },
-                    updatedAt: Date.now(),
-                  }
+                  ...s,
+                  lichess: {
+                    account: account,
+                    username: lichessSession.username,
+                    accessToken: lichessSession.accessToken,
+                  },
+                  updatedAt: Date.now(),
+                }
                 : s,
             ),
           );
@@ -233,12 +163,14 @@ function LichessOrChessCom({
     return (
       <AccountCard
         key={session.chessCom.username}
+        name={name}
         type="chesscom"
         title={session.chessCom.username}
         database={databases.find((db) => db.filename === `${session.chessCom?.username}_chesscom.db3`) ?? null}
         updatedAt={session.updatedAt}
         total={totalGames}
         stats={getStats(session.chessCom.stats)}
+        setSessions={setSessions}
         logout={() => {
           setSessions((sessions) => sessions.filter((s) => s.chessCom?.username !== session.chessCom?.username));
         }}
@@ -250,13 +182,13 @@ function LichessOrChessCom({
             sessions.map((s) =>
               session.chessCom && s.chessCom?.username === session.chessCom?.username
                 ? {
-                    ...s,
-                    chessCom: {
-                      username: session.chessCom?.username,
-                      stats,
-                    },
-                    updatedAt: Date.now(),
-                  }
+                  ...s,
+                  chessCom: {
+                    username: session.chessCom?.username,
+                    stats,
+                  },
+                  updatedAt: Date.now(),
+                }
                 : s,
             ),
           );
