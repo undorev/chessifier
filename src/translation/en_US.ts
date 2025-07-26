@@ -123,8 +123,8 @@ export const en_US = {
 
     "Tab.NewTab": "New Tab",
 
-    "Home.Card.PlayChess.Title": "Play Chess",
-    "Home.Card.PlayChess.Desc": "Play against an engine or a friend",
+    "Home.Card.PlayChess.Title": "Play a game",
+    "Home.Card.PlayChess.Desc": "Challenge an engine or a friend.",
     "Home.Card.PlayChess.Button": "Play Now",
     "Home.Card.AnalysisBoard.Title": "Analysis Board",
     "Home.Card.AnalysisBoard.Desc": "Analyze a game or position",
