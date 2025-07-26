@@ -45,7 +45,7 @@ function SelectOption({ label }: { label: string }) {
           height: "32px",
           backgroundImage: `url(/board/${image})`,
           flexShrink: 0,
-          backgroundSize: label.endsWith(".svg") ? "256px" : undefined,
+          backgroundSize: label.endsWith(".svg") ? "256px" : undefined
         }}
       />
       <Text fz="sm" fw={500}>
@@ -73,7 +73,6 @@ export default function BoardSelect() {
   return (
     <Combobox
       store={combobox}
-      withinPortal={false}
       onOptionSubmit={(val) => {
         setBoard(val);
         combobox.closeDropdown();
@@ -86,7 +85,7 @@ export default function BoardSelect() {
           pointer
           onClick={() => combobox.toggleDropdown()}
           multiline
-          w="10rem"
+          w="14rem"
         >
           {selected ? <SelectOption label={selected} /> : <Input.Placeholder>Pick value</Input.Placeholder>}
         </InputBase>
