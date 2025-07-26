@@ -14,6 +14,14 @@
   - Completed **Russian**
 - **File System**
   - Added directory and file creation checks in main logic
+- **Accounts Page**
+  - Improved account card UI and functionality
+  - Edit account names
+  - Restructured stats in a grid layout
+  - Updated styling and layout
+  - Improved progress tracking during game downloads
+- **Settings Pages**
+  - Restructured board and settings pages for better usability
 
 ### 🛠 Improvements & Refactors
 - **Keybindings**
@@ -23,8 +31,11 @@
   - Improved component structure and variation handling
 - **Chess.com Integration**
   - Refactored stats retrieval and TCN decoding
+  - Handled 404 errors gracefully in API responses
 - **Report Creation**
   - Refactored logic and UI handling
+- **Settings**
+  - Adjusted BoardSelect component behavior
 - **General**
   - Updated dependencies
   - Linted code and fixed build issues
