@@ -114,7 +114,7 @@ export const tr_TR = {
     "Menu.Help.About": "Hakkında",
 
     "SideBar.Board": "Tahta",
-    "SideBar.User": "Kullanıcı",
+    "SideBar.Accounts": "Kullanıcı",
     "SideBar.Files": "Dosyalar",
     "SideBar.Databases": "Veritabanları",
     "SideBar.Engines": "Motorlar",

@@ -78,7 +78,7 @@ Ensure you have the required tools installed for your platform:
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | ✅ 100% | [AM](./src/translation/am_AM.ts) |
+| 🇦🇲 AM | 🟡 99% | [AM](./src/translation/am_AM.ts) |
 | 🇧🇾 BY | 🟡 90% | [BY](./src/translation/be_BY.ts) |
 | 🇩🇪 DE | 🟡 90% | [DE](./src/translation/de_DE.ts) |
 | 🇪🇸 ES | 🟡 90% | [ES](./src/translation/es_ES.ts) |
