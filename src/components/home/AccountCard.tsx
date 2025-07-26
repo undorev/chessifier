@@ -1,4 +1,19 @@
-import { Accordion, ActionIcon, Box, Card, Center, Group, Image, Loader, Progress, SimpleGrid, Stack, Text, TextInput, Tooltip } from "@mantine/core";
+import {
+  Accordion,
+  ActionIcon,
+  Box,
+  Card,
+  Center,
+  Group,
+  Image,
+  Loader,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
 import {
   IconArrowDownRight,
   IconArrowRight,
@@ -19,11 +34,11 @@ import { downloadChessCom } from "@/utils/chess.com/api";
 import { getDatabases, query_games } from "@/utils/db";
 import { capitalize } from "@/utils/format";
 import { downloadLichess } from "@/utils/lichess/api";
+import type { Session } from "@/utils/session";
 import { unwrap } from "@/utils/unwrap";
+import moduleClasses from "./AccountCard.module.css";
 import LichessLogo from "./LichessLogo";
 import * as classes from "./styles.css";
-import moduleClasses from "./AccountCard.module.css";
-import { Session } from "@/utils/session";
 
 interface AccountCardProps {
   name: string;
@@ -56,7 +71,7 @@ export function AccountCard({
   reload,
   setDatabases,
   token,
-  setSessions
+  setSessions,
 }: AccountCardProps) {
   const items = stats.map((stat) => {
     let color = "gray.5";
@@ -89,7 +104,11 @@ export function AccountCard({
               )}
             </Group>
           </Stack>
-          {stat.diff && <Box c={color}><DiffIcon size="1rem" stroke={1.5} /></Box>}
+          {stat.diff && (
+            <Box c={color}>
+              <DiffIcon size="1rem" stroke={1.5} />
+            </Box>
+          )}
         </Group>
       </Card>
     );
@@ -139,7 +158,7 @@ export function AccountCard({
   }, [setDatabases]);
 
   const downloadedGames = database?.type === "success" ? database.game_count : 0;
-  const percentage = total === 0 || downloadedGames === 0 ? "0" : ((downloadedGames / total) * 100).toFixed(2);
+  const percentage = total === 0 || downloadedGames === 0 ? "0" : ((downloadedGames / total) * 100).toFixed(2);  
 
   async function getLastGameDate({ database }: { database: DatabaseInfo }) {
     const games = await query_games(database.file, {
@@ -190,10 +209,14 @@ export function AccountCard({
                   </Text>
                 )}
                 <Group wrap="nowrap">
-                  <Text size="xs" fw="bold" c="dimmed">{title}</Text>
+                  <Text size="xs" fw="bold" c="dimmed">
+                    {title}
+                  </Text>
 
                   <Group gap="3px">
-                    <Text size="xs" fw="bold" c="dimmed">{total}</Text>
+                    <Text size="xs" fw="bold" c="dimmed">
+                      {total}
+                    </Text>
                     <Text size="xs" c="dimmed">
                       Games
                     </Text>
@@ -201,7 +224,9 @@ export function AccountCard({
 
                   <Group gap="3px">
                     <Tooltip label={`${downloadedGames} games`}>
-                      <Text size="xs" fw="bold" c="dimmed">{percentage === "0" ? "0" : `${percentage}%`}</Text>
+                      <Text size="xs" fw="bold" c="dimmed">
+                        {percentage === "0" ? "0" : `${percentage}%`}
+                      </Text>
                     </Tooltip>
                     <Text size="xs" c="dimmed">
                       Downloaded
@@ -277,9 +302,7 @@ export function AccountCard({
               </ActionIcon>
             </Tooltip>
             <Tooltip label="Remove account">
-              <ActionIcon
-                onClick={() => logout()}
-              >
+              <ActionIcon onClick={() => logout()}>
                 <IconX size="1rem" />
               </ActionIcon>
             </Tooltip>
