@@ -114,7 +114,7 @@ export const am_AM = {
     "Menu.Help.About": "Մեր մասին",
 
     "SideBar.Board": "Տախտակ",
-    "SideBar.User": "Օգտատեր",
+    "SideBar.Accounts": "Օգտատեր",
     "SideBar.Files": "Ֆայլեր",
     "SideBar.Databases": "Տվյալների բազաներ",
     "SideBar.Engines": "Շարժիչներ",

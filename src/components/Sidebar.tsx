@@ -1,5 +1,5 @@
 import { ActionIcon, AppShellSection, Menu, Stack, Tooltip } from "@mantine/core";
-import { type Icon, IconChess, IconCpu, IconDatabase, IconFiles, IconSettings, IconUser } from "@tabler/icons-react";
+import { type Icon, IconChess, IconCpu, IconDatabase, IconFiles, IconSettings, IconUsers } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import cx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -30,14 +30,14 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
 
 export const linksdata = [
   { icon: IconChess, label: "Board", url: "/" },
-  { icon: IconUser, label: "User", url: "/accounts" },
-  { icon: IconFiles, label: "Files", url: "/files" },
+  { icon: IconCpu, label: "Engines", url: "/engines" },
   {
     icon: IconDatabase,
     label: "Databases",
     url: "/databases",
   },
-  { icon: IconCpu, label: "Engines", url: "/engines" },
+  { icon: IconFiles, label: "Files", url: "/files" },
+  { icon: IconUsers, label: "Accounts", url: "/accounts" },
 ];
 
 export function SideBar() {

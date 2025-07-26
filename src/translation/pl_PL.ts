@@ -114,7 +114,7 @@ export const pl_PL = {
     "Menu.Help.About": "O programie",
 
     "SideBar.Board": "Szachownica",
-    "SideBar.User": "Użytkownik",
+    "SideBar.Accounts": "Użytkownik",
     "SideBar.Files": "Pliki",
     "SideBar.Databases": "Bazy danych",
     "SideBar.Engines": "Silniki",

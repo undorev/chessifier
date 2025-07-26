@@ -114,7 +114,7 @@ export const fr_FR = {
     "Menu.Help.About": "À propos",
 
     "SideBar.Board": "Échiquier",
-    "SideBar.User": "Utilisateur",
+    "SideBar.Accounts": "Utilisateur",
     "SideBar.Files": "Fichiers",
     "SideBar.Databases": "Bases de données",
     "SideBar.Engines": "Moteurs",

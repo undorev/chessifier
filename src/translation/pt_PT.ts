@@ -114,7 +114,7 @@ export const pt_PT = {
     "Menu.Help.About": "Sobre",
 
     "SideBar.Board": "Tabuleiro",
-    "SideBar.User": "Utilizador",
+    "SideBar.Accounts": "Utilizador",
     "SideBar.Files": "Ficheiros",
     "SideBar.Databases": "Bases de dados",
     "SideBar.Engines": "Engines",

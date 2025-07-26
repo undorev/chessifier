@@ -1,0 +1,7 @@
+.accordionItem:hover .accordionActions {
+    opacity: 1
+}
+
+.accordionActions {
+    opacity: 0;
+}

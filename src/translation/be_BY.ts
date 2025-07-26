@@ -114,7 +114,7 @@ export const be_BY = {
     "Menu.Help.About": "Аб праграме",
 
     "SideBar.Board": "Шахматная дошка",
-    "SideBar.User": "Карыстальнік",
+    "SideBar.Accounts": "Карыстальнік",
     "SideBar.Files": "Файлы",
     "SideBar.Databases": "Базы дадзеных",
     "SideBar.Engines": "Рухавікі",

@@ -114,7 +114,7 @@ export const es_ES = {
     "Menu.Help.About": "Acerca de",
 
     "SideBar.Board": "Tablero",
-    "SideBar.User": "Usuario",
+    "SideBar.Accounts": "Usuario",
     "SideBar.Files": "Archivos",
     "SideBar.Databases": "Bases de datos",
     "SideBar.Engines": "Motores",

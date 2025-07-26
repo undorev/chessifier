@@ -114,7 +114,7 @@ export const ru_RU = {
     "Menu.Help.About": "О программе",
 
     "SideBar.Board": "Доска",
-    "SideBar.User": "Пользователь",
+    "SideBar.Accounts": "Пользователь",
     "SideBar.Files": "Файлы",
     "SideBar.Databases": "Базы данных",
     "SideBar.Engines": "Движки",
