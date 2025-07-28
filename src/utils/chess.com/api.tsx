@@ -120,7 +120,7 @@ export async function downloadChessCom(player: string, timestamp: number | null)
       method: "GET",
     });
     const games = ChessComGames.safeParse(await response.json());
-    
+
     if (!games.success) {
       error(`Failed to fetch Chess.com games: ${response.status} ${response.url}`);
       notifications.show({

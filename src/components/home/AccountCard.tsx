@@ -158,7 +158,7 @@ export function AccountCard({
   }, [setDatabases]);
 
   const downloadedGames = database?.type === "success" ? database.game_count : 0;
-  const percentage = total === 0 || downloadedGames === 0 ? "0" : ((downloadedGames / total) * 100).toFixed(2);  
+  const percentage = total === 0 || downloadedGames === 0 ? "0" : ((downloadedGames / total) * 100).toFixed(2);
 
   async function getLastGameDate({ database }: { database: DatabaseInfo }) {
     const games = await query_games(database.file, {

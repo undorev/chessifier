@@ -1,5 +1,5 @@
 import { createContext, useRef } from "react";
-import { createTreeStore, type TreeStore } from "@/state/store";
+import { createTreeStore, type TreeStore } from "@/state/store/tree";
 import type { TreeState } from "@/utils/treeReducer";
 
 export const TreeStateContext = createContext<TreeStore | null>(null);
