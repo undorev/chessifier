@@ -28,7 +28,8 @@ import useSWR from "swr";
 import type { DatabaseInfo } from "@/bindings";
 import { commands } from "@/bindings";
 import * as classes from "@/components/common/GenericCard.css";
-import { referenceDbAtom, selectedDatabaseAtom } from "@/state/atoms";
+import { referenceDbAtom } from "@/state/atoms";
+import { useActiveDatabaseViewStore } from "@/state/store/database";
 import { getDatabases, type SuccessDatabaseInfo } from "@/utils/db";
 import { formatBytes, formatNumber } from "@/utils/format";
 import { unwrap } from "@/utils/unwrap";
@@ -50,7 +51,7 @@ export default function DatabasesPage() {
     () => (databases ?? []).find((db) => db.file === selected) ?? null,
     [databases, selected],
   );
-  const [, setStorageSelected] = useAtom(selectedDatabaseAtom);
+  const setActiveDatabase = useActiveDatabaseViewStore((store) => store.setDatabase);
   const [referenceDatabase, setReferenceDatabase] = useAtom(referenceDbAtom);
   const isReference = referenceDatabase === selectedDatabase?.file;
 
@@ -123,7 +124,7 @@ export default function DatabasesPage() {
                         databaseId: item.title,
                       },
                     });
-                    setStorageSelected(item);
+                    setActiveDatabase(item);
                   }}
                   content={
                     <>
@@ -248,7 +249,7 @@ export default function DatabasesPage() {
                           to="/databases/$databaseId"
                           // @ts-ignore
                           params={{ databaseId: selectedDatabase.title }}
-                          onClick={() => setStorageSelected(selectedDatabase)}
+                          onClick={() => setActiveDatabase(selectedDatabase)}
                           fullWidth
                           variant="default"
                           size="lg"

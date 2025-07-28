@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { StoreApi } from "zustand";
 import { commands } from "@/bindings";
 import { type FileMetadata, fileMetadataSchema } from "@/components/files/file";
-import type { TreeStoreState } from "@/state/store";
+import type { TreeStoreState } from "@/state/store/tree";
 import { getPGN, parsePGN } from "./chess";
 import type { GameHeaders } from "./treeReducer";
 
