@@ -1,4 +1,4 @@
 import { createContext } from "react";
-import type { activeDatabaseViewStore } from "@/state/store/database";
+import { activeDatabaseViewStore } from "@/state/store/database";
 
-export const DatabaseViewStateContext = createContext<typeof activeDatabaseViewStore | null>(null);
+export const DatabaseViewStateContext = createContext<typeof activeDatabaseViewStore | null>(activeDatabaseViewStore);

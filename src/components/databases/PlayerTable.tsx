@@ -14,7 +14,6 @@ import * as classes from "./styles.css";
 
 function PlayerTable() {
   const store = useContext(DatabaseViewStateContext)!;
-
   const file = useStore(store, (s) => s.database?.file)!;
   const query = useStore(store, (s) => s.players.query);
   const setQuery = useStore(store, (s) => s.setPlayersQuery);

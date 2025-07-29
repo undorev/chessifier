@@ -14,7 +14,6 @@ import TournamentCard from "./TournamentCard";
 
 function TournamentTable() {
   const store = useContext(DatabaseViewStateContext)!;
-
   const file = useStore(store, (s) => s.database?.file)!;
   const query = useStore(store, (s) => s.tournaments.query);
   const selected = useStore(store, (s) => s.tournaments.selectedTournamet);
