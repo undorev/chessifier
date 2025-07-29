@@ -21,8 +21,8 @@ function PersonalPlayerCard({
   setName?: (name: string) => void;
   info: PlayerGameInfo;
 }) {
-  const store = useContext(DatabaseViewStateContext)!;
-  const activeTab = useStore(store, (s) => s.players.activeTab);
+  const store = useContext(DatabaseViewStateContext)!;    
+  const activeTab = useStore(store, (s) => s?.players?.activeTab);
   const setActiveTab = useStore(store, (s) => s.setPlayersActiveTab);
 
   const [opened, setOpened] = useState(false);
