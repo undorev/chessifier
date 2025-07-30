@@ -72,6 +72,30 @@ Ensure you have the required tools installed for your platform:
     src-tauri/target/release
     ```
 
+### 🐳 Using Docker
+
+You can also build Chessifier using Docker (make sure [Docker](https://www.docker.com/) is installed and running):
+
+1. **🏗️ Build the Docker image**:
+
+   ```bash
+   docker build -t chessifier .
+   ```
+
+2. **🚀 Run the container**:
+
+   ```bash
+   docker run -d --name chessifier-app chessifier
+   ```
+
+3. **📦 Copy the built binary from the container**:
+
+   ```bash
+   docker cp chessifier-app:/output/chessifier ./chessifier
+   ```
+
+The binary will be available in your current directory.
+
 ## 🌍 Translations
 
 <!-- TRANSLATIONS_START -->
