@@ -154,7 +154,7 @@ export const ru_RU = {
     "Board.Practice.Build": "Создать",
     "Board.Practice.NoPositionForTrain1": "Нет позиций для тренировки. Сначала добавьте ходы в этот файл PGN.",
     "Board.Practice.NoPositionForTrain2": "Необходимо переключиться в режим анализа, чтобы добавлять ходы.",
-    "Board.Practice.SeeAnser": "Посмотреть ответ",
+    "Board.Practice.SeeAnswer": "Посмотреть ответ",
     "Board.Practice.Practiced": "Отработано",
     "Board.Practice.Due": "Подлежит тренировке",
     "Board.Practice.Unseen": "Не просмотрено",

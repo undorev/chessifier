@@ -145,7 +145,7 @@ export const es_ES = {
     "Board.Practice.NoPositionForTrain1":
       "No hay posiciones para practicar. Comienza agregando movimientos a este archivo PGN.",
     "Board.Practice.NoPositionForTrain2": "Necesitas cambiar al modo de análisis para poder agregar movimientos.",
-    "Board.Practice.SeeAnser": "Ver respuesta",
+    "Board.Practice.SeeAnswer": "Ver respuesta",
     "Board.Practice.Practiced": "Practicado",
     "Board.Practice.Due": "Por practicar",
     "Board.Practice.Unseen": "No visto",

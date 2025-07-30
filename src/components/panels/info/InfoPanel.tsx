@@ -1,5 +1,7 @@
 import { Accordion, Box, Group, ScrollArea, Stack, Text } from "@mantine/core";
-import { useHotkeys, useToggle } from "@mantine/hooks";
+import { useHotkeys } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
+import { useLoaderData } from "@tanstack/react-router";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,12 +9,12 @@ import { useStore } from "zustand";
 import { commands } from "@/bindings";
 import GameInfo from "@/components/common/GameInfo";
 import { TreeStateContext } from "@/components/common/TreeStateContext";
-import ConfirmChangesModal from "@/components/tabs/ConfirmChangesModal";
 import { currentTabAtom, missingMovesAtom } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
 import { parsePGN } from "@/utils/chess";
 import { formatNumber } from "@/utils/format";
 import { getTreeStats } from "@/utils/repertoire";
+import { saveToFile } from "@/utils/tabs";
 import { getNodeAtPath } from "@/utils/treeReducer";
 import { unwrap } from "@/utils/unwrap";
 import FenSearch from "./FenSearch";
@@ -78,14 +80,14 @@ function GameSelectorAccordion({
   games: Map<number, string>;
   setGames: React.Dispatch<React.SetStateAction<Map<number, string>>>;
 }) {
+  const { t } = useTranslation();
   const store = useContext(TreeStateContext)!;
   const dirty = useStore(store, (s) => s.dirty);
   const setState = useStore(store, (s) => s.setState);
   const [currentTab, setCurrentTab] = useAtom(currentTabAtom);
   const setMissingMoves = useSetAtom(missingMovesAtom);
-
-  const [confirmChanges, toggleConfirmChanges] = useToggle();
   const [tempPage, setTempPage] = useState(0);
+  const { documentDir } = useLoaderData({ from: "/" });
 
   if (!currentTab?.file) return null;
 
@@ -95,7 +97,24 @@ function GameSelectorAccordion({
   async function setPage(page: number, forced?: boolean) {
     if (!forced && dirty) {
       setTempPage(page);
-      toggleConfirmChanges();
+      modals.openConfirmModal({
+        title: t("Common.UnsavedChanges.Title"),
+        withCloseButton: false,
+        children: <Text>{t("Common.UnsavedChanges.Desc")}</Text>,
+        labels: { confirm: t("Common.SaveAndClose"), cancel: t("Common.CloseWithoutSaving") },
+        onConfirm: async () => {
+          saveToFile({
+            dir: documentDir,
+            setCurrentTab,
+            tab: currentTab,
+            store,
+          });
+          setPage(tempPage, true);
+        },
+        onCancel: () => {
+          setPage(tempPage, true);
+        },
+      });
       return;
     }
 
@@ -136,35 +155,26 @@ function GameSelectorAccordion({
   ]);
 
   return (
-    <>
-      <ConfirmChangesModal
-        opened={confirmChanges}
-        toggle={toggleConfirmChanges}
-        closeTab={() => {
-          setPage(tempPage, true);
-        }}
-      />
-      <Accordion>
-        <Accordion.Item value="game">
-          <Accordion.Control>
-            {formatNumber(gameNumber + 1)}. {currentName}
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Box h="10rem">
-              <GameSelector
-                games={games}
-                setGames={setGames}
-                setPage={setPage}
-                deleteGame={deleteGame}
-                path={currentTab.file.path}
-                activePage={gameNumber || 0}
-                total={currentTab.file.numGames}
-              />
-            </Box>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-    </>
+    <Accordion>
+      <Accordion.Item value="game">
+        <Accordion.Control>
+          {formatNumber(gameNumber + 1)}. {currentName}
+        </Accordion.Control>
+        <Accordion.Panel>
+          <Box h="10rem">
+            <GameSelector
+              games={games}
+              setGames={setGames}
+              setPage={setPage}
+              deleteGame={deleteGame}
+              path={currentTab.file.path}
+              activePage={gameNumber || 0}
+              total={currentTab.file.numGames}
+            />
+          </Box>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
   );
 }
 export default InfoPanel;

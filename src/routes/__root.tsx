@@ -1,5 +1,6 @@
 import { AppShell } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
+import { ModalsProvider, modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { createRootRouteWithContext, Outlet, useNavigate } from "@tanstack/react-router";
 import { Menu, MenuItem, PredefinedMenuItem, Submenu } from "@tauri-apps/api/menu";
@@ -10,7 +11,7 @@ import { openPath } from "@tauri-apps/plugin-opener";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { check } from "@tauri-apps/plugin-updater";
 import { useAtom, useAtomValue } from "jotai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
 import { match } from "ts-pattern";
@@ -18,6 +19,7 @@ import type { Dirs } from "@/App";
 import AboutModal from "@/components/About";
 import { SideBar } from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import ImportModal from "@/components/tabs/ImportModal";
 import { activeTabAtom, nativeBarAtom, tabsAtom } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
 import { openFile } from "@/utils/files";
@@ -170,8 +172,6 @@ function RootLayout() {
     [keyMap.EXIT_APP.keys, () => exit(0)],
   ]);
 
-  const [opened, setOpened] = useState(false);
-
   const menuActions: MenuGroup[] = useMemo(
     () => [
       {
@@ -246,7 +246,13 @@ function RootLayout() {
           {
             label: t("Menu.Help.About"),
             id: "about",
-            action: () => setOpened(true),
+            action: () => {
+              modals.openContextModal({
+                modal: "aboutModal",
+                title: "Pawn Appétit",
+                innerProps: {},
+              });
+            },
           },
         ],
       },
@@ -268,37 +274,38 @@ function RootLayout() {
   }, [menu, isNative]);
 
   return (
-    <AppShell
-      navbar={{
-        width: "3rem",
-        breakpoint: 0,
-      }}
-      header={
-        isNative
-          ? undefined
-          : {
-              height: "35px",
-            }
-      }
-      styles={{
-        main: {
-          height: "100vh",
-          userSelect: "none",
-        },
-      }}
-    >
-      <AboutModal opened={opened} setOpened={setOpened} />
-      {!isNative && (
-        <AppShell.Header>
-          <TopBar menuActions={menuActions} />
-        </AppShell.Header>
-      )}
-      <AppShell.Navbar>
-        <SideBar />
-      </AppShell.Navbar>
-      <AppShell.Main>
-        <Outlet />
-      </AppShell.Main>
-    </AppShell>
+    <ModalsProvider modals={{ importModal: ImportModal, aboutModal: AboutModal }}>
+      <AppShell
+        navbar={{
+          width: "3rem",
+          breakpoint: 0,
+        }}
+        header={
+          isNative
+            ? undefined
+            : {
+                height: "35px",
+              }
+        }
+        styles={{
+          main: {
+            height: "100vh",
+            userSelect: "none",
+          },
+        }}
+      >
+        {!isNative && (
+          <AppShell.Header>
+            <TopBar menuActions={menuActions} />
+          </AppShell.Header>
+        )}
+        <AppShell.Navbar>
+          <SideBar />
+        </AppShell.Navbar>
+        <AppShell.Main>
+          <Outlet />
+        </AppShell.Main>
+      </AppShell>
+    </ModalsProvider>
   );
 }

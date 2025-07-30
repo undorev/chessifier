@@ -144,7 +144,7 @@ export const uk_UA = {
     "Board.Practice.Build": "Створити",
     "Board.Practice.NoPositionForTrain1": "Немає позицій для тренування. Спочатку додайте ходи в цей файл PGN.",
     "Board.Practice.NoPositionForTrain2": "Необхідно перейти в режим аналізу, щоб додати ходи.",
-    "Board.Practice.SeeAnser": "Подивитися відповідь",
+    "Board.Practice.SeeAnswer": "Подивитися відповідь",
     "Board.Practice.Practiced": "Відпрацьовано",
     "Board.Practice.Due": "Підлягає тренуванню",
     "Board.Practice.Unseen": "Не переглянуто",

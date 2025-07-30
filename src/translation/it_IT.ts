@@ -145,7 +145,7 @@ export const it_IT = {
     "Board.Practice.NoPositionForTrain1":
       "Nessuna posizione disponibile per l'allenamento. Inizia aggiungendo posizioni a questo file PNG.",
     "Board.Practice.NoPositionForTrain2": "È necessario passare alla modalità di analisi per aggiungere posizioni.",
-    "Board.Practice.SeeAnser": "Vedi soluzione",
+    "Board.Practice.SeeAnswer": "Vedi soluzione",
     "Board.Practice.Practiced": "Già praticato",
     "Board.Practice.Due": "Da fare",
     "Board.Practice.Unseen": "Mai visto",

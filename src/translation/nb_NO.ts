@@ -146,7 +146,7 @@ export const nb_NO = {
       "Det er ingen stillinger å trene på. Start med å legge til trekk i denne PGN-filen.",
     "Board.Practice.NoPositionForTrain2":
       "Det er ingen stillinger å trene på. Start med å legge til trekk i denne PGN-filen.",
-    "Board.Practice.SeeAnser": "Se svar",
+    "Board.Practice.SeeAnswer": "Se svar",
     "Board.Practice.Practiced": "Øvd",
     "Board.Practice.Due": "Forfaller",
     "Board.Practice.Unseen": "Usett",

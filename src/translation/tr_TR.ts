@@ -144,7 +144,7 @@ export const tr_TR = {
     "Board.Practice.Build": "Oluştur",
     "Board.Practice.NoPositionForTrain1": "Çalışılacak pozisyon yok. Bu PGN dosyasına hamle ekleyerek başlayın.",
     "Board.Practice.NoPositionForTrain2": "Hamle ekleyebilmeniz için Analiz moduna geçmelisiniz.",
-    "Board.Practice.SeeAnser": "Cevabı Gör",
+    "Board.Practice.SeeAnswer": "Cevabı Gör",
     "Board.Practice.Practiced": "Çalışıldı",
     "Board.Practice.Due": "Çalışılmalı",
     "Board.Practice.Unseen": "Görülmeyen",

@@ -144,7 +144,7 @@ export const pl_PL = {
     "Board.Practice.Build": "Buduj",
     "Board.Practice.NoPositionForTrain1": "Brak pozycji do ćwiczenia. Rozpocznij od dodania ruchów do tego pliku PGN.",
     "Board.Practice.NoPositionForTrain2": "Musisz przełączyć się na tryb Analizy, aby móc dodawać ruchy.",
-    "Board.Practice.SeeAnser": "Zobacz odpowiedź",
+    "Board.Practice.SeeAnswer": "Zobacz odpowiedź",
     "Board.Practice.Practiced": "Przećwiczone",
     "Board.Practice.Due": "Termin",
     "Board.Practice.Unseen": "Nieprzećwiczone",

@@ -144,7 +144,7 @@ export const zh_CN = {
     "Board.Practice.Build": "构建",
     "Board.Practice.NoPositionForTrain1": "没有可供练习的局面，请先向 PGN 文件中添加着法。",
     "Board.Practice.NoPositionForTrain2": "你需要切换到分析模式来向 PGN 文件中添加着法。",
-    "Board.Practice.SeeAnser": "查看答案",
+    "Board.Practice.SeeAnswer": "查看答案",
     "Board.Practice.Practiced": "已练习",
     "Board.Practice.Due": "需复习",
     "Board.Practice.Unseen": "未学习",

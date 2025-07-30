@@ -155,7 +155,7 @@ export const fr_FR = {
     "Board.Practice.NoPositionForTrain1":
       "Aucune position pour s'entraîner. Commencez en ajoutant des coups à ce fichier PGN.",
     "Board.Practice.NoPositionForTrain2": "Vous devez utiliser le mode Analyse pour ajouter des coups.",
-    "Board.Practice.SeeAnser": "Voir la solution",
+    "Board.Practice.SeeAnswer": "Voir la solution",
     "Board.Practice.Practiced": "Entraîné",
     "Board.Practice.Due": "À faire",
     "Board.Practice.Unseen": "Jamais vu",

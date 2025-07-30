@@ -154,7 +154,7 @@ export const am_AM = {
     "Board.Practice.Build": "Կառուցել",
     "Board.Practice.NoPositionForTrain1": "Մարզվելու դիրքեր չկան։ Սկսեք՝ ավելացնելով քայլեր այս PGN ֆայլին։",
     "Board.Practice.NoPositionForTrain2": "Ձեզ հարկավոր է անցնել Վերլուծության ռեժիմ՝ քայլեր ավելացնելու համար։",
-    "Board.Practice.SeeAnser": "Տեսնել պատասխանը",
+    "Board.Practice.SeeAnswer": "Տեսնել պատասխանը",
     "Board.Practice.Practiced": "Մարզված է",
     "Board.Practice.Due": "Պատշաճ",
     "Board.Practice.Unseen": "Չտեսնված",
