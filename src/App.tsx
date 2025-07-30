@@ -122,7 +122,7 @@ export default function App() {
       </Helmet>
       <MantineProvider
         colorSchemeManager={colorSchemeManager}
-        defaultColorScheme="dark"
+        defaultColorScheme="auto"
         theme={{
           primaryColor,
           components: {
