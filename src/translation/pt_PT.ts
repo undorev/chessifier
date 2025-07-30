@@ -145,7 +145,7 @@ export const pt_PT = {
     "Board.Practice.NoPositionForTrain1":
       "Não há posições para treinar. Começa por adicionar jogadas a este ficheiro PGN.",
     "Board.Practice.NoPositionForTrain2": "É preciso alterar para o modo de análise para se adicionar jogadas.",
-    "Board.Practice.SeeAnser": "Ver resposta",
+    "Board.Practice.SeeAnswer": "Ver resposta",
     "Board.Practice.Practiced": "Praticado",
     "Board.Practice.Due": "Por praticar",
     "Board.Practice.Unseen": "Não visto",

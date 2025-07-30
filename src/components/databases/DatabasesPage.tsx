@@ -18,6 +18,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue, useToggle } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconArrowRight, IconDatabase, IconPlus } from "@tabler/icons-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { open as openDialog, save } from "@tauri-apps/plugin-dialog";
@@ -33,7 +34,6 @@ import { useActiveDatabaseViewStore } from "@/state/store/database";
 import { getDatabases, type SuccessDatabaseInfo } from "@/utils/db";
 import { formatBytes, formatNumber } from "@/utils/format";
 import { unwrap } from "@/utils/unwrap";
-import ConfirmModal from "../common/ConfirmModal";
 import GenericCard from "../common/GenericCard";
 import OpenFolderButton from "../common/OpenFolderButton";
 import AddDatabase from "./AddDatabase";
@@ -43,7 +43,7 @@ import { PlayerSearchInput } from "./PlayerSearchInput";
 export default function DatabasesPage() {
   const { t } = useTranslation();
 
-  const { data: databases, error, isLoading, mutate } = useSWR("databases", () => getDatabases());
+  const { data: databases, isLoading, mutate } = useSWR("databases", () => getDatabases());
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -55,7 +55,6 @@ export default function DatabasesPage() {
   const [referenceDatabase, setReferenceDatabase] = useAtom(referenceDbAtom);
   const isReference = referenceDatabase === selectedDatabase?.file;
 
-  const [deleteModal, toggleDeleteModal] = useToggle();
   const [convertLoading, setConvertLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
 
@@ -71,20 +70,6 @@ export default function DatabasesPage() {
 
   return (
     <Stack h="100%">
-      <ConfirmModal
-        title={t("Databases.Delete.Title")}
-        description={t("Databases.Delete.Message")}
-        opened={deleteModal}
-        onClose={toggleDeleteModal}
-        onConfirm={() => {
-          commands.deleteDatabase(selectedDatabase?.file!).then(() => {
-            mutate();
-            setSelected(null);
-          });
-          toggleDeleteModal();
-        }}
-      />
-
       <AddDatabase
         databases={databases ?? []}
         opened={open}
@@ -306,7 +291,29 @@ export default function DatabasesPage() {
                       </Button>
                     </Group>
                   )}
-                  <Button onClick={() => toggleDeleteModal()} color="red">
+                  <Button
+                    onClick={() => {
+                      modals.openConfirmModal({
+                        title: t("Databases.Delete.Title"),
+                        withCloseButton: false,
+                        children: (
+                          <>
+                            <Text>{t("Databases.Delete.Message")}</Text>
+                            <Text>{t("Common.CannotUndo")}</Text>
+                          </>
+                        ),
+                        labels: { confirm: t("Common.Remove"), cancel: t("Common.Cancel") },
+                        confirmProps: { color: "red" },
+                        onConfirm: () => {
+                          commands.deleteDatabase(selectedDatabase?.file!).then(() => {
+                            mutate();
+                            setSelected(null);
+                          });
+                        },
+                      });
+                    }}
+                    color="red"
+                  >
                     {t("Common.Delete")}
                   </Button>
                 </Group>

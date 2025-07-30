@@ -1,39 +1,41 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { ActionIcon, Group, Kbd, Menu, ScrollArea, Tabs } from "@mantine/core";
-import { useHotkeys, useToggle } from "@mantine/hooks";
+import { ActionIcon, Group, Kbd, Menu, ScrollArea, Tabs, Text } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconChess, IconFileImport, IconPlus, IconPuzzle } from "@tabler/icons-react";
+import { useLoaderData } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
-import { type JSX, useCallback, useEffect } from "react";
+import { atomWithStorage } from "jotai/utils";
+import { type JSX, useCallback, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Mosaic, type MosaicNode } from "react-mosaic-component";
 import { match } from "ts-pattern";
 import { commands } from "@/bindings";
-import { activeTabAtom, tabsAtom } from "@/state/atoms";
+import { activeTabAtom, currentTabAtom, tabsAtom } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
-import { createTab, genID, type Tab } from "@/utils/tabs";
+import { createTab, genID, saveToFile, type Tab } from "@/utils/tabs";
 import { unwrap } from "@/utils/unwrap";
 import BoardAnalysis from "../boards/BoardAnalysis";
 import BoardGame from "../boards/BoardGame";
-import { TreeStateProvider } from "../common/TreeStateContext";
+import { TreeStateContext, TreeStateProvider } from "../common/TreeStateContext";
+import Chessboard from "../icons/Chessboard";
+import ReportProgressSubscriber from "../panels/analysis/ReportProgressSubscriber";
 import Puzzles from "../puzzles/Puzzles";
+import * as classes from "./BoardsPage.css";
 import { BoardTab } from "./BoardTab";
-import ConfirmChangesModal from "./ConfirmChangesModal";
 import NewTabHome from "./NewTabHome";
 
 import "react-mosaic-component/react-mosaic-component.css";
-
 import "@/styles/react-mosaic.css";
-import { atomWithStorage } from "jotai/utils";
-import Chessboard from "../icons/Chessboard";
-import ReportProgressSubscriber from "../panels/analysis/ReportProgressSubscriber";
-import * as classes from "./BoardsPage.css";
 
-export default function BoardsPageTabs({ setOpenModal }: { setOpenModal: (_open: boolean) => void }) {
+export default function BoardsPageTabs() {
   const { t } = useTranslation();
 
   const [tabs, setTabs] = useAtom(tabsAtom);
   const [activeTab, setActiveTab] = useAtom(activeTabAtom);
-  const [saveModalOpened, toggleSaveModal] = useToggle();
+  const [currentTab, setCurrentTab] = useAtom(currentTabAtom);
+  const store = useContext(TreeStateContext)!;
+  const { documentDir } = useLoaderData({ from: "/" });
 
   useEffect(() => {
     if (tabs.length === 0) {
@@ -51,7 +53,24 @@ export default function BoardsPageTabs({ setOpenModal }: { setOpenModal: (_open:
         const closedTab = tabs.find((tab) => tab.value === value);
         const tabState = JSON.parse(sessionStorage.getItem(value) || "{}");
         if (tabState && closedTab?.file && tabState.state.dirty && !forced) {
-          toggleSaveModal();
+          modals.openConfirmModal({
+            title: "Unsaved Changes",
+            withCloseButton: false,
+            children: <Text>You have unsaved changes. Do you want to save them before closing?</Text>,
+            labels: { confirm: "Save and Close", cancel: "Close Without Saving" },
+            onConfirm: async () => {
+              saveToFile({
+                dir: documentDir,
+                setCurrentTab,
+                tab: currentTab,
+                store,
+              });
+              closeTab(activeTab, true);
+            },
+            onCancel: () => {
+              closeTab(activeTab, true);
+            },
+          });
           return;
         }
         if (value === activeTab) {
@@ -70,7 +89,7 @@ export default function BoardsPageTabs({ setOpenModal }: { setOpenModal: (_open:
         unwrap(await commands.killEngines(value));
       }
     },
-    [tabs, activeTab, setTabs, toggleSaveModal, setActiveTab],
+    [tabs, activeTab, setTabs, setActiveTab],
   );
 
   function selectTab(index: number) {
@@ -248,7 +267,10 @@ export default function BoardsPageTabs({ setOpenModal }: { setOpenModal: (_open:
                     <Menu.Item
                       leftSection={<IconFileImport size={14} />}
                       onClick={() => {
-                        setOpenModal(true);
+                        modals.openContextModal({
+                          modal: "importModal",
+                          innerProps: {},
+                        });
                       }}
                     >
                       <Group justify="space-between">
@@ -287,13 +309,7 @@ export default function BoardsPageTabs({ setOpenModal }: { setOpenModal: (_open:
       </ScrollArea>
       {tabs.map((tab) => (
         <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-          <TabSwitch
-            tab={tab}
-            saveModalOpened={saveModalOpened}
-            toggleSaveModal={toggleSaveModal}
-            closeTab={closeTab}
-            activeTab={activeTab}
-          />
+          <TabSwitch tab={tab} />
         </Tabs.Panel>
       ))}
     </Tabs>
@@ -324,19 +340,7 @@ const windowsStateAtom = atomWithStorage<WindowsState>("windowsState", {
   },
 });
 
-function TabSwitch({
-  tab,
-  saveModalOpened,
-  toggleSaveModal,
-  closeTab,
-  activeTab,
-}: {
-  tab: Tab;
-  saveModalOpened: boolean;
-  toggleSaveModal: () => void;
-  closeTab: (value: string | null, forced?: boolean) => void;
-  activeTab: string | null;
-}) {
+function TabSwitch({ tab }: { tab: Tab }) {
   const [windowsState, setWindowsState] = useAtom(windowsStateAtom);
 
   return match(tab.type)
@@ -362,11 +366,6 @@ function TabSwitch({
         />
         <ReportProgressSubscriber id={`report_${tab.value}`} />
         <BoardAnalysis />
-        <ConfirmChangesModal
-          opened={saveModalOpened}
-          toggle={toggleSaveModal}
-          closeTab={() => closeTab(activeTab, true)}
-        />
       </TreeStateProvider>
     ))
     .with("puzzles", () => (

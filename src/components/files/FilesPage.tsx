@@ -1,5 +1,6 @@
 import { Button, Center, Chip, Group, Input, Stack, Text, Title } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { useLoaderData } from "@tanstack/react-router";
 import { readDir, remove } from "@tauri-apps/plugin-fs";
@@ -7,7 +8,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { capitalize } from "@/utils/format";
-import ConfirmModal from "../common/ConfirmModal";
 import OpenFolderButton from "../common/OpenFolderButton";
 import DirectoryTable from "./DirectoryTable";
 import FileCard from "./FileCard";
@@ -35,14 +35,13 @@ function FilesPage() {
   const { t } = useTranslation();
 
   const { documentDir } = useLoaderData({ from: "/files" });
-  const { files, isLoading, error, mutate } = useFileDirectory(documentDir);
+  const { files, isLoading, mutate } = useFileDirectory(documentDir);
 
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<FileMetadata | null>(null);
   const [games, setGames] = useState<Map<number, string>>(new Map());
   const [filter, setFilter] = useState<FileType | null>(null);
 
-  const [deleteModal, toggleDeleteModal] = useToggle();
   const [createModal, toggleCreateModal] = useToggle();
   const [editModal, toggleEditModal] = useToggle();
 
@@ -94,7 +93,32 @@ function FilesPage() {
               color="red"
               disabled={!selected}
               leftSection={<IconX size="1rem" />}
-              onClick={() => toggleDeleteModal()}
+              onClick={() => {
+                modals.openConfirmModal({
+                  title: t("Files.Delete.Title"),
+                  withCloseButton: false,
+                  children: (
+                    <>
+                      <Text>
+                        {t("Files.Delete.Message", {
+                          fileName: selected?.name,
+                        })}
+                      </Text>
+                      <Text>{t("Common.CannotUndo")}</Text>
+                    </>
+                  ),
+                  labels: { confirm: t("Common.Remove"), cancel: t("Common.Cancel") },
+                  confirmProps: { color: "red" },
+                  onConfirm: async () => {
+                    if (selected) {
+                      await remove(selected.path);
+                      await remove(selected.path.replace(".pgn", ".info"));
+                      mutate(files?.filter((file) => file.name !== selected.name));
+                    }
+                    setSelected(null);
+                  },
+                });
+              }}
             >
               {t("Common.Delete")}
             </Button>
@@ -124,24 +148,7 @@ function FilesPage() {
         </Stack>
 
         {selected ? (
-          <>
-            <ConfirmModal
-              title={t("Files.Delete.Title")}
-              description={t("Files.Delete.Message", {
-                fileName: selected.name,
-              })}
-              opened={deleteModal}
-              onClose={toggleDeleteModal}
-              onConfirm={async () => {
-                await remove(selected.path);
-                await remove(selected.path.replace(".pgn", ".info"));
-                mutate(files?.filter((file) => file.name !== selected.name));
-                toggleDeleteModal();
-                setSelected(null);
-              }}
-            />
-            <FileCard selected={selected} games={games} setGames={setGames} toggleEditModal={toggleEditModal} />
-          </>
+          <FileCard selected={selected} games={games} setGames={setGames} toggleEditModal={toggleEditModal} />
         ) : (
           <Center h="100%">
             <Text>No file selected</Text>

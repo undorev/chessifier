@@ -4,7 +4,6 @@ import {
   Divider,
   FileInput,
   Group,
-  Modal,
   SimpleGrid,
   Stack,
   Text,
@@ -39,13 +38,7 @@ const FILE_TYPES = [
   { label: "Other", value: "other" },
 ] as const;
 
-export default function ImportModal({
-  openModal,
-  setOpenModal,
-}: {
-  openModal: boolean;
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function ImportModal() {
   const [pgn, setPgn] = useState("");
   const [fen, setFen] = useState("");
   const [file, setFile] = useState<string | null>(null);
@@ -276,7 +269,7 @@ export default function ImportModal({
     .exhaustive();
 
   return (
-    <Modal opened={openModal} onClose={() => setOpenModal(false)} title="Import game">
+    <>
       <Group grow mb="sm">
         <GenericCard
           id={"PGN"}
@@ -302,9 +295,9 @@ export default function ImportModal({
 
       {Input}
 
-      <Button fullWidth mt="md" radius="md" loading={loading} disabled={disabled} onClick={handleSubmit}>
+      <Button fullWidth mt="md" radius="md" loading={loading} disabled={disabled} onClick={() => {}}>
         {loading ? "Importing..." : "Import"}
       </Button>
-    </Modal>
+    </>
   );
 }

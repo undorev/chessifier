@@ -145,7 +145,7 @@ export const de_DE = {
     "Board.Practice.NoPositionForTrain1":
       "Es gibt keine Position zum Üben. Beginne damit, Züge zu diesem PGN hinzuzufügen.",
     "Board.Practice.NoPositionForTrain2": "Wechsle in den Analysemodus, um Züge hinzufügen zu können.",
-    "Board.Practice.SeeAnser": "Antwort anzeigen",
+    "Board.Practice.SeeAnswer": "Antwort anzeigen",
     "Board.Practice.Practiced": "Geübt",
     "Board.Practice.Due": "Fällig",
     "Board.Practice.Unseen": "Ungesehen",

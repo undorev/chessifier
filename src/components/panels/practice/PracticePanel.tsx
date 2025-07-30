@@ -13,6 +13,7 @@ import {
   Text,
 } from "@mantine/core";
 import { useHotkeys, useToggle } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -20,7 +21,6 @@ import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDate } from "ts-fsrs";
 import { useStore } from "zustand";
-import ConfirmModal from "@/components/common/ConfirmModal";
 import { TreeStateContext } from "@/components/common/TreeStateContext";
 import { buildFromTree, getCardForReview, getStats, updateCardPerformance } from "@/components/files/opening";
 import {
@@ -44,7 +44,6 @@ function PracticePanel() {
   const goToNext = useStore(store, (s) => s.goToNext);
 
   const currentTab = useAtomValue(currentTabAtom);
-  const [resetModal, toggleResetModal] = useToggle();
 
   const [deck, setDeck] = useAtom(
     deckAtomFamily({
@@ -195,9 +194,33 @@ function PracticePanel() {
                   goToNext();
                 }}
               >
-                {t("Board.Practice.SeeAnser")}
+                {t("Board.Practice.SeeAnswer")}
               </Button>
-              <Button variant="default" onClick={() => toggleResetModal()}>
+              <Button
+                variant="default"
+                onClick={() => {
+                  modals.openConfirmModal({
+                    title: t("Board.Practice.ResetOpeningData.Title"),
+                    withCloseButton: false,
+                    children: (
+                      <>
+                        <Text>
+                          {t("Board.Practice.ResetOpeningData.Desc", {
+                            fileName: currentTab?.file?.name
+                          })}
+                        </Text>
+                        <Text>{t("Common.CannotUndo")}</Text>
+                      </>
+                    ),
+                    labels: { confirm: "Reset", cancel: t("Common.Cancel") },
+                    confirmProps: { color: "red" },
+                    onConfirm: () => {
+                      const cards = buildFromTree(root, headers.orientation || "white", headers.start || []);
+                      setDeck({ positions: cards, logs: [] });
+                    },
+                  });
+                }}
+              >
                 {t("Common.Reset")}
               </Button>
             </Group>
@@ -209,18 +232,6 @@ function PracticePanel() {
         </Tabs.Panel>
       </Tabs>
 
-      <ConfirmModal
-        title={"Reset opening data"}
-        description={`Are you sure you want to reset the opening data for "${currentTab?.file?.name}"? All the learning progress will be lost.`}
-        opened={resetModal}
-        onClose={toggleResetModal}
-        onConfirm={() => {
-          const cards = buildFromTree(root, headers.orientation || "white", headers.start || []);
-          setDeck({ positions: cards, logs: [] });
-          toggleResetModal();
-        }}
-        confirmLabel="Reset"
-      />
       <PositionsModal open={positionsOpen} setOpen={setPositionsOpen} deck={deck} />
       <LogsModal open={logsOpen} setOpen={setLogsOpen} logs={deck.logs} />
     </>

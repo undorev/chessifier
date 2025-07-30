@@ -1,17 +1,15 @@
 import { Box, Button, Card, SimpleGrid, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { IconChess, IconFileImport, IconPuzzle } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { tabsAtom } from "@/state/atoms";
 import type { Tab } from "@/utils/tabs";
 import Chessboard from "../icons/Chessboard";
-import ImportModal from "./ImportModal";
 
 export default function NewTabHome({ id }: { id: string }) {
   const { t } = useTranslation();
 
-  const [openModal, setOpenModal] = useState(false);
   const [, setTabs] = useAtom(tabsAtom);
 
   const cards = [
@@ -51,7 +49,10 @@ export default function NewTabHome({ id }: { id: string }) {
       description: t("Home.Card.ImportGame.Desc"),
       label: t("Home.Card.ImportGame.Button"),
       onClick: () => {
-        setOpenModal(true);
+        modals.openContextModal({
+          modal: "importModal",
+          innerProps: {},
+        });
       },
     },
     {
@@ -72,28 +73,25 @@ export default function NewTabHome({ id }: { id: string }) {
   ];
 
   return (
-    <>
-      <ImportModal openModal={openModal} setOpenModal={setOpenModal} />
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
-        {cards.map((card) => (
-          <Card shadow="sm" p="lg" radius="md" withBorder key={card.title}>
-            <Stack align="center" h="100%" justify="space-between">
-              {card.icon}
+    <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
+      {cards.map((card) => (
+        <Card shadow="sm" p="lg" radius="md" withBorder key={card.title}>
+          <Stack align="center" h="100%" justify="space-between">
+            {card.icon}
 
-              <Box style={{ textAlign: "center" }}>
-                <Text fw={500}>{card.title}</Text>
-                <Text size="sm" c="dimmed">
-                  {card.description}
-                </Text>
-              </Box>
+            <Box style={{ textAlign: "center" }}>
+              <Text fw={500}>{card.title}</Text>
+              <Text size="sm" c="dimmed">
+                {card.description}
+              </Text>
+            </Box>
 
-              <Button variant="light" fullWidth mt="md" radius="md" onClick={card.onClick}>
-                {card.label}
-              </Button>
-            </Stack>
-          </Card>
-        ))}
-      </SimpleGrid>
-    </>
+            <Button variant="light" fullWidth mt="md" radius="md" onClick={card.onClick}>
+              {card.label}
+            </Button>
+          </Stack>
+        </Card>
+      ))}
+    </SimpleGrid>
   );
 }
