@@ -72,6 +72,30 @@ Ensure you have the required tools installed for your platform:
     src-tauri/target/release
     ```
 
+### 🐳 Using Docker
+
+You can also build Pawn Appétit using Docker (make sure [Docker](https://www.docker.com/) is installed and running):
+
+1. **🏗️ Build the Docker image**:
+
+   ```bash
+   docker build -t pawn-appetit .
+   ```
+
+2. **🚀 Run the container**:
+
+   ```bash
+   docker run -d --name pawn-appetit-app pawn-appetit
+   ```
+
+3. **📦 Copy the built binary from the container**:
+
+   ```bash
+   docker cp pawn-appetit-app:/output/pawn-appetit ./pawn-appetit
+   ```
+
+The binary will be available in your current directory.
+
 ## 🌍 Translations
 
 <!-- TRANSLATIONS_START -->
