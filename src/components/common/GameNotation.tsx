@@ -10,6 +10,7 @@ import {
   Stack,
   Text,
   Tooltip,
+  useMantineColorScheme,
   useMantineTheme,
 } from "@mantine/core";
 import { useColorScheme, useHotkeys, useToggle } from "@mantine/hooks";
@@ -87,7 +88,6 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
 
   const root = useStore(store, (s) => s.root);
   const currentFen = useStore(store, (s) => s.currentNode().fen);
-  const position = useStore(store, (s) => s.position);
   const headers = useStore(store, (s) => s.headers);
 
   const viewport = useRef<HTMLDivElement>(null);
@@ -100,7 +100,8 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
   const [showComments, toggleComments] = useToggle([true, false]);
 
   const invisible = topBar && invisibleValue;
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useMantineColorScheme();
+  const osColorScheme = useColorScheme();
   const keyMap = useAtomValue(keyMapAtom);
 
   useHotkeys([[keyMap.TOGGLE_BLUR.keys, () => setInvisible((prev: boolean) => !prev)]]);
@@ -138,7 +139,7 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
               {invisible && (
                 <Overlay
                   backgroundOpacity={0.6}
-                  color={colorScheme === "dark" ? "#1a1b1e" : undefined}
+                  color={colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? "#1a1b1e" : undefined}
                   blur={8}
                   zIndex={2}
                 />
