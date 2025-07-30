@@ -1,5 +1,5 @@
 import { Box, Center, Group, type MantineColorScheme, SegmentedControl, useMantineColorScheme } from "@mantine/core";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
 export default function ThemeButton() {
@@ -9,7 +9,7 @@ export default function ThemeButton() {
 
   return (
     <Group justify="center">
-      <SegmentedControl
+     <SegmentedControl
         value={colorScheme}
         onChange={(value) => setColorScheme(value as MantineColorScheme)}
         data={[
@@ -28,6 +28,15 @@ export default function ThemeButton() {
               <Center>
                 <IconMoon size="1rem" stroke={1.5} />
                 <Box ml={10}>{t("Settings.Appearance.Theme.Dark")}</Box>
+              </Center>
+            ),
+          },
+          {
+            value: "auto",
+            label: (
+              <Center>
+                <IconSunMoon size="1rem" stroke={1.5} />
+                <Box ml={10}>{t("Settings.Appearance.Theme.Auto")}</Box>
               </Center>
             ),
           },

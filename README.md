@@ -103,18 +103,18 @@ The binary will be available in your current directory.
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
 | 🇦🇲 AM | 🟡 97% | [AM](./src/translation/am_AM.ts) |
-| 🇧🇾 BY | 🟡 88% | [BY](./src/translation/be_BY.ts) |
+| 🇧🇾 BY | 🟡 87% | [BY](./src/translation/be_BY.ts) |
 | 🇩🇪 DE | 🟡 88% | [DE](./src/translation/de_DE.ts) |
 | 🇪🇸 ES | 🟡 88% | [ES](./src/translation/es_ES.ts) |
-| 🇫🇷 FR | 🟡 97% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 88% | [IT](./src/translation/it_IT.ts) |
+| 🇫🇷 FR | 🟡 96% | [FR](./src/translation/fr_FR.ts) |
+| 🇮🇹 IT | 🟡 87% | [IT](./src/translation/it_IT.ts) |
 | 🇳🇴 NO | 🟡 88% | [NO](./src/translation/nb_NO.ts) |
-| 🇵🇱 PL | 🟡 88% | [PL](./src/translation/pl_PL.ts) |
-| 🇵🇹 PT | 🟡 88% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 98% | [RU](./src/translation/ru_RU.ts) |
+| 🇵🇱 PL | 🟡 87% | [PL](./src/translation/pl_PL.ts) |
+| 🇵🇹 PT | 🟡 87% | [PT](./src/translation/pt_PT.ts) |
+| 🇷🇺 RU | 🟡 97% | [RU](./src/translation/ru_RU.ts) |
 | 🇹🇷 TR | 🟡 88% | [TR](./src/translation/tr_TR.ts) |
-| 🇺🇦 UA | 🟡 88% | [UA](./src/translation/uk_UA.ts) |
-| 🇨🇳 CN | 🟡 88% | [CN](./src/translation/zh_CN.ts) |
+| 🇺🇦 UA | 🟡 87% | [UA](./src/translation/uk_UA.ts) |
+| 🇨🇳 CN | 🟡 87% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
 
 📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).

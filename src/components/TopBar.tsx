@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Center, Group, Image, Kbd, Menu, Text, UnstyledButton } from "@mantine/core";
+import { ActionIcon, Box, Center, Group, Image, Kbd, Menu, Text, UnstyledButton, useMantineColorScheme } from "@mantine/core";
 import { useColorScheme } from "@mantine/hooks";
 import { Spotlight, type SpotlightActionData, type SpotlightActionGroupData, spotlight } from "@mantine/spotlight";
 import { IconSearch, IconSettings } from "@tabler/icons-react";
@@ -97,9 +97,10 @@ function getActions(navigate: any, t: any): (SpotlightActionGroupData | Spotligh
 }
 
 function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
-  const colorScheme = useColorScheme();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { colorScheme } = useMantineColorScheme();
+  const osColorScheme = useColorScheme();
 
   return (
     <Group h="100%">
@@ -122,7 +123,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
                     fz="xs"
                     px="xs"
                     variant="subtle"
-                    color={colorScheme === "dark" ? "gray" : "dark"}
+                    color={colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? "gray" : "dark"}
                     size="compact-md"
                   >
                     {action.label}

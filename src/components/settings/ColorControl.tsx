@@ -1,15 +1,17 @@
 import { CheckIcon, ColorSwatch, Group, Input, useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { useAtom } from "jotai";
 import { primaryColorAtom } from "@/state/atoms";
+import { useColorScheme } from "@mantine/hooks";
 
 export default function ColorControl() {
   const [primaryColor, setPrimaryColor] = useAtom(primaryColorAtom);
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
+  const osColorScheme = useColorScheme();
 
   const colors = Object.keys(theme.colors).map((color) => (
     <ColorSwatch
-      color={colorScheme === "dark" ? theme.colors[color][7] : theme.colors[color][5]}
+      color={colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? theme.colors[color][7] : theme.colors[color][5]}
       component="button"
       key={color}
       onClick={() => setPrimaryColor(color)}
@@ -19,7 +21,7 @@ export default function ColorControl() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: colorScheme === "dark" ? theme.colors[color][2] : theme.white,
+        color: colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? theme.colors[color][2] : theme.white,
         flex: "1 0 calc(15% - 4px)",
       }}
     >
