@@ -1,12 +1,12 @@
 import { ActionIcon, Box, Group, ScrollArea, Text } from "@mantine/core";
-import { useToggle } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconX } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import cx from "clsx";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { commands } from "@/bindings";
-import ConfirmModal from "@/components/common/ConfirmModal";
 import { fontSizeAtom } from "@/state/atoms";
 import { parsePGN } from "@/utils/chess";
 import { formatNumber } from "@/utils/format";
@@ -120,22 +120,10 @@ function GameRow({
   activePage: number;
   deleteGame?: (indxe: number) => void;
 }) {
-  const [deleteModal, toggleDelete] = useToggle();
+  const { t } = useTranslation();
 
   return (
     <>
-      {deleteGame && (
-        <ConfirmModal
-          title={"Remove game"}
-          description={"Are you sure you want to remove this game?"}
-          opened={deleteModal}
-          onClose={toggleDelete}
-          onConfirm={() => {
-            deleteGame(index);
-            toggleDelete();
-          }}
-        />
-      )}
       <Group
         style={style}
         justify="space-between"
@@ -157,7 +145,28 @@ function GameRow({
         </Text>
         {deleteGame && (
           <Group>
-            <ActionIcon onClick={() => toggleDelete()} variant="outline" color="red" size="1rem">
+            <ActionIcon
+              onClick={() => {
+                modals.openConfirmModal({
+                  title: t("Files.Game.Delete.Title"),
+                  withCloseButton: false,
+                  children: (
+                    <>
+                      <Text>{t("Files.Game.Delete.Desc")}</Text>
+                      <Text>{t("Common.CannotUndo")}</Text>
+                    </>
+                  ),
+                  labels: { confirm: t("Common.Remove"), cancel: t("Common.Cancel") },
+                  confirmProps: { color: "red" },
+                  onConfirm: () => {
+                    deleteGame(index);
+                  },
+                });
+              }}
+              variant="outline"
+              color="red"
+              size="1rem"
+            >
               <IconX />
             </ActionIcon>
           </Group>

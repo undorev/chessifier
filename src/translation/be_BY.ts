@@ -144,7 +144,7 @@ export const be_BY = {
     "Board.Practice.Build": "Стварыць",
     "Board.Practice.NoPositionForTrain1": "Няма пазіцый для трэніроўкі. Спачатку дадайце хады ў гэты файл PGN.",
     "Board.Practice.NoPositionForTrain2": "Неабходна пераключыцца ў рэжым аналізу, каб дадаваць хады.",
-    "Board.Practice.SeeAnser": "Паглядзець адказ",
+    "Board.Practice.SeeAnswer": "Паглядзець адказ",
     "Board.Practice.Practiced": "Адпрацавана",
     "Board.Practice.Due": "Падлягае трэніроўцы",
     "Board.Practice.Unseen": "Не прагледжана",

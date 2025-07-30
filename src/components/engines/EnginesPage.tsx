@@ -21,6 +21,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { IconCloud, IconCpu, IconPhotoPlus, IconPlus } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -35,7 +36,6 @@ import { Route } from "@/routes/engines";
 import { enginesAtom } from "@/state/atoms";
 import { type Engine, engineSchema, type LocalEngine, requiredEngineSettings } from "@/utils/engines";
 import { unwrap } from "@/utils/unwrap";
-import ConfirmModal from "../common/ConfirmModal";
 import GenericCard from "../common/GenericCard";
 import GoModeInput from "../common/GoModeInput";
 import LocalImage from "../common/LocalImage";
@@ -270,7 +270,6 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
     }
   }
 
-  const [deleteModal, toggleDeleteModal] = useToggle();
   const [jsonModal, toggleJSONModal] = useToggle();
 
   return (
@@ -446,22 +445,30 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
           >
             {t("Engines.Settings.Reset")}
           </Button>
-          <Button color="red" onClick={() => toggleDeleteModal()}>
+          <Button
+            color="red"
+            onClick={() => {
+              modals.openConfirmModal({
+                title: t("Engines.Remove.Title"),
+                withCloseButton: false,
+                children: (
+                  <>
+                    <Text>{t("Engines.Remove.Message")}</Text>
+                    <Text>{t("Common.CannotUndo")}</Text>
+                  </>
+                ),
+                labels: { confirm: t("Common.Remove"), cancel: t("Common.Cancel") },
+                confirmProps: { color: "red" },
+                onConfirm: () => {
+                  setEngines(async (prev) => (await prev).filter((e) => e.name !== engine.name));
+                  setSelected(null);
+                },
+              });
+            }}
+          >
             {t("Common.Remove")}
           </Button>
         </Group>
-        <ConfirmModal
-          title={t("Engines.Remove.Title")}
-          description={t("Engines.Remove.Message")}
-          opened={deleteModal}
-          onClose={toggleDeleteModal}
-          onConfirm={() => {
-            setEngines(async (prev) => (await prev).filter((e) => e.name !== engine.name));
-            setSelected(null);
-            toggleDeleteModal();
-          }}
-          confirmLabel={t("Common.Remove")}
-        />
       </Stack>
       <JSONModal
         key={engine.name}

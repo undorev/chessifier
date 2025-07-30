@@ -1,18 +1,16 @@
 import { Box, Button, Card, Group, Image, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { IconChess, IconFileImport, IconPuzzle } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { activeTabAtom, tabsAtom } from "@/state/atoms";
 import { genID, type Tab } from "@/utils/tabs";
 import Chessboard from "../icons/Chessboard";
 import BoardsPageTabs from "./BoardsPageTabs";
-import ImportModal from "./ImportModal";
 
 export default function BoardsPage() {
   const { t } = useTranslation();
 
-  const [openModal, setOpenModal] = useState(false);
   const [tabs, setTabs] = useAtom(tabsAtom);
   const [_, setActiveTab] = useAtom(activeTabAtom);
 
@@ -64,7 +62,10 @@ export default function BoardsPage() {
       description: t("Home.Card.ImportGame.Desc"),
       label: t("Home.Card.ImportGame.Button"),
       onClick: () => {
-        setOpenModal(true);
+        modals.openContextModal({
+          modal: "importModal",
+          innerProps: {},
+        });
       },
     },
     {
@@ -90,58 +91,50 @@ export default function BoardsPage() {
   ];
 
   if (tabs?.length) {
-    return (
-      <>
-        <BoardsPageTabs setOpenModal={setOpenModal} />
-        <ImportModal openModal={openModal} setOpenModal={setOpenModal} />
-      </>
-    );
+    return <BoardsPageTabs />;
   }
 
   return (
-    <>
-      <Stack p="lg">
-        <Card shadow="sm" p="lg" radius="md" withBorder key={PLAY_CHESS.title}>
-          <Group>
-            <Box flex={1} pl="xl">
-              <Title order={1} fz="50px" fw={700}>
-                {PLAY_CHESS.title}
-              </Title>
-              <Text size="md" c="dimmed">
-                {PLAY_CHESS.description}
-              </Text>
+    <Stack p="lg">
+      <Card shadow="sm" p="lg" radius="md" withBorder key={PLAY_CHESS.title}>
+        <Group>
+          <Box flex={1} pl="xl">
+            <Title order={1} fz="50px" fw={700}>
+              {PLAY_CHESS.title}
+            </Title>
+            <Text size="md" c="dimmed">
+              {PLAY_CHESS.description}
+            </Text>
 
-              <Button mt="md" radius="md" onClick={PLAY_CHESS.onClick}>
-                {PLAY_CHESS.label}
+            <Button mt="md" radius="md" onClick={PLAY_CHESS.onClick}>
+              {PLAY_CHESS.label}
+            </Button>
+          </Box>
+          <Box flex={1}>
+            <Image src="/chess-play.jpg" alt="Chess play" radius="lg" />
+          </Box>
+        </Group>
+      </Card>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+        {cards.map((card) => (
+          <Card shadow="sm" p="lg" radius="md" withBorder key={card.title}>
+            <Stack align="center" h="100%" justify="space-between">
+              {card.icon}
+
+              <Box style={{ textAlign: "center" }}>
+                <Text fw={500}>{card.title}</Text>
+                <Text size="sm" c="dimmed">
+                  {card.description}
+                </Text>
+              </Box>
+
+              <Button variant="light" fullWidth mt="md" radius="md" onClick={card.onClick}>
+                {card.label}
               </Button>
-            </Box>
-            <Box flex={1}>
-              <Image src="/chess-play.jpg" alt="Chess play" radius="lg" />
-            </Box>
-          </Group>
-        </Card>
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-          {cards.map((card) => (
-            <Card shadow="sm" p="lg" radius="md" withBorder key={card.title}>
-              <Stack align="center" h="100%" justify="space-between">
-                {card.icon}
-
-                <Box style={{ textAlign: "center" }}>
-                  <Text fw={500}>{card.title}</Text>
-                  <Text size="sm" c="dimmed">
-                    {card.description}
-                  </Text>
-                </Box>
-
-                <Button variant="light" fullWidth mt="md" radius="md" onClick={card.onClick}>
-                  {card.label}
-                </Button>
-              </Stack>
-            </Card>
-          ))}
-        </SimpleGrid>
-      </Stack>
-      <ImportModal openModal={openModal} setOpenModal={setOpenModal} />
-    </>
+            </Stack>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </Stack>
   );
 }
