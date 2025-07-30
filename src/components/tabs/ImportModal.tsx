@@ -295,7 +295,7 @@ export default function ImportModal() {
 
       {Input}
 
-      <Button fullWidth mt="md" radius="md" loading={loading} disabled={disabled} onClick={() => {}}>
+      <Button fullWidth mt="md" radius="md" loading={loading} disabled={disabled} onClick={handleSubmit}>
         {loading ? "Importing..." : "Import"}
       </Button>
     </>

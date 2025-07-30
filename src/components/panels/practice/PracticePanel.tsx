@@ -45,9 +45,11 @@ function PracticePanel() {
 
   const currentTab = useAtomValue(currentTabAtom);
 
+  const fileName = currentTab?.source?.type === "file" ? currentTab.source.name : "";
+
   const [deck, setDeck] = useAtom(
     deckAtomFamily({
-      file: currentTab?.file?.path || "",
+      file: currentTab?.source?.type === "file" ? currentTab.source.path : "",
       game: currentTab?.gameNumber || 0,
     }),
   );
@@ -206,7 +208,7 @@ function PracticePanel() {
                       <>
                         <Text>
                           {t("Board.Practice.ResetOpeningData.Desc", {
-                            fileName: currentTab?.file?.name
+                            fileName,
                           })}
                         </Text>
                         <Text>{t("Common.CannotUndo")}</Text>
