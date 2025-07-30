@@ -146,6 +146,11 @@ function TournamentCard({ tournament, file }: { tournament: Event; file: string 
                           setActiveTab,
                           pgn: game.moves,
                           headers: game,
+                          srcInfo: {
+                            type: "db",
+                            db: file,
+                            id: game.id,
+                          },
                         });
                         navigate({ to: "/" });
                       }}

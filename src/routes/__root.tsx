@@ -150,10 +150,9 @@ function RootLayout() {
       keyMap.IMPORT_BOARD.keys,
       () => {
         navigate({ to: "/" });
-        createTab({
-          tab: { name: "Import", type: "play" },
-          setTabs,
-          setActiveTab,
+        modals.openContextModal({
+          modal: "importModal",
+          innerProps: {},
         });
       },
     ],
