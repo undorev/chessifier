@@ -34,6 +34,11 @@ function GameCard({ game, file, mutate }: { game: NormalizedGame; file: string; 
                     setActiveTab,
                     pgn: game.moves,
                     headers: game,
+                    srcInfo: {
+                      type: "db",
+                      db: file,
+                      id: game.id,
+                    },
                   });
                   navigate({ to: "/" });
                 }}

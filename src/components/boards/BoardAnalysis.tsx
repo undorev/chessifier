@@ -17,7 +17,7 @@ import {
 } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
 import { defaultPGN } from "@/utils/chess";
-import { saveToFile } from "@/utils/tabs";
+import { reloadTab, saveTab, saveToFile } from "@/utils/tabs";
 import GameNotation from "../common/GameNotation";
 import MoveControls from "../common/MoveControls";
 import { TreeStateContext } from "../common/TreeStateContext";
@@ -46,33 +46,56 @@ function BoardAnalysis() {
   const reset = useStore(store, (s) => s.reset);
   const clearShapes = useStore(store, (s) => s.clearShapes);
   const setAnnotation = useStore(store, (s) => s.setAnnotation);
+  const setStoreState = useStore(store, (s) => s.setState);
+  const setStoreSave = useStore(store, (s) => s.save);
 
   const saveFile = useCallback(async () => {
-    saveToFile({
-      dir: documentDir,
-      setCurrentTab,
-      tab: currentTab,
-      store,
-    });
+    if (currentTab?.source != null) {
+      saveTab(currentTab, store);
+      setStoreSave();
+    } else {
+      saveToFile({
+        dir: documentDir,
+        setCurrentTab,
+        tab: currentTab,
+        store,
+      });
+    }
   }, [setCurrentTab, currentTab, documentDir, store]);
+
+  const reloadBoard = useCallback(async () => {
+    if (currentTab != null) {
+      const state = await reloadTab(currentTab);
+
+      if (state != null) {
+        setStoreState(state);
+      }
+    }
+  }, [store]);
+
   useEffect(() => {
-    if (currentTab?.file && autoSave && dirty) {
+    if (currentTab?.source?.type === "file" && autoSave && dirty) {
       saveFile();
     }
-  }, [currentTab?.file, saveFile, autoSave, dirty]);
+  }, [currentTab?.source, saveFile, autoSave, dirty]);
+
+  const filePath = currentTab?.source?.type === "file" ? currentTab.source.path : undefined;
 
   const addGame = useCallback(() => {
     setCurrentTab((prev) => {
-      if (!prev?.file) return prev;
-      prev.gameNumber = prev.file.numGames;
-      prev.file.numGames += 1;
-      return { ...prev };
+      if (prev.source?.type === "file") {
+        prev.gameNumber = prev.source.numGames;
+        prev.source.numGames += 1;
+        return { ...prev };
+      }
+
+      return prev;
     });
     reset();
-    writeTextFile(currentTab?.file?.path!, `\n\n${defaultPGN()}\n\n`, {
+    writeTextFile(filePath!, `\n\n${defaultPGN()}\n\n`, {
       append: true,
     });
-  }, [setCurrentTab, reset, currentTab?.file?.path]);
+  }, [setCurrentTab, reset, filePath]);
 
   const [, enable] = useAtom(enableAllAtom);
   const allEnabledLoader = useAtomValue(allEnabledAtom);
@@ -111,7 +134,7 @@ function BoardAnalysis() {
 
   const [currentTabSelected, setCurrentTabSelected] = useAtom(currentTabSelectedAtom);
   const practiceTabSelected = useAtomValue(currentPracticeTabAtom);
-  const isRepertoire = currentTab?.file?.metadata.type === "repertoire";
+  const isRepertoire = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "repertoire";
   const practicing = currentTabSelected === "practice" && practiceTabSelected === "train";
 
   return (
@@ -125,6 +148,7 @@ function BoardAnalysis() {
           toggleEditingMode={toggleEditingMode}
           boardRef={boardRef}
           saveFile={saveFile}
+          reload={reloadBoard}
           addGame={addGame}
         />
       </Portal>

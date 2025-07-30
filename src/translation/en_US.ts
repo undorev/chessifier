@@ -169,7 +169,8 @@ export const en_US = {
     "Board.Practice.PracticedAll2": "The next review is on",
     "Board.Practice.CorrectMoveWas": "The correct move was {{move}}",
     "Board.Practice.ResetOpeningData.Title": "Reset opening data",
-    "Board.Practice.ResetOpeningData.Desc": "Are you sure you want to reset the opening data for \"{{fileName}}\"? All the learning progress will be lost.",
+    "Board.Practice.ResetOpeningData.Desc":
+      'Are you sure you want to reset the opening data for "{{fileName}}"? All the learning progress will be lost.',
     "Board.Analysis.Engines": "Engines",
     "Board.Analysis.Report": "Report",
     "Board.Analysis.Logs": "Logs",
