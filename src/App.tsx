@@ -47,7 +47,7 @@ const colorSchemeManager = localStorageColorSchemeManager({
   key: "mantine-color-scheme",
 });
 
-import { documentDir, resolve } from "@tauri-apps/api/path";
+import { documentDir, homeDir, resolve } from "@tauri-apps/api/path";
 import ErrorComponent from "@/components/ErrorComponent";
 import { routeTree } from "./routeTree.gen";
 
@@ -61,7 +61,14 @@ const router = createRouter({
   context: {
     loadDirs: async () => {
       const store = getDefaultStore();
-      const doc = store.get(storedDocumentDirAtom) || (await resolve(await documentDir(), "Chessifier"));
+      let doc = store.get(storedDocumentDirAtom);
+      if (!doc) {
+        try {
+          doc = await resolve(await documentDir(), "Chessifier");
+        } catch (e) {
+          doc = await resolve(await homeDir(), "Chessifier");
+        }
+      }
       const dirs: Dirs = { documentDir: doc };
       return dirs;
     },

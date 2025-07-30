@@ -18,7 +18,7 @@ import {
   IconTarget,
   IconZoomCheck,
 } from "@tabler/icons-react";
-import { documentDir } from "@tauri-apps/api/path";
+import { documentDir, homeDir } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import type { DrawShape } from "chessground/draw";
@@ -172,7 +172,12 @@ function Board({
 
     domtoimage.toBlob(refChildNode).then(async (blob) => {
       if (blob == null) return;
-      const documentsDirPath = await documentDir();
+      let documentsDirPath;
+      try {
+        documentsDirPath = await documentDir();
+      } catch (e) {
+        documentsDirPath = await homeDir();
+      }
 
       const filePath = await save({
         title: "Save board snapshot",
