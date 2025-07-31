@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import DatabasesPage from "@/components/databases/DatabasesPage";
+import DatabasesPage from "@/features/databases/DatabasesPage";
 import { activeDatabaseViewStore } from "@/state/store/database";
 
 export const Route = createFileRoute("/databases/")({

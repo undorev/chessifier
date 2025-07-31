@@ -102,19 +102,19 @@ The binary will be available in your current directory.
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | 🟡 97% | [AM](./src/translation/am_AM.ts) |
-| 🇧🇾 BY | 🟡 87% | [BY](./src/translation/be_BY.ts) |
-| 🇩🇪 DE | 🟡 88% | [DE](./src/translation/de_DE.ts) |
-| 🇪🇸 ES | 🟡 88% | [ES](./src/translation/es_ES.ts) |
-| 🇫🇷 FR | 🟡 96% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 87% | [IT](./src/translation/it_IT.ts) |
-| 🇳🇴 NO | 🟡 88% | [NO](./src/translation/nb_NO.ts) |
-| 🇵🇱 PL | 🟡 87% | [PL](./src/translation/pl_PL.ts) |
-| 🇵🇹 PT | 🟡 87% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 97% | [RU](./src/translation/ru_RU.ts) |
-| 🇹🇷 TR | 🟡 88% | [TR](./src/translation/tr_TR.ts) |
-| 🇺🇦 UA | 🟡 87% | [UA](./src/translation/uk_UA.ts) |
-| 🇨🇳 CN | 🟡 87% | [CN](./src/translation/zh_CN.ts) |
+| 🇦🇲 AM | 🟡 93% | [AM](./src/translation/am_AM.ts) |
+| 🇧🇾 BY | 🟡 84% | [BY](./src/translation/be_BY.ts) |
+| 🇩🇪 DE | 🟡 84% | [DE](./src/translation/de_DE.ts) |
+| 🇪🇸 ES | 🟡 84% | [ES](./src/translation/es_ES.ts) |
+| 🇫🇷 FR | 🟡 92% | [FR](./src/translation/fr_FR.ts) |
+| 🇮🇹 IT | 🟡 84% | [IT](./src/translation/it_IT.ts) |
+| 🇳🇴 NO | 🟡 84% | [NO](./src/translation/nb_NO.ts) |
+| 🇵🇱 PL | 🟡 84% | [PL](./src/translation/pl_PL.ts) |
+| 🇵🇹 PT | 🟡 84% | [PT](./src/translation/pt_PT.ts) |
+| 🇷🇺 RU | 🟡 93% | [RU](./src/translation/ru_RU.ts) |
+| 🇹🇷 TR | 🟡 84% | [TR](./src/translation/tr_TR.ts) |
+| 🇺🇦 UA | 🟡 84% | [UA](./src/translation/uk_UA.ts) |
+| 🇨🇳 CN | 🟡 84% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
 
 📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).

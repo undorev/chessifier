@@ -26,8 +26,9 @@ const keys = {
   // === Mode Switching ===
   PLAY_BOARD: { name: "Play", keys: "mod+1" },
   ANALYZE_BOARD: { name: "Analyze", keys: "mod+2" },
-  IMPORT_BOARD: { name: "Import", keys: "mod+3" },
-  TRAIN_BOARD: { name: "Train", keys: "mod+4" },
+  TRAIN_BOARD: { name: "Train", keys: "mod+3" },
+
+  IMPORT_BOARD: { name: "Import", keys: "mod+i" },
 
   // === Move Navigation ===
   NEXT_MOVE: { name: "Next move", keys: "arrowright" },

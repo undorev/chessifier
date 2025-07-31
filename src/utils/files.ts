@@ -5,7 +5,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { defaultGame, makePgn } from "chessops/pgn";
 import useSWR from "swr";
 import { commands } from "@/bindings";
-import type { FileMetadata } from "@/components/files/file";
+import type { FileMetadata } from "@/features/files/components/file";
 import { unwrap } from "@/utils/unwrap";
 import { parsePGN } from "./chess";
 import { createTab, type Tab } from "./tabs";
