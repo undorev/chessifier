@@ -16,10 +16,10 @@ import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
 import { match } from "ts-pattern";
 import type { Dirs } from "@/App";
-import AboutModal from "@/components/About";
-import { SideBar } from "@/components/Sidebar";
-import TopBar from "@/components/TopBar";
-import ImportModal from "@/components/tabs/ImportModal";
+import AboutModal from "@/common/components/About";
+import { SideBar } from "@/common/components/Sidebar";
+import TopBar from "@/common/components/TopBar";
+import ImportModal from "@/features/boards/components/ImportModal";
 import { activeTabAtom, nativeBarAtom, tabsAtom } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
 import { openFile } from "@/utils/files";
@@ -98,7 +98,7 @@ function RootLayout() {
   }, [navigate, setActiveTab, setTabs]);
 
   const createNewTab = useCallback(() => {
-    navigate({ to: "/" });
+    navigate({ to: "/boards" });
     createTab({
       tab: { name: t("Tab.NewTab"), type: "new" },
       setTabs,
@@ -125,9 +125,20 @@ function RootLayout() {
 
   useHotkeys([
     [
+      keyMap.NEW_BOARD_TAB.keys,
+      () => {
+        navigate({ to: "/boards" });
+        createTab({
+          tab: { name: t("Tab.NewTab"), type: "new" },
+          setTabs,
+          setActiveTab,
+        });
+      },
+    ],
+    [
       keyMap.PLAY_BOARD.keys,
       () => {
-        navigate({ to: "/" });
+        navigate({ to: "/boards" });
         createTab({
           tab: { name: "Play", type: "play" },
           setTabs,
@@ -138,7 +149,7 @@ function RootLayout() {
     [
       keyMap.ANALYZE_BOARD.keys,
       () => {
-        navigate({ to: "/" });
+        navigate({ to: "/boards" });
         createTab({
           tab: { name: "Analyze", type: "analysis" },
           setTabs,
@@ -149,7 +160,7 @@ function RootLayout() {
     [
       keyMap.IMPORT_BOARD.keys,
       () => {
-        navigate({ to: "/" });
+        navigate({ to: "/boards" });
         modals.openContextModal({
           modal: "importModal",
           innerProps: {},
@@ -159,7 +170,7 @@ function RootLayout() {
     [
       keyMap.TRAIN_BOARD.keys,
       () => {
-        navigate({ to: "/" });
+        navigate({ to: "/boards" });
         createTab({
           tab: { name: "Train", type: "puzzles" },
           setTabs,
@@ -176,12 +187,12 @@ function RootLayout() {
       {
         label: t("Menu.File"),
         options: [
-          // {
-          //   label: t("Menu.File.NewTab"),
-          //   id: "new_tab",
-          //   shortcut: keyMap.NEW_BOARD_TAB.keys,
-          //   action: createNewTab,
-          // },
+          {
+            label: t("Menu.File.NewTab"),
+            id: "new_tab",
+            shortcut: keyMap.NEW_BOARD_TAB.keys,
+            action: createNewTab,
+          },
           {
             label: t("Menu.File.OpenFile"),
             id: "open_file",

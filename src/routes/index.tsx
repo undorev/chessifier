@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import BoardsPage from "@/components/tabs/BoardsPage";
+import HomePage from "@/features/home/HomePage";
 
 export const Route = createFileRoute("/")({
-  component: BoardsPage,
+  component: HomePage,
   loader: ({ context: { loadDirs } }) => loadDirs(),
 });

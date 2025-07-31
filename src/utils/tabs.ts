@@ -2,7 +2,7 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { z } from "zod";
 import type { StoreApi } from "zustand";
 import { commands } from "@/bindings";
-import { fileMetadataSchema } from "@/components/files/file";
+import { fileMetadataSchema } from "@/features/files/components/file";
 import type { TreeStoreState } from "@/state/store/tree";
 import { unwrap } from "@/utils/unwrap";
 import { getPGN, parsePGN } from "./chess";

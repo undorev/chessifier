@@ -117,6 +117,7 @@ export const en_US = {
     "Menu.Help.CheckUpdate": "Check for updates",
     "Menu.Help.About": "About",
 
+    "SideBar.Home": "Home",
     "SideBar.Board": "Board",
     "SideBar.Accounts": "Accounts",
     "SideBar.Files": "Files",
@@ -126,6 +127,18 @@ export const en_US = {
     "SideBar.KeyboardShortcuts": "Keyboard Shortcuts",
 
     "Tab.NewTab": "New Tab",
+    "Tab.PlayChess.Title": "Play a game",
+    "Tab.PlayChess.Desc": "Challenge an engine or a friend",
+    "Tab.PlayChess.Button": "Play Now",
+    "Tab.AnalysisBoard.Title": "Analysis Board",
+    "Tab.AnalysisBoard.Desc": "Analyze a game or position",
+    "Tab.AnalysisBoard.Button": "Analyze",
+    "Tab.ImportGame.Title": "Import Game",
+    "Tab.ImportGame.Desc": "Import a game from a PGN",
+    "Tab.ImportGame.Button": "Import",
+    "Tab.Puzzle.Title": "Puzzles",
+    "Tab.Puzzle.Desc": "Train your chess skills",
+    "Tab.Puzzle.Button": "Train",
 
     "Home.Card.PlayChess.Title": "Play a game",
     "Home.Card.PlayChess.Desc": "Challenge an engine or a friend",
@@ -136,9 +149,28 @@ export const en_US = {
     "Home.Card.ImportGame.Title": "Import Game",
     "Home.Card.ImportGame.Desc": "Import a game from a PGN",
     "Home.Card.ImportGame.Button": "Import",
-    "Home.Card.Puzzle.Title": "Puzzles",
-    "Home.Card.Puzzle.Desc": "Train your chess skills",
-    "Home.Card.Puzzle.Button": "Train",
+
+    "Home.Card.Analyze.Title": "Board Analysis",
+    "Home.Card.Analyze.Desc": "Analyze positions, games, and variations with powerful chess engines.",
+    "Home.Card.Analyze.Button": "Analyze",
+    "Home.Card.Database.Title": "Database Access",
+    "Home.Card.Database.Desc": "Explore extensive chess databases and study master games to deepen your understanding.",
+    "Home.Card.Database.Button": "Browse",
+    "Home.Card.Engine.Title": "Engine Integration",
+    "Home.Card.Engine.Desc":
+      "Add and manage multiple chess engines to customize your analysis setup and enhance flexibility.",
+    "Home.Card.Engine.Button": "Manage",
+    "Home.Card.Puzzle.Title": "Tactical Puzzles",
+    "Home.Card.Puzzle.Desc": "Sharpen your chess skills with tactical puzzles and enhance your pattern recognition.",
+    "Home.Card.Puzzle.Button": "Solve",
+    "Home.Card.Account.Title": "Accounts",
+    "Home.Card.Account.Desc":
+      "Import your games and stats by connecting your Chess.com or Lichess account for personalized analysis.",
+    "Home.Card.Account.Button": "Connect",
+    "Home.Card.Import.Title": "Import",
+    "Home.Card.Import.Desc":
+      "Upload and edit PGN files to analyze your own games or study specific positions with full control.",
+    "Home.Card.Import.Button": "Import",
 
     "Board.Action.TogglePawnStructureView": "Toggle Pawn Structure View",
     "Board.Action.TakeSnapshot": "Take Snapshot",
