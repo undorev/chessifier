@@ -1,4 +1,8 @@
 {
+  "productName": "Chessifier",
+  "version": "0.1.0",
+  "mainBinaryName": "Chessifier",
+  "identifier": "org.chessifier.app",
   "bundle": {
     "active": true,
     "category": "BoardGame",
@@ -43,9 +47,6 @@
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420"
   },
-  "productName": "Chessifier",
-  "mainBinaryName": "chessifier",
-  "identifier": "org.chessifier.app",
   "plugins": {
     "cli": {
       "args": [
