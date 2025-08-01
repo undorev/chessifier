@@ -1,5 +1,44 @@
 # Chessifier
 
+## v0.2.0
+
+### ✨ Features
+- **Game Management**
+  - Added support for **saving and reloading games**
+  - Extended move format to support **glyphs, comments, and variants** (fully backward-compatible)
+- **UI Enhancements**
+  - Added **auto color scheme** support in theme settings
+  - Added **filter option** to game search for easier navigation
+
+### 🛠 Improvements & Refactors
+- **Database**
+  - Improved state management with a **persistent store**
+  - Initialized `DatabaseViewStateContext` using `activeDatabaseViewStore`
+- **Session & Auth**
+  - Refactored session management and authentication logic for cleaner flow
+- **Modals**
+  - Simplified **confirmation modal** usage across app
+  - Fixed `ImportModal` close behavior and added error handling
+- **Codebase**
+  - Reorganized folder and file structure for better modularity and maintainability
+  - Renamed binary casing in `Cargo.toml` and `tauri.conf.json` for consistency
+
+### 🐛 Fixes
+- **Importing**
+  - Fixed import modal functionality and hotkey behavior
+- **Linux Support**
+  - Added fallback to default document directory when **XDG is not configured**
+
+### 📚 Documentation
+- Added **Dockerfile** and setup instructions
+- Updated `README` with supported platforms
+- Included build instructions and updated formatting
+
+### 🧹 Chores
+- Added missing translations
+- Updated project dependencies
+- Updated app logo
+
 ## v0.1.0
 
 ### ✨ Features
