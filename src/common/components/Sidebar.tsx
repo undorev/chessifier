@@ -66,7 +66,7 @@ export function SideBar() {
       </AppShellSection>
       <AppShellSection>
         <Stack justify="center" gap={0}>
-          <Tooltip label={t("SideBar.KeyboardShortcuts")}  position="right">
+          <Tooltip label={t("SideBar.KeyboardShortcuts")} position="right">
             <Link
               to="/settings/keyboard-shortcuts"
               className={cx(classes.link, {
@@ -76,7 +76,7 @@ export function SideBar() {
               <IconKeyboard size="1.5rem" stroke={1.5} />
             </Link>
           </Tooltip>
-           <Tooltip label={t("SideBar.Settings")} position="right">
+          <Tooltip label={t("SideBar.Settings")} position="right">
             <Link
               to="/settings"
               className={cx(classes.link, {
