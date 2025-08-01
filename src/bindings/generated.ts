@@ -523,6 +523,7 @@ export type GameQueryJs = {
   sides?: Sides | null;
   outcome?: string | null;
   position?: PositionQueryJs | null;
+  wanted_result?: string | null;
 };
 export type GameSort = "id" | "date" | "whiteElo" | "blackElo" | "ply_count";
 export type GoMode =
