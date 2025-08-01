@@ -96,25 +96,42 @@ You can also build Chessifier using Docker (make sure [Docker](https://www.docke
 
 The binary will be available in your current directory.
 
+## 💻 Supported Platforms
+
+Chessifier currently supports the following desktop platforms:
+
+| Platform | Supported Versions |
+|----------|-------------------|
+| Windows  | Windows 7 and above |
+| macOS    | macOS 10.15 (Catalina) and above |
+| Linux    | Distributions with webkit2gtk 4.1 (e.g., Ubuntu 22.04) |
+
+## 📱 Planned Platform Support
+
+We’re planning to bring Chessifier to additional platforms in future releases:
+- Android
+- iOS
+- Web Browser
+
 ## 🌍 Translations
 
 <!-- TRANSLATIONS_START -->
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | 🟡 93% | [AM](./src/translation/am_AM.ts) |
-| 🇧🇾 BY | 🟡 84% | [BY](./src/translation/be_BY.ts) |
-| 🇩🇪 DE | 🟡 84% | [DE](./src/translation/de_DE.ts) |
-| 🇪🇸 ES | 🟡 84% | [ES](./src/translation/es_ES.ts) |
-| 🇫🇷 FR | 🟡 92% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 84% | [IT](./src/translation/it_IT.ts) |
-| 🇳🇴 NO | 🟡 84% | [NO](./src/translation/nb_NO.ts) |
-| 🇵🇱 PL | 🟡 84% | [PL](./src/translation/pl_PL.ts) |
-| 🇵🇹 PT | 🟡 84% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 93% | [RU](./src/translation/ru_RU.ts) |
-| 🇹🇷 TR | 🟡 84% | [TR](./src/translation/tr_TR.ts) |
-| 🇺🇦 UA | 🟡 84% | [UA](./src/translation/uk_UA.ts) |
-| 🇨🇳 CN | 🟡 84% | [CN](./src/translation/zh_CN.ts) |
+| 🇦🇲 AM | 🟡 90% | [AM](./src/translation/am_AM.ts) |
+| 🇧🇾 BY | 🟡 81% | [BY](./src/translation/be_BY.ts) |
+| 🇩🇪 DE | 🟡 81% | [DE](./src/translation/de_DE.ts) |
+| 🇪🇸 ES | 🟡 81% | [ES](./src/translation/es_ES.ts) |
+| 🇫🇷 FR | 🟡 89% | [FR](./src/translation/fr_FR.ts) |
+| 🇮🇹 IT | 🟡 81% | [IT](./src/translation/it_IT.ts) |
+| 🇳🇴 NO | 🟡 81% | [NO](./src/translation/nb_NO.ts) |
+| 🇵🇱 PL | 🟡 81% | [PL](./src/translation/pl_PL.ts) |
+| 🇵🇹 PT | 🟡 81% | [PT](./src/translation/pt_PT.ts) |
+| 🇷🇺 RU | 🟡 90% | [RU](./src/translation/ru_RU.ts) |
+| 🇹🇷 TR | 🟡 81% | [TR](./src/translation/tr_TR.ts) |
+| 🇺🇦 UA | 🟡 81% | [UA](./src/translation/uk_UA.ts) |
+| 🇨🇳 CN | 🟡 81% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
 
 📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).
