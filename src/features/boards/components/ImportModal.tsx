@@ -27,6 +27,7 @@ import { createFile } from "@/utils/files";
 import { getLichessGame } from "@/utils/lichess/api";
 import { defaultTree, getGameName } from "@/utils/treeReducer";
 import { unwrap } from "@/utils/unwrap";
+import { ContextModalProps } from "@mantine/modals";
 
 type ImportType = "PGN" | "Link" | "FEN";
 
@@ -38,7 +39,10 @@ const FILE_TYPES = [
   { label: "Other", value: "other" },
 ] as const;
 
-export default function ImportModal() {
+export default function ImportModal({
+  context,
+  id,
+}: ContextModalProps<{ modalBody: string }>) {
   const [pgn, setPgn] = useState("");
   const [fen, setFen] = useState("");
   const [file, setFile] = useState<string | null>(null);
@@ -96,18 +100,25 @@ export default function ImportModal() {
             };
           }
         }
-        const tree = await parsePGN(input);
-        setCurrentTab((prev) => {
-          sessionStorage.setItem(prev?.value, JSON.stringify({ version: 0, state: tree }));
 
-          return {
-            ...prev,
-            name: getGameName(tree.headers),
-            file: fileInfo,
-            gameNumber: 0,
-            type: "analysis",
-          };
-        });
+        try {
+          const tree = await parsePGN(input);
+          setCurrentTab((prev) => {
+            sessionStorage.setItem(prev?.value, JSON.stringify({ version: 0, state: tree }));
+
+            return {
+              ...prev,
+              name: getGameName(tree.headers),
+              file: fileInfo,
+              gameNumber: 0,
+              type: "analysis",
+            };
+          });
+        } catch (e: any) {
+          setError(e?.message);
+          setLoading(false);
+          return;
+        }
       }
     } else if (importType === "Link") {
       if (!link) {
@@ -157,6 +168,7 @@ export default function ImportModal() {
       });
     }
     setLoading(false);
+    context.closeModal(id);
   }
 
   const Input = match(importType)
