@@ -10,6 +10,7 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
+import type { ContextModalProps } from "@mantine/modals";
 import { useLoaderData } from "@tanstack/react-router";
 import { open } from "@tauri-apps/plugin-dialog";
 import { makeFen, parseFen } from "chessops/fen";
@@ -27,7 +28,6 @@ import { createFile } from "@/utils/files";
 import { getLichessGame } from "@/utils/lichess/api";
 import { defaultTree, getGameName } from "@/utils/treeReducer";
 import { unwrap } from "@/utils/unwrap";
-import { ContextModalProps } from "@mantine/modals";
 
 type ImportType = "PGN" | "Link" | "FEN";
 
@@ -39,10 +39,7 @@ const FILE_TYPES = [
   { label: "Other", value: "other" },
 ] as const;
 
-export default function ImportModal({
-  context,
-  id,
-}: ContextModalProps<{ modalBody: string }>) {
+export default function ImportModal({ context, id }: ContextModalProps<{ modalBody: string }>) {
   const [pgn, setPgn] = useState("");
   const [fen, setFen] = useState("");
   const [file, setFile] = useState<string | null>(null);

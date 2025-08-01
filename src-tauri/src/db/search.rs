@@ -310,6 +310,29 @@ pub async fn search_position(
                 }
             }
 
+            if let Some(result) = result {
+                if let Some(wanted_result) = &query.wanted_result {
+                    match wanted_result.as_str() {
+                        "whitewon" => {
+                            if result != "1-0" {
+                                return
+                            } 
+                        }
+                        "blackwon" => {
+                            if result != "0-1" {
+                                return
+                            } 
+                        }
+                        "draw" => {
+                            if result != "1/2-1/2" {
+                                return
+                            } 
+                        }
+                        &_ => {}
+                    }
+                }
+            }
+
             if let Some(position_query) = &query.position {
                 let position_query =
                     convert_position_query(position_query.clone()).expect("Invalid position query");
