@@ -349,7 +349,7 @@ function Board({
             </ActionIcon>
           </Tooltip>
         )}
-        <Tooltip label={t(currentTab?.type === "analysis" ? "Board.Action.PlayFromHere" : "Board.AnalyzeGame")}>
+        <Tooltip label={t(currentTab?.type === "analysis" ? "Board.Action.PlayFromHere" : "Board.Action.AnalyzeGame")}>
           <ActionIcon variant="default" size="lg" onClick={changeTabType}>
             {currentTab?.type === "analysis" ? <IconTarget size="1.3rem" /> : <IconZoomCheck size="1.3rem" />}
           </ActionIcon>
