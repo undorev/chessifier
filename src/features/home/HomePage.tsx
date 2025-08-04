@@ -1,6 +1,5 @@
 import { Box, Button, Card, Group, Image, SimpleGrid, Stack, Text, Title } from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { IconChess, IconCpu, IconDatabase, IconFileImport, IconPuzzle, IconUsers } from "@tabler/icons-react";
+import { IconBook, IconChess, IconCpu, IconDatabase, IconPuzzle, IconUsers } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
@@ -12,8 +11,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const [tabs, setTabs] = useAtom(tabsAtom);
-  const [_, setActiveTab] = useAtom(activeTabAtom);
+  const [_tabs, setTabs] = useAtom(tabsAtom);
+  const [_activeTab, setActiveTab] = useAtom(activeTabAtom);
 
   const PLAY_CHESS = {
     icon: <IconChess size={50} />,
@@ -96,12 +95,12 @@ export default function HomePage() {
       },
     },
     {
-      icon: <IconFileImport size={50} />,
-      title: t("Home.Card.Import.Title"),
-      description: t("Home.Card.Import.Desc"),
-      label: t("Home.Card.Import.Button"),
+      icon: <IconBook size={50} />,
+      title: t("Home.Card.Learn.Title"),
+      description: t("Home.Card.Learn.Desc"),
+      label: t("Home.Card.Learn.Button"),
       onClick: () => {
-        navigate({ to: "/boards" });
+        navigate({ to: "/learn" });
       },
     },
   ];

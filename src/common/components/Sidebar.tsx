@@ -1,12 +1,14 @@
 import { AppShellSection, Stack, Tooltip } from "@mantine/core";
 import {
   type Icon,
+  IconBook,
   IconChess,
   IconCpu,
   IconDatabase,
   IconFiles,
   IconHome,
   IconKeyboard,
+  IconSchool,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
@@ -49,6 +51,7 @@ export const linksdata = [
   },
   { icon: IconFiles, label: "Files", url: "/files" },
   { icon: IconUsers, label: "Accounts", url: "/accounts" },
+  { icon: IconSchool, label: "Learn", url: "/learn" },
 ];
 
 export function SideBar() {
