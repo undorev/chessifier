@@ -119,19 +119,19 @@ We’re planning to bring Chessifier to additional platforms in future releases:
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | 🟡 90% | [AM](./src/translation/am_AM.ts) |
-| 🇧🇾 BY | 🟡 81% | [BY](./src/translation/be_BY.ts) |
-| 🇩🇪 DE | 🟡 81% | [DE](./src/translation/de_DE.ts) |
-| 🇪🇸 ES | 🟡 81% | [ES](./src/translation/es_ES.ts) |
-| 🇫🇷 FR | 🟡 89% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 81% | [IT](./src/translation/it_IT.ts) |
-| 🇳🇴 NO | 🟡 81% | [NO](./src/translation/nb_NO.ts) |
-| 🇵🇱 PL | 🟡 81% | [PL](./src/translation/pl_PL.ts) |
-| 🇵🇹 PT | 🟡 81% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 90% | [RU](./src/translation/ru_RU.ts) |
-| 🇹🇷 TR | 🟡 81% | [TR](./src/translation/tr_TR.ts) |
-| 🇺🇦 UA | 🟡 81% | [UA](./src/translation/uk_UA.ts) |
-| 🇨🇳 CN | 🟡 81% | [CN](./src/translation/zh_CN.ts) |
+| 🇦🇲 AM | 🟡 82% | [AM](./src/translation/am_AM.ts) |
+| 🇧🇾 BY | 🟡 74% | [BY](./src/translation/be_BY.ts) |
+| 🇩🇪 DE | 🟡 74% | [DE](./src/translation/de_DE.ts) |
+| 🇪🇸 ES | 🟡 74% | [ES](./src/translation/es_ES.ts) |
+| 🇫🇷 FR | 🟡 82% | [FR](./src/translation/fr_FR.ts) |
+| 🇮🇹 IT | 🟡 74% | [IT](./src/translation/it_IT.ts) |
+| 🇳🇴 NO | 🟡 74% | [NO](./src/translation/nb_NO.ts) |
+| 🇵🇱 PL | 🟡 74% | [PL](./src/translation/pl_PL.ts) |
+| 🇵🇹 PT | 🟡 74% | [PT](./src/translation/pt_PT.ts) |
+| 🇷🇺 RU | 🟡 82% | [RU](./src/translation/ru_RU.ts) |
+| 🇹🇷 TR | 🟡 74% | [TR](./src/translation/tr_TR.ts) |
+| 🇺🇦 UA | 🟡 74% | [UA](./src/translation/uk_UA.ts) |
+| 🇨🇳 CN | 🟡 74% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
 
 📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).
