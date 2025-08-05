@@ -28,6 +28,32 @@ Chessifier is a modern, open-source, cross-platform chess GUI built for power us
 - 📦 Engine & Database Management - Install and manage engines and databases with minimal effort.
 - 🔎 Position Search - Search for absolute or partial positions across your game database.
 
+## 📸 Screenshots
+
+
+Here are some screenshots of Chessifier in action:
+
+<div align="center">
+  <img src="./screenshots/home-page.png" alt="Home Page" width="600" />
+  <br />
+  <em>Home Page</em>
+  <br /><br />
+  <img src="./screenshots/game-page.png" alt="Game Page" width="300" />
+  <img src="./screenshots/analyze-page.png" alt="Analyze Page" width="300" />
+  <br />
+  <em>Game & Analyze Pages</em>
+  <br /><br />
+  <img src="./screenshots/learn-page.png" alt="Learn Page" width="300" />
+  <img src="./screenshots/practice-page.png" alt="Practice Page" width="300" />
+  <br />
+  <em>Learn & Practice Pages</em>
+  <br /><br />
+  <img src="./screenshots/keybindings-page.png" alt="Keybindings Page" width="300" />
+  <img src="./screenshots/settings-page.png" alt="Settings Page" width="300" />
+  <br />
+  <em>Keybindings & Settings Pages</em>
+</div>
+
 ## 🚀 Getting Started
 
 ### Prerequisites
