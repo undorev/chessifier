@@ -128,7 +128,7 @@ export const en_US = {
     "SideBar.KeyboardShortcuts": "Keyboard Shortcuts",
 
     "Home.Card.Learn.Title": "Learn Chess",
-    "Home.Card.Learn.Desc": "Interactive learn to learn chess from basics to advanced strategies",
+    "Home.Card.Learn.Desc": "Interactive lessons to learn chess from basics to advanced strategies",
     "Home.Card.Learn.Button": "Start Learning",
 
     "Lessons.Title": "Chess Lessons",

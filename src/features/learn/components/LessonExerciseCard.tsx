@@ -2,7 +2,7 @@ import { ActionIcon, Badge, Box, Button, Card, Group, Stack, Text } from "@manti
 import { IconCheck, IconChevronRight } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
-interface ExerciseCardProps {
+interface LessonExerciseCardProps {
   id: string;
   title: string;
   description: string;
@@ -12,14 +12,14 @@ interface ExerciseCardProps {
   showDifficulty?: boolean;
 }
 
-export function ExerciseCard({
+export function LessonExerciseCard({
   title,
   description,
   difficulty,
   isCompleted,
   onClick,
   showDifficulty = false,
-}: ExerciseCardProps) {
+}: LessonExerciseCardProps) {
   const { t } = useTranslation();
 
   const getDifficultyColor = (diff?: string) => {

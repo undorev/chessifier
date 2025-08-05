@@ -8,329 +8,334 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as AccountsRouteImport } from "./routes/accounts";
-import { Route as BoardsRouteImport } from "./routes/boards";
-import { Route as DatabasesDatabaseIdRouteImport } from "./routes/databases/$databaseId";
-import { Route as DatabasesIndexRouteImport } from "./routes/databases/index";
-import { Route as EnginesRouteImport } from "./routes/engines";
-import { Route as FilesRouteImport } from "./routes/files";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LearnIndexRouteImport } from "./routes/learn/index";
-import { Route as LearnLessonsRouteImport } from "./routes/learn/lessons";
-import { Route as LearnPracticeRouteImport } from "./routes/learn/practice";
-import { Route as LearnRouteRouteImport } from "./routes/learn/route";
-import { Route as SettingsIndexRouteImport } from "./routes/settings/index";
-import { Route as SettingsKeyboardShortcutsRouteImport } from "./routes/settings/keyboard-shortcuts";
-import { Route as SettingsRouteRouteImport } from "./routes/settings/route";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as FilesRouteImport } from './routes/files'
+import { Route as EnginesRouteImport } from './routes/engines'
+import { Route as BoardsRouteImport } from './routes/boards'
+import { Route as AccountsRouteImport } from './routes/accounts'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
+import { Route as LearnRouteRouteImport } from './routes/learn/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as LearnIndexRouteImport } from './routes/learn/index'
+import { Route as DatabasesIndexRouteImport } from './routes/databases/index'
+import { Route as SettingsKeyboardShortcutsRouteImport } from './routes/settings/keyboard-shortcuts'
+import { Route as LearnPracticeRouteImport } from './routes/learn/practice'
+import { Route as LearnLessonsRouteImport } from './routes/learn/lessons'
+import { Route as DatabasesDatabaseIdRouteImport } from './routes/databases/$databaseId'
 
 const FilesRoute = FilesRouteImport.update({
-  id: "/files",
-  path: "/files",
+  id: '/files',
+  path: '/files',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const EnginesRoute = EnginesRouteImport.update({
-  id: "/engines",
-  path: "/engines",
+  id: '/engines',
+  path: '/engines',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const BoardsRoute = BoardsRouteImport.update({
-  id: "/boards",
-  path: "/boards",
+  id: '/boards',
+  path: '/boards',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AccountsRoute = AccountsRouteImport.update({
-  id: "/accounts",
-  path: "/accounts",
+  id: '/accounts',
+  path: '/accounts',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsRouteRoute = SettingsRouteRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LearnRouteRoute = LearnRouteRouteImport.update({
-  id: "/learn",
-  path: "/learn",
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => SettingsRouteRoute,
-} as any);
+} as any)
 const LearnIndexRoute = LearnIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => LearnRouteRoute,
-} as any);
+} as any)
 const DatabasesIndexRoute = DatabasesIndexRouteImport.update({
-  id: "/databases/",
-  path: "/databases/",
+  id: '/databases/',
+  path: '/databases/',
   getParentRoute: () => rootRouteImport,
-} as any);
-const SettingsKeyboardShortcutsRoute = SettingsKeyboardShortcutsRouteImport.update({
-  id: "/keyboard-shortcuts",
-  path: "/keyboard-shortcuts",
-  getParentRoute: () => SettingsRouteRoute,
-} as any);
+} as any)
+const SettingsKeyboardShortcutsRoute =
+  SettingsKeyboardShortcutsRouteImport.update({
+    id: '/keyboard-shortcuts',
+    path: '/keyboard-shortcuts',
+    getParentRoute: () => SettingsRouteRoute,
+  } as any)
 const LearnPracticeRoute = LearnPracticeRouteImport.update({
-  id: "/practice",
-  path: "/practice",
+  id: '/practice',
+  path: '/practice',
   getParentRoute: () => LearnRouteRoute,
-} as any);
+} as any)
 const LearnLessonsRoute = LearnLessonsRouteImport.update({
-  id: "/lessons",
-  path: "/lessons",
+  id: '/lessons',
+  path: '/lessons',
   getParentRoute: () => LearnRouteRoute,
-} as any);
+} as any)
 const DatabasesDatabaseIdRoute = DatabasesDatabaseIdRouteImport.update({
-  id: "/databases/$databaseId",
-  path: "/databases/$databaseId",
+  id: '/databases/$databaseId',
+  path: '/databases/$databaseId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/learn": typeof LearnRouteRouteWithChildren;
-  "/settings": typeof SettingsRouteRouteWithChildren;
-  "/accounts": typeof AccountsRoute;
-  "/boards": typeof BoardsRoute;
-  "/engines": typeof EnginesRoute;
-  "/files": typeof FilesRoute;
-  "/databases/$databaseId": typeof DatabasesDatabaseIdRoute;
-  "/learn/lessons": typeof LearnLessonsRoute;
-  "/learn/practice": typeof LearnPracticeRoute;
-  "/settings/keyboard-shortcuts": typeof SettingsKeyboardShortcutsRoute;
-  "/databases": typeof DatabasesIndexRoute;
-  "/learn/": typeof LearnIndexRoute;
-  "/settings/": typeof SettingsIndexRoute;
+  '/': typeof IndexRoute
+  '/learn': typeof LearnRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
+  '/accounts': typeof AccountsRoute
+  '/boards': typeof BoardsRoute
+  '/engines': typeof EnginesRoute
+  '/files': typeof FilesRoute
+  '/databases/$databaseId': typeof DatabasesDatabaseIdRoute
+  '/learn/lessons': typeof LearnLessonsRoute
+  '/learn/practice': typeof LearnPracticeRoute
+  '/settings/keyboard-shortcuts': typeof SettingsKeyboardShortcutsRoute
+  '/databases': typeof DatabasesIndexRoute
+  '/learn/': typeof LearnIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/accounts": typeof AccountsRoute;
-  "/boards": typeof BoardsRoute;
-  "/engines": typeof EnginesRoute;
-  "/files": typeof FilesRoute;
-  "/databases/$databaseId": typeof DatabasesDatabaseIdRoute;
-  "/learn/lessons": typeof LearnLessonsRoute;
-  "/learn/practice": typeof LearnPracticeRoute;
-  "/settings/keyboard-shortcuts": typeof SettingsKeyboardShortcutsRoute;
-  "/databases": typeof DatabasesIndexRoute;
-  "/learn": typeof LearnIndexRoute;
-  "/settings": typeof SettingsIndexRoute;
+  '/': typeof IndexRoute
+  '/accounts': typeof AccountsRoute
+  '/boards': typeof BoardsRoute
+  '/engines': typeof EnginesRoute
+  '/files': typeof FilesRoute
+  '/databases/$databaseId': typeof DatabasesDatabaseIdRoute
+  '/learn/lessons': typeof LearnLessonsRoute
+  '/learn/practice': typeof LearnPracticeRoute
+  '/settings/keyboard-shortcuts': typeof SettingsKeyboardShortcutsRoute
+  '/databases': typeof DatabasesIndexRoute
+  '/learn': typeof LearnIndexRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/learn": typeof LearnRouteRouteWithChildren;
-  "/settings": typeof SettingsRouteRouteWithChildren;
-  "/accounts": typeof AccountsRoute;
-  "/boards": typeof BoardsRoute;
-  "/engines": typeof EnginesRoute;
-  "/files": typeof FilesRoute;
-  "/databases/$databaseId": typeof DatabasesDatabaseIdRoute;
-  "/learn/lessons": typeof LearnLessonsRoute;
-  "/learn/practice": typeof LearnPracticeRoute;
-  "/settings/keyboard-shortcuts": typeof SettingsKeyboardShortcutsRoute;
-  "/databases/": typeof DatabasesIndexRoute;
-  "/learn/": typeof LearnIndexRoute;
-  "/settings/": typeof SettingsIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/learn': typeof LearnRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
+  '/accounts': typeof AccountsRoute
+  '/boards': typeof BoardsRoute
+  '/engines': typeof EnginesRoute
+  '/files': typeof FilesRoute
+  '/databases/$databaseId': typeof DatabasesDatabaseIdRoute
+  '/learn/lessons': typeof LearnLessonsRoute
+  '/learn/practice': typeof LearnPracticeRoute
+  '/settings/keyboard-shortcuts': typeof SettingsKeyboardShortcutsRoute
+  '/databases/': typeof DatabasesIndexRoute
+  '/learn/': typeof LearnIndexRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/learn"
-    | "/settings"
-    | "/accounts"
-    | "/boards"
-    | "/engines"
-    | "/files"
-    | "/databases/$databaseId"
-    | "/learn/lessons"
-    | "/learn/practice"
-    | "/settings/keyboard-shortcuts"
-    | "/databases"
-    | "/learn/"
-    | "/settings/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/learn'
+    | '/settings'
+    | '/accounts'
+    | '/boards'
+    | '/engines'
+    | '/files'
+    | '/databases/$databaseId'
+    | '/learn/lessons'
+    | '/learn/practice'
+    | '/settings/keyboard-shortcuts'
+    | '/databases'
+    | '/learn/'
+    | '/settings/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/accounts"
-    | "/boards"
-    | "/engines"
-    | "/files"
-    | "/databases/$databaseId"
-    | "/learn/lessons"
-    | "/learn/practice"
-    | "/settings/keyboard-shortcuts"
-    | "/databases"
-    | "/learn"
-    | "/settings";
+    | '/'
+    | '/accounts'
+    | '/boards'
+    | '/engines'
+    | '/files'
+    | '/databases/$databaseId'
+    | '/learn/lessons'
+    | '/learn/practice'
+    | '/settings/keyboard-shortcuts'
+    | '/databases'
+    | '/learn'
+    | '/settings'
   id:
-    | "__root__"
-    | "/"
-    | "/learn"
-    | "/settings"
-    | "/accounts"
-    | "/boards"
-    | "/engines"
-    | "/files"
-    | "/databases/$databaseId"
-    | "/learn/lessons"
-    | "/learn/practice"
-    | "/settings/keyboard-shortcuts"
-    | "/databases/"
-    | "/learn/"
-    | "/settings/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/learn'
+    | '/settings'
+    | '/accounts'
+    | '/boards'
+    | '/engines'
+    | '/files'
+    | '/databases/$databaseId'
+    | '/learn/lessons'
+    | '/learn/practice'
+    | '/settings/keyboard-shortcuts'
+    | '/databases/'
+    | '/learn/'
+    | '/settings/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  LearnRouteRoute: typeof LearnRouteRouteWithChildren;
-  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren;
-  AccountsRoute: typeof AccountsRoute;
-  BoardsRoute: typeof BoardsRoute;
-  EnginesRoute: typeof EnginesRoute;
-  FilesRoute: typeof FilesRoute;
-  DatabasesDatabaseIdRoute: typeof DatabasesDatabaseIdRoute;
-  DatabasesIndexRoute: typeof DatabasesIndexRoute;
+  IndexRoute: typeof IndexRoute
+  LearnRouteRoute: typeof LearnRouteRouteWithChildren
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
+  AccountsRoute: typeof AccountsRoute
+  BoardsRoute: typeof BoardsRoute
+  EnginesRoute: typeof EnginesRoute
+  FilesRoute: typeof FilesRoute
+  DatabasesDatabaseIdRoute: typeof DatabasesDatabaseIdRoute
+  DatabasesIndexRoute: typeof DatabasesIndexRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/files": {
-      id: "/files";
-      path: "/files";
-      fullPath: "/files";
-      preLoaderRoute: typeof FilesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/engines": {
-      id: "/engines";
-      path: "/engines";
-      fullPath: "/engines";
-      preLoaderRoute: typeof EnginesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/boards": {
-      id: "/boards";
-      path: "/boards";
-      fullPath: "/boards";
-      preLoaderRoute: typeof BoardsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/accounts": {
-      id: "/accounts";
-      path: "/accounts";
-      fullPath: "/accounts";
-      preLoaderRoute: typeof AccountsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings": {
-      id: "/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof SettingsRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/learn": {
-      id: "/learn";
-      path: "/learn";
-      fullPath: "/learn";
-      preLoaderRoute: typeof LearnRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings/": {
-      id: "/settings/";
-      path: "/";
-      fullPath: "/settings/";
-      preLoaderRoute: typeof SettingsIndexRouteImport;
-      parentRoute: typeof SettingsRouteRoute;
-    };
-    "/learn/": {
-      id: "/learn/";
-      path: "/";
-      fullPath: "/learn/";
-      preLoaderRoute: typeof LearnIndexRouteImport;
-      parentRoute: typeof LearnRouteRoute;
-    };
-    "/databases/": {
-      id: "/databases/";
-      path: "/databases";
-      fullPath: "/databases";
-      preLoaderRoute: typeof DatabasesIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/settings/keyboard-shortcuts": {
-      id: "/settings/keyboard-shortcuts";
-      path: "/keyboard-shortcuts";
-      fullPath: "/settings/keyboard-shortcuts";
-      preLoaderRoute: typeof SettingsKeyboardShortcutsRouteImport;
-      parentRoute: typeof SettingsRouteRoute;
-    };
-    "/learn/practice": {
-      id: "/learn/practice";
-      path: "/practice";
-      fullPath: "/learn/practice";
-      preLoaderRoute: typeof LearnPracticeRouteImport;
-      parentRoute: typeof LearnRouteRoute;
-    };
-    "/learn/lessons": {
-      id: "/learn/lessons";
-      path: "/lessons";
-      fullPath: "/learn/lessons";
-      preLoaderRoute: typeof LearnLessonsRouteImport;
-      parentRoute: typeof LearnRouteRoute;
-    };
-    "/databases/$databaseId": {
-      id: "/databases/$databaseId";
-      path: "/databases/$databaseId";
-      fullPath: "/databases/$databaseId";
-      preLoaderRoute: typeof DatabasesDatabaseIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/files': {
+      id: '/files'
+      path: '/files'
+      fullPath: '/files'
+      preLoaderRoute: typeof FilesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/engines': {
+      id: '/engines'
+      path: '/engines'
+      fullPath: '/engines'
+      preLoaderRoute: typeof EnginesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boards': {
+      id: '/boards'
+      path: '/boards'
+      fullPath: '/boards'
+      preLoaderRoute: typeof BoardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accounts': {
+      id: '/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof LearnRouteRoute
+    }
+    '/databases/': {
+      id: '/databases/'
+      path: '/databases'
+      fullPath: '/databases'
+      preLoaderRoute: typeof DatabasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/keyboard-shortcuts': {
+      id: '/settings/keyboard-shortcuts'
+      path: '/keyboard-shortcuts'
+      fullPath: '/settings/keyboard-shortcuts'
+      preLoaderRoute: typeof SettingsKeyboardShortcutsRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/learn/practice': {
+      id: '/learn/practice'
+      path: '/practice'
+      fullPath: '/learn/practice'
+      preLoaderRoute: typeof LearnPracticeRouteImport
+      parentRoute: typeof LearnRouteRoute
+    }
+    '/learn/lessons': {
+      id: '/learn/lessons'
+      path: '/lessons'
+      fullPath: '/learn/lessons'
+      preLoaderRoute: typeof LearnLessonsRouteImport
+      parentRoute: typeof LearnRouteRoute
+    }
+    '/databases/$databaseId': {
+      id: '/databases/$databaseId'
+      path: '/databases/$databaseId'
+      fullPath: '/databases/$databaseId'
+      preLoaderRoute: typeof DatabasesDatabaseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface LearnRouteRouteChildren {
-  LearnLessonsRoute: typeof LearnLessonsRoute;
-  LearnPracticeRoute: typeof LearnPracticeRoute;
-  LearnIndexRoute: typeof LearnIndexRoute;
+  LearnLessonsRoute: typeof LearnLessonsRoute
+  LearnPracticeRoute: typeof LearnPracticeRoute
+  LearnIndexRoute: typeof LearnIndexRoute
 }
 
 const LearnRouteRouteChildren: LearnRouteRouteChildren = {
   LearnLessonsRoute: LearnLessonsRoute,
   LearnPracticeRoute: LearnPracticeRoute,
   LearnIndexRoute: LearnIndexRoute,
-};
+}
 
-const LearnRouteRouteWithChildren = LearnRouteRoute._addFileChildren(LearnRouteRouteChildren);
+const LearnRouteRouteWithChildren = LearnRouteRoute._addFileChildren(
+  LearnRouteRouteChildren,
+)
 
 interface SettingsRouteRouteChildren {
-  SettingsKeyboardShortcutsRoute: typeof SettingsKeyboardShortcutsRoute;
-  SettingsIndexRoute: typeof SettingsIndexRoute;
+  SettingsKeyboardShortcutsRoute: typeof SettingsKeyboardShortcutsRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
   SettingsKeyboardShortcutsRoute: SettingsKeyboardShortcutsRoute,
   SettingsIndexRoute: SettingsIndexRoute,
-};
+}
 
-const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(SettingsRouteRouteChildren);
+const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
+  SettingsRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -342,5 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilesRoute: FilesRoute,
   DatabasesDatabaseIdRoute: DatabasesDatabaseIdRoute,
   DatabasesIndexRoute: DatabasesIndexRoute,
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
