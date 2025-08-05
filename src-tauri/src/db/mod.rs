@@ -1059,7 +1059,10 @@ pub async fn get_players_game_info(
                         // max length of opening in data
                         break;
                     }
-                    let m = decode_move(*byte, &chess).unwrap();
+                    let m = match decode_move(*byte, &chess) {
+                        Some(m) => m,
+                        None => break, // Stop processing moves if decoding fails
+                    };
                     chess.play_unchecked(&m);
                     setups.push(chess.clone().into_setup(EnPassantMode::Legal));
                 }
