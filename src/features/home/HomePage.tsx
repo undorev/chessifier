@@ -38,6 +38,15 @@ export default function HomePage() {
 
   const cards = [
     {
+      icon: <IconBook size={50} />,
+      title: t("Home.Card.Learn.Title"),
+      description: t("Home.Card.Learn.Desc"),
+      label: t("Home.Card.Learn.Button"),
+      onClick: () => {
+        navigate({ to: "/learn" });
+      },
+    },
+    {
       icon: <Chessboard size={50} />,
       title: t("Home.Card.Analyze.Title"),
       description: t("Home.Card.Analyze.Desc"),
@@ -92,15 +101,6 @@ export default function HomePage() {
       label: t("Home.Card.Account.Button"),
       onClick: () => {
         navigate({ to: "/accounts" });
-      },
-    },
-    {
-      icon: <IconBook size={50} />,
-      title: t("Home.Card.Learn.Title"),
-      description: t("Home.Card.Learn.Desc"),
-      label: t("Home.Card.Learn.Button"),
-      onClick: () => {
-        navigate({ to: "/learn" });
       },
     },
   ];
