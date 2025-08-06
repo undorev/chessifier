@@ -30,6 +30,7 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useUserStatsStore } from "../../state/userStatsStore";
 import { CategoryCard } from "./components/CategoryCard";
 import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
 import { CompletionModal } from "./components/CompletionModal";
@@ -62,6 +63,7 @@ export interface PracticeCategory {
 }
 
 export default function PracticePage() {
+  const { setUserStats } = useUserStatsStore();
   const GROUPS = ["All", "Checkmates", "Basic Tactics", "Intermediate Tactics", "Pawn Endgames", "Rook Endgames"];
   const [activeTab, setActiveTab] = useState<string>(GROUPS[0]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,6 +79,15 @@ export default function PracticePage() {
       totalExercises += category.exercises.length;
       const progress = allProgress[category.id] || { exercisesCompleted: [] };
       completedExercises += progress.exercisesCompleted.length;
+    });
+
+    setUserStats({
+      practiceCompleted: completedExercises,
+      totalPractice: totalExercises,
+      totalPoints: practiceCategories.reduce(
+        (sum, cat) => sum + cat.exercises.reduce((catSum, ex) => catSum + (ex.points || 0), 0),
+        0,
+      ),
     });
 
     return totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
@@ -146,12 +157,6 @@ export default function PracticePage() {
       category.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesGroup && matchesSearch;
   });
-
-  const totalExercises = practiceCategories.reduce((sum, cat) => sum + cat.exercises.length, 0);
-  const totalPoints = practiceCategories.reduce(
-    (sum, cat) => sum + cat.exercises.reduce((catSum, ex) => catSum + (ex.points || 0), 0),
-    0,
-  );
 
   return (
     <>
@@ -323,7 +328,7 @@ export default function PracticePage() {
 
             <Box flex={1}>
               <ChessExerciseBoardWithProvider
-                fen={currentFen}
+                fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                 onMove={handleMove}
                 lastCorrectMove={lastCorrectMove}
                 showingCorrectAnimation={showingCorrectAnimation}
@@ -332,32 +337,7 @@ export default function PracticePage() {
 
               {selectedExercise && (
                 <>
-                  <Group justify="space-between" align="center">
-                    <Title order={4}>{selectedExercise.title}</Title>
-                    <Group gap="md">
-                      {selectedExercise.points && (
-                        <Badge color="orange" variant="light" size="lg">
-                          <Group gap="xs">
-                            <IconTrophy size={16} />
-                            <Text>{selectedExercise.points} pts</Text>
-                          </Group>
-                        </Badge>
-                      )}
-                      {selectedExercise.timeLimit && (
-                        <Badge color="blue" variant="light" size="lg">
-                          <Group gap="xs">
-                            <IconClock size={16} />
-                            <Text>
-                              {Math.floor(selectedExercise.timeLimit / 60)}:
-                              {(selectedExercise.timeLimit % 60).toString().padStart(2, "0")}
-                            </Text>
-                          </Group>
-                        </Badge>
-                      )}
-                    </Group>
-                  </Group>
-
-                  <Paper p="md" withBorder>
+                  <Paper mt="md" p="md" withBorder>
                     <Group justify="space-between" align="center">
                       <Text>{selectedExercise.description}</Text>
                       <Tooltip label="Show hint">
@@ -370,6 +350,7 @@ export default function PracticePage() {
 
                   {message && (
                     <Paper
+                      my="md"
                       p="md"
                       withBorder
                       bg={message.includes("Correct") ? "rgba(0,128,0,0.1)" : "rgba(255,0,0,0.1)"}
@@ -388,7 +369,7 @@ export default function PracticePage() {
                   )}
 
                   {showHint && (
-                    <Paper p="md" withBorder bg="rgba(255,223,0,0.1)">
+                    <Paper my="md" p="md" withBorder bg="rgba(255,223,0,0.1)">
                       <Group>
                         <IconBulb size={20} color="yellow" />
                         <Box>

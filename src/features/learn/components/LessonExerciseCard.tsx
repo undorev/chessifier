@@ -39,7 +39,7 @@ export function LessonExerciseCard({
 
   return (
     <Card shadow="sm" p="md" radius="md" withBorder>
-      <Group>
+      <Group justify="space-between">
         <Group>
           {isCompleted && (
             <ActionIcon color="green" variant="subtle">
