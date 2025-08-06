@@ -17,6 +17,7 @@ import {
 import { IconArrowBackUp, IconBulb, IconCheck, IconClock, IconX } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useUserStatsStore } from "../../state/userStatsStore";
 
 import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
 import { CompletionModal } from "./components/CompletionModal";
@@ -48,6 +49,7 @@ export interface Exercise {
 }
 
 export default function LessonsPage() {
+  const { setUserStats } = useUserStatsStore();
   const navigate = useNavigate();
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedLessonTitle, setCompletedLessonTitle] = useState("");
@@ -60,6 +62,11 @@ export default function LessonsPage() {
       totalExercises += lesson.exercises.length;
       const progress = allProgress[lesson.id] || { exercisesCompleted: [] };
       completedExercises += progress.exercisesCompleted.length;
+    });
+
+    setUserStats({
+      lessonsCompleted: completedExercises,
+      totalLessons: totalExercises,
     });
 
     return totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
@@ -243,7 +250,7 @@ export default function LessonsPage() {
 
             <Box flex={1}>
               <ChessExerciseBoardWithProvider
-                fen={currentFen}
+                fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                 onMove={handleMove}
                 lastCorrectMove={lastCorrectMove}
                 showingCorrectAnimation={showingCorrectAnimation}
@@ -252,7 +259,7 @@ export default function LessonsPage() {
 
               {selectedExercise && (
                 <>
-                  <Paper p="md" withBorder>
+                  <Paper mt="md" p="md" withBorder>
                     <Group justify="space-between" align="center">
                       <Text>{selectedExercise.description}</Text>
                       <Tooltip label="Show hint">
@@ -265,6 +272,7 @@ export default function LessonsPage() {
 
                   {message && (
                     <Paper
+                      my="md"
                       p="md"
                       withBorder
                       bg={message.includes("Correct") ? "rgba(0,128,0,0.1)" : "rgba(255,0,0,0.1)"}
@@ -283,7 +291,7 @@ export default function LessonsPage() {
                   )}
 
                   {showHint && (
-                    <Paper p="md" withBorder bg="rgba(255,223,0,0.1)">
+                    <Paper my="md" p="md" withBorder bg="rgba(255,223,0,0.1)">
                       <Group>
                         <IconBulb size={20} color="yellow" />
                         <Box>

@@ -2,7 +2,6 @@ import { IconBrain, IconCrown, IconRocket, IconSchool, IconSword } from "@tabler
 import type { PracticeCategory } from "../PracticePage";
 
 export const practiceCategories: PracticeCategory[] = [
-  // ♟️ Checkmates
   {
     group: "Checkmates",
     id: "piece-checkmates-1",
@@ -240,7 +239,6 @@ export const practiceCategories: PracticeCategory[] = [
       },
     ],
   },
-  // 🧠 Basic Tactics
   {
     group: "Basic Tactics",
     id: "the-pin",
@@ -459,7 +457,6 @@ export const practiceCategories: PracticeCategory[] = [
       },
     ],
   },
-  // 🧠 Intermediate Tactics
   {
     group: "Intermediate Tactics",
     id: "zugzwang",
@@ -670,7 +667,6 @@ export const practiceCategories: PracticeCategory[] = [
       },
     ],
   },
-  // ♟️ Pawn Endgames
   {
     group: "Pawn Endgames",
     id: "key-squares",
@@ -734,7 +730,6 @@ export const practiceCategories: PracticeCategory[] = [
       },
     ],
   },
-  // 🏰 Rook Endgames
   {
     group: "Rook Endgames",
     id: "rook-pawn-7th-rook",

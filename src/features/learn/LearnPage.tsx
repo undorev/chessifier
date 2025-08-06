@@ -2,19 +2,29 @@ import { Badge, Box, Button, Card, Grid, Group, Progress, Stack, Text, ThemeIcon
 import { IconBook, IconStar, IconTargetArrow, IconTrophy } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { useUserStatsStore } from "../../state/userStatsStore";
+
+function calculateCurrentStreak(completionDates: string[]): number {
+  if (!completionDates || completionDates.length === 0) return 0;
+  const dateSet = new Set(completionDates.map((date) => date.slice(0, 10)));
+  let streak = 0;
+  const current = new Date();
+  while (true) {
+    const iso = current.toISOString().slice(0, 10);
+    if (dateSet.has(iso)) {
+      streak++;
+      current.setDate(current.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
 
 export default function LearnPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
-  const userStats = {
-    lessonsCompleted: 12,
-    totalLessons: 30,
-    practiceCompleted: 25,
-    totalPractice: 50,
-    currentStreak: 7,
-    totalPoints: 1250,
-  };
+  const userStats = useUserStatsStore((state) => state.userStats);
 
   const learningPaths = [
     {
@@ -40,6 +50,8 @@ export default function LearnPage() {
       onClick: () => navigate({ to: "/learn/practice" }),
     },
   ];
+
+  const currentStreak = calculateCurrentStreak(userStats.completionDates || []);
 
   return (
     <Stack gap="xl" p="md">
@@ -126,7 +138,7 @@ export default function LearnPage() {
                 </Text>
               </Group>
               <Text fw={600} size="lg" mt="xs">
-                {userStats.currentStreak} days
+                {currentStreak} days
               </Text>
             </Card>
           </Grid.Col>

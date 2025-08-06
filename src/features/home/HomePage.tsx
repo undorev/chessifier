@@ -1,5 +1,5 @@
 import { Box, Button, Card, Group, Image, SimpleGrid, Stack, Text, Title } from "@mantine/core";
-import { IconBook, IconChess, IconCpu, IconDatabase, IconPuzzle, IconUsers } from "@tabler/icons-react";
+import { IconChess, IconCpu, IconDatabase, IconPuzzle, IconSchool, IconUsers } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
@@ -38,7 +38,7 @@ export default function HomePage() {
 
   const cards = [
     {
-      icon: <IconBook size={50} />,
+      icon: <IconSchool size={50} />,
       title: t("Home.Card.Learn.Title"),
       description: t("Home.Card.Learn.Desc"),
       label: t("Home.Card.Learn.Button"),

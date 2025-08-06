@@ -1,7 +1,6 @@
 import type { Lesson } from "../LessonsPage";
 
 export const lessons: Lesson[] = [
-  // Chess pieces
   {
     id: "chess-pieces",
     title: "Chess Pieces",
@@ -18,35 +17,50 @@ export const lessons: Lesson[] = [
         title: "The rook",
         description: "It moves in straight lines",
         fen: "8/8/8/8/4R3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e8", "e4e1", "e4a4", "e4h4"],
+        correctMoves: [
+          "e4e5", "e4e6", "e4e7", "e4e8", "e4e3", "e4e2", "e4e1",
+          "e4d4", "e4c4", "e4b4", "e4a4", "e4f4", "e4g4", "e4h4"
+        ],
       },
       {
         id: "bishop-movement",
         title: "The bishop",
         description: "It moves diagonally",
         fen: "8/8/8/8/4B3/8/8/8 w - - 0 1",
-        correctMoves: ["e4a8", "e4h7", "e4a1", "e4h1"],
+        correctMoves: [
+          "e4d5", "e4c6", "e4b7", "e4a8", "e4f5", "e4g6", "e4h7",
+          "e4d3", "e4c2", "e4b1", "e4f3", "e4g2", "e4h1", "e4a1"
+        ],
       },
       {
         id: "queen-movement",
         title: "The queen",
         description: "Queen = rook + bishop",
         fen: "8/8/8/8/4Q3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e8", "e4e1", "e4a4", "e4h4", "e4a8", "e4h7", "e4a1", "e4h1"],
+        correctMoves: [
+          "e4e5", "e4e6", "e4e7", "e4e8", "e4e3", "e4e2", "e4e1",
+          "e4d4", "e4c4", "e4b4", "e4a4", "e4f4", "e4g4", "e4h4",
+          "e4d5", "e4c6", "e4b7", "e4a8", "e4f5", "e4g6", "e4h7",
+          "e4d3", "e4c2", "e4b1", "e4f3", "e4g2", "e4h1", "e4a1"
+        ],
       },
       {
         id: "king-movement",
         title: "The king",
         description: "The most important piece",
         fen: "8/8/8/8/4K3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e5", "e4e3", "e4d4", "e4f4", "e4d5", "e4f5", "e4d3", "e4f3"],
+        correctMoves: [
+          "e4e5", "e4e3", "e4d4", "e4f4", "e4d5", "e4f5", "e4d3", "e4f3"
+        ],
       },
       {
         id: "knight-movement",
         title: "The knight",
         description: "It moves in an L shape",
         fen: "8/8/8/8/4N3/8/8/8 w - - 0 1",
-        correctMoves: ["e4d6", "e4f6", "e4c5", "e4g5", "e4c3", "e4g3", "e4d2", "e4f2"],
+        correctMoves: [
+          "e4d6", "e4f6", "e4c5", "e4g5", "e4c3", "e4g3", "e4d2", "e4f2"
+        ],
       },
       {
         id: "pawn-movement",
@@ -58,7 +72,6 @@ export const lessons: Lesson[] = [
     ],
   },
 
-  // Fundamentals
   {
     id: "fundamentals",
     title: "Fundamentals",
@@ -75,21 +88,21 @@ export const lessons: Lesson[] = [
         title: "Capture",
         description: "Take the enemy pieces",
         fen: "8/8/8/4p3/4P3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e5"],
+        correctMoves: ["e4e5", "e4d5"],
       },
       {
         id: "protection",
         title: "Protection",
         description: "Keep your pieces safe",
         fen: "8/8/8/4p3/4P3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e5"],
+        correctMoves: ["e4e5", "e4d5"],
       },
       {
         id: "combat",
         title: "Combat",
         description: "Capture and defend pieces",
         fen: "8/8/8/4p3/4P3/8/8/8 w - - 0 1",
-        correctMoves: ["e4e5"],
+        correctMoves: ["e4e5", "e4d5"],
       },
       {
         id: "check-in-one",
@@ -114,8 +127,6 @@ export const lessons: Lesson[] = [
       },
     ],
   },
-
-  // Intermediate
   {
     id: "intermediate",
     title: "Intermediate",
@@ -132,21 +143,26 @@ export const lessons: Lesson[] = [
         title: "Board setup",
         description: "How the game starts",
         fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-        correctMoves: [],
+        correctMoves: [
+          "a2a3", "a2a4", "b2b3", "b2b4", "c2c3", "c2c4", "d2d3", "d2d4", "e2e3", "e2e4", "f2f3", "f2f4", "g2g3", "g2g4", "h2h3", "h2h4",
+          "b1a3", "b1c3", "g1f3", "g1h3"
+        ],
       },
       {
         id: "castling",
         title: "Castling",
         description: "The special king move",
         fen: "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
-        correctMoves: ["e1g1", "e1c1"],
+        correctMoves: [
+          "e1d1", "e1f1", "e1g1", "e1c1", "h1g1", "a1b1"
+        ],
       },
       {
         id: "en-passant",
         title: "En passant",
         description: "The special pawn move",
         fen: "8/8/8/4pP2/8/8/8/8 b - f6 0 1",
-        correctMoves: ["e5f6"],
+        correctMoves: ["e5f6", "e5e4", "f5f6"],
       },
       {
         id: "stalemate",
@@ -157,8 +173,6 @@ export const lessons: Lesson[] = [
       },
     ],
   },
-
-  // Advanced
   {
     id: "advanced",
     title: "Advanced",
