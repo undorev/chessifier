@@ -15,8 +15,10 @@ import { Spotlight, type SpotlightActionData, type SpotlightActionGroupData, spo
 import { IconSearch, IconSettings } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import type { JSX, SVGProps } from "react";
+import { useAtomValue } from "jotai";
+import { type JSX, type SVGProps, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { nativeBarAtom } from "@/state/atoms";
 import { linksdata } from "./Sidebar";
 import * as classes from "./TopBar.css";
 
@@ -108,10 +110,12 @@ function getActions(navigate: any, t: any): (SpotlightActionGroupData | Spotligh
 }
 
 function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
+  const isNative = useAtomValue(nativeBarAtom);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { colorScheme } = useMantineColorScheme();
   const osColorScheme = useColorScheme();
+  const [maximized, setMaximized] = useState(true);
 
   return (
     <Group h="100%">
@@ -120,55 +124,57 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
           <Box h="1.4rem" w="1.4rem">
             <Image src="/logo.png" fit="fill" />
           </Box>
-          <Group gap={0}>
-            {menuActions.map((action) => (
-              <Menu
-                key={action.label}
-                shadow="md"
-                width={200}
-                position="bottom-start"
-                transitionProps={{ duration: 0 }}
-              >
-                <Menu.Target>
-                  <UnstyledButton
-                    fz="xs"
-                    px="xs"
-                    variant="subtle"
-                    color={
-                      colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? "gray" : "dark"
-                    }
-                    size="compact-md"
-                  >
-                    {action.label}
-                  </UnstyledButton>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  {action.options.map((option, i) =>
-                    option.label === "divider" ? (
-                      <Menu.Divider key={i} />
-                    ) : (
-                      <Menu.Item
-                        key={option.label}
-                        rightSection={
-                          option.shortcut && (
-                            <Text size="xs" c="dimmed">
-                              {option.shortcut}
-                            </Text>
-                          )
-                        }
-                        onClick={option.action}
-                      >
-                        {option.label}
-                      </Menu.Item>
-                    ),
-                  )}
-                </Menu.Dropdown>
-              </Menu>
-            ))}
-          </Group>
+          {!isNative && (
+            <Group gap={0}>
+              {menuActions.map((action) => (
+                <Menu
+                  key={action.label}
+                  shadow="md"
+                  width={200}
+                  position="bottom-start"
+                  transitionProps={{ duration: 0 }}
+                >
+                  <Menu.Target>
+                    <UnstyledButton
+                      fz="xs"
+                      px="xs"
+                      variant="subtle"
+                      color={
+                        colorScheme === "dark" || (osColorScheme === "dark" && colorScheme === "auto") ? "gray" : "dark"
+                      }
+                      size="compact-md"
+                    >
+                      {action.label}
+                    </UnstyledButton>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    {action.options.map((option, i) =>
+                      option.label === "divider" ? (
+                        <Menu.Divider key={i} />
+                      ) : (
+                        <Menu.Item
+                          key={option.label}
+                          rightSection={
+                            option.shortcut && (
+                              <Text size="xs" c="dimmed">
+                                {option.shortcut}
+                              </Text>
+                            )
+                          }
+                          onClick={option.action}
+                        >
+                          {option.label}
+                        </Menu.Item>
+                      ),
+                    )}
+                  </Menu.Dropdown>
+                </Menu>
+              ))}
+            </Group>
+          )}
         </Group>
       </Box>
-      <Group style={{ flexGrow: 1 }} justify="center">
+      <Group style={{ flexGrow: 1 }} justify="center" data-tauri-drag-region>
         <UnstyledButton
           onClick={spotlight.open}
           size="xs"
@@ -201,19 +207,30 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
           }}
         />
       </Group>
-      <Center h="30" mr="xs">
-        <Group gap="5px" data-tauri-drag-region>
-          <ActionIcon h={25} w={25} radius="lg" onClick={() => appWindow.minimize()} className={classes.icon}>
-            <Icons.minimizeWin />
-          </ActionIcon>
-          <ActionIcon h={25} w={25} radius="lg" onClick={() => appWindow.toggleMaximize()} className={classes.icon}>
-            <Icons.maximizeWin />
-          </ActionIcon>
-          <ActionIcon h={25} w={25} radius="lg" onClick={() => appWindow.close()} className={classes.icon}>
-            <Icons.closeWin />
-          </ActionIcon>
-        </Group>
-      </Center>
+      {!isNative && (
+        <Center h="30" mr="xs">
+          <Group gap="5px" data-tauri-drag-region>
+            <ActionIcon h={25} w={25} radius="lg" onClick={() => appWindow.minimize()} className={classes.icon}>
+              <Icons.minimizeWin />
+            </ActionIcon>
+            <ActionIcon
+              h={25}
+              w={25}
+              radius="lg"
+              onClick={() => {
+                appWindow.toggleMaximize();
+                setMaximized((prev) => !prev);
+              }}
+              className={classes.icon}
+            >
+              {maximized ? <Icons.maximizeRestoreWin /> : <Icons.maximizeWin />}
+            </ActionIcon>
+            <ActionIcon h={25} w={25} radius="lg" onClick={() => appWindow.close()} className={classes.icon}>
+              <Icons.closeWin />
+            </ActionIcon>
+          </Group>
+        </Center>
+      )}
     </Group>
   );
 }

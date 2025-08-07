@@ -5,7 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { createRootRouteWithContext, Outlet, useNavigate } from "@tanstack/react-router";
 import { Menu, MenuItem, PredefinedMenuItem, Submenu } from "@tauri-apps/api/menu";
 import { appLogDir, resolve } from "@tauri-apps/api/path";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { ask, message, open } from "@tauri-apps/plugin-dialog";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
@@ -272,14 +272,14 @@ function RootLayout() {
 
   const { data: menu } = useSWRImmutable(["menu", menuActions], () => createMenu(menuActions));
 
-  useEffect(() => {
+  useEffect(() => {    
     if (!menu) return;
     if (isNative) {
       menu.setAsAppMenu();
-      getCurrentWindow().setDecorations(true);
+      getCurrentWebviewWindow().setDecorations(true);
     } else {
       Menu.new().then((m) => m.setAsAppMenu());
-      getCurrentWindow().setDecorations(false);
+      getCurrentWebviewWindow().setDecorations(false);
     }
   }, [menu, isNative]);
 
@@ -290,13 +290,9 @@ function RootLayout() {
           width: "3rem",
           breakpoint: 0,
         }}
-        header={
-          isNative
-            ? undefined
-            : {
-                height: "35px",
-              }
-        }
+        header={{
+          height: "35px",
+        }}
         styles={{
           main: {
             height: "100vh",
@@ -304,11 +300,9 @@ function RootLayout() {
           },
         }}
       >
-        {!isNative && (
-          <AppShell.Header>
-            <TopBar menuActions={menuActions} />
-          </AppShell.Header>
-        )}
+        <AppShell.Header>
+          <TopBar menuActions={menuActions} />
+        </AppShell.Header>
         <AppShell.Navbar>
           <SideBar />
         </AppShell.Navbar>
