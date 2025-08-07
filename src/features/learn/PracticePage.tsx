@@ -38,7 +38,6 @@ import { PracticeExerciseCard } from "./components/PracticeExerciseCard";
 import { LinearProgress } from "./components/ProgressIndicator";
 import { practiceCategories } from "./constants/practiceCategories";
 import { useExerciseState } from "./hooks/useExerciseState";
-import { type ProgressData, useProgress } from "./hooks/useProgress";
 
 export interface PracticeExercise {
   id: string;
@@ -63,7 +62,6 @@ export interface PracticeCategory {
 }
 
 export default function PracticePage() {
-  const { setUserStats } = useUserStatsStore();
   const GROUPS = ["All", "Checkmates", "Basic Tactics", "Intermediate Tactics", "Pawn Endgames", "Rook Endgames"];
   const [activeTab, setActiveTab] = useState<string>(GROUPS[0]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,36 +69,7 @@ export default function PracticePage() {
   const [completedCategoryTitle, setCompletedCategoryTitle] = useState("");
   const { navigate } = useRouter();
 
-  const calculateOverallProgress = (allProgress: Record<string, ProgressData>): number => {
-    let totalExercises = 0;
-    let completedExercises = 0;
-
-    practiceCategories.forEach((category) => {
-      totalExercises += category.exercises.length;
-      const progress = allProgress[category.id] || { exercisesCompleted: [] };
-      completedExercises += progress.exercisesCompleted.length;
-    });
-
-    setUserStats({
-      practiceCompleted: completedExercises,
-      totalPractice: totalExercises,
-      totalPoints: practiceCategories.reduce(
-        (sum, cat) => sum + cat.exercises.reduce((catSum, ex) => catSum + (ex.points || 0), 0),
-        0,
-      ),
-    });
-
-    return totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
-  };
-
-  const {
-    progress: practiceProgress,
-    updateExerciseCompletion,
-    loadAllProgress,
-  } = useProgress({
-    prefix: "practice",
-    calculateOverallProgress,
-  });
+  const { userStats, setUserStats } = useUserStatsStore();
 
   const {
     selectedCategory,
@@ -108,8 +77,6 @@ export default function PracticePage() {
     currentFen,
     message,
     showHint,
-    lastCorrectMove,
-    showingCorrectAnimation,
     handleCategorySelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
@@ -118,16 +85,22 @@ export default function PracticePage() {
   } = useExerciseState<PracticeExercise, PracticeCategory>({
     initialFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     onExerciseComplete: (categoryId, exerciseId) => {
-      const category = practiceCategories.find((c) => c.id === categoryId);
-      if (!category) return;
-
-      updateExerciseCompletion(categoryId, exerciseId, category.exercises.length, (completedCategoryId) => {
-        const completedCategory = practiceCategories.find((c) => c.id === completedCategoryId);
-        if (completedCategory) {
-          setCompletedCategoryTitle(completedCategory.title);
+      const prevCompleted = userStats.completedPractice?.[categoryId] || [];
+      if (!prevCompleted.includes(exerciseId)) {
+        const updatedCompleted = {
+          ...userStats.completedPractice,
+          [categoryId]: [...prevCompleted, exerciseId],
+        };
+        setUserStats({
+          completedPractice: updatedCompleted,
+          practiceCompleted: Object.values(updatedCompleted).reduce((sum, arr) => sum + arr.length, 0),
+        });
+        const category = practiceCategories.find((c) => c.id === categoryId);
+        if (category && updatedCompleted[categoryId]?.length === category.exercises.length) {
+          setCompletedCategoryTitle(category.title);
           setShowCompletionModal(true);
         }
-      });
+      }
 
       if (selectedCategory && selectedExercise) {
         const currentIndex = selectedCategory.exercises.findIndex((ex) => ex.id === selectedExercise.id);
@@ -140,10 +113,6 @@ export default function PracticePage() {
       }
     },
   });
-
-  useEffect(() => {
-    loadAllProgress(practiceCategories.map((category) => category.id));
-  }, []);
 
   const handleMove = (orig: string, dest: string) => {
     if (!selectedExercise || !selectedCategory) return;
@@ -182,6 +151,7 @@ export default function PracticePage() {
                 size="md"
                 onClick={() => navigate({ to: "/learn" })}
                 aria-label="Back to Learn"
+                title="Back to Learn"
               >
                 <IconArrowBackUp size={20} />
               </ActionIcon>
@@ -213,17 +183,20 @@ export default function PracticePage() {
             </Group>
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-              {filteredCategories.map((category) => (
-                <CategoryCard
-                  key={category.id}
-                  category={category}
-                  progress={{
-                    completed: practiceProgress[category.id]?.exercisesCompleted.length || 0,
-                    total: category.exercises.length,
-                  }}
-                  onClick={() => handleCategorySelect(category)}
-                />
-              ))}
+              {filteredCategories.map((category) => {
+                const completedCount = userStats.completedPractice?.[category.id]?.length || 0;
+                return (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    progress={{
+                      completed: completedCount,
+                      total: category.exercises.length,
+                    }}
+                    onClick={() => handleCategorySelect(category)}
+                  />
+                );
+              })}
             </SimpleGrid>
 
             {filteredCategories.length === 0 && (
@@ -250,13 +223,19 @@ export default function PracticePage() {
                   <ActionIcon
                     variant="light"
                     onClick={() => {
-                      const currentCategoryIndex = practiceCategories.findIndex((c) => c.id === selectedCategory.id);
-                      if (currentCategoryIndex >= 0) {
-                        clearSelection();
-                        handleCategorySelect(practiceCategories[currentCategoryIndex]);
+                      if (selectedExercise) {
+                          const currentCategoryIndex = practiceCategories.findIndex((c) => c.id === selectedCategory.id);
+                          if (currentCategoryIndex >= 0) {
+                              clearSelection();
+                              handleCategorySelect(practiceCategories[currentCategoryIndex]);
+                          }
+                      } else {
+                          handleCategorySelect(null);
+                          navigate({ to: "/learn/practice" });
                       }
                     }}
-                    aria-label="Back to Learn"
+                    aria-label="Back to Practice"
+                    title="Back to Practice"
                   >
                     <IconArrowBackUp size={20} />
                   </ActionIcon>
@@ -270,7 +249,7 @@ export default function PracticePage() {
                 </Group>
 
                 <LinearProgress
-                  completed={practiceProgress[selectedCategory.id]?.exercisesCompleted.length || 0}
+                  completed={userStats.completedPractice?.[selectedCategory.id]?.length || 0}
                   total={selectedCategory.exercises.length}
                   size="md"
                   width={200}
@@ -311,8 +290,7 @@ export default function PracticePage() {
               <Title order={4}>Exercises ({selectedCategory.exercises.length})</Title>
               <Stack gap="md">
                 {selectedCategory.exercises.map((exercise, index) => {
-                  const isCompleted = practiceProgress[selectedCategory.id]?.exercisesCompleted.includes(exercise.id);
-
+                  const isCompleted = userStats.completedPractice?.[selectedCategory.id]?.includes(exercise.id) || false;
                   return (
                     <PracticeExerciseCard
                       key={exercise.id}
@@ -330,8 +308,6 @@ export default function PracticePage() {
               <ChessExerciseBoardWithProvider
                 fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                 onMove={handleMove}
-                lastCorrectMove={lastCorrectMove}
-                showingCorrectAnimation={showingCorrectAnimation}
                 readOnly={!selectedExercise}
               />
 

@@ -150,7 +150,7 @@ We’re planning to bring Chessifier to additional platforms in future releases:
 | 🇩🇪 DE | 🟡 74% | [DE](./src/translation/de_DE.ts) |
 | 🇪🇸 ES | 🟡 74% | [ES](./src/translation/es_ES.ts) |
 | 🇫🇷 FR | 🟡 82% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 74% | [IT](./src/translation/it_IT.ts) |
+| 🇮🇹 IT | 🟡 99% | [IT](./src/translation/it_IT.ts) |
 | 🇳🇴 NO | 🟡 74% | [NO](./src/translation/nb_NO.ts) |
 | 🇵🇱 PL | 🟡 74% | [PL](./src/translation/pl_PL.ts) |
 | 🇵🇹 PT | 🟡 74% | [PT](./src/translation/pt_PT.ts) |
