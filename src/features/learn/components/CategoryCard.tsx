@@ -41,7 +41,7 @@ export function CategoryCard({
             {category.icon}
           </ThemeIcon>
           <Badge color={category.color} variant="light" size="sm">
-            {completionPercentage}%
+            {completionPercentage || 0}%
           </Badge>
         </Group>
 
@@ -74,7 +74,7 @@ export function CategoryCard({
             <Group gap="xs">
               <IconClock size={16} />
               <Text size="xs" c="dimmed">
-                {category.estimatedTime || 20} min
+                {category.estimatedTime || 0} min
               </Text>
             </Group>
             <Text size="xs" c="dimmed">

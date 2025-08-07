@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useUserStatsStore } from "../../state/userStatsStore";
 
-function calculateCurrentStreak(completionDates: string[]): number {    
+function calculateCurrentStreak(completionDates: string[]): number {
   if (!completionDates || completionDates.length === 0) return 0;
   const dateSet = new Set(completionDates.map((date) => date.slice(0, 10)));
   let streak = 0;
@@ -52,6 +52,9 @@ export default function LearnPage() {
   ];
 
   const currentStreak = calculateCurrentStreak(userStats.completionDates || []);
+  const overallProgress =
+    ((userStats.lessonsCompleted + userStats.practiceCompleted) / (userStats.totalLessons + userStats.totalPractice)) *
+    100;
 
   return (
     <Stack gap="xl" p="md">
@@ -82,22 +85,8 @@ export default function LearnPage() {
                 </Text>
               </Group>
               <Progress.Root mt="lg" radius="xl" size="md">
-                <Tooltip
-                  label={`${Math.round(
-                    ((userStats.lessonsCompleted / userStats.totalLessons +
-                      userStats.practiceCompleted / userStats.totalPractice) /
-                      2) *
-                      100,
-                  )}%`}
-                >
-                  <Progress.Section
-                    value={
-                      ((userStats.lessonsCompleted / userStats.totalLessons +
-                        userStats.practiceCompleted / userStats.totalPractice) /
-                        2) *
-                      100
-                    }
-                  />
+                <Tooltip label={`${overallProgress}%`}>
+                  <Progress.Section value={overallProgress} />
                 </Tooltip>
               </Progress.Root>
             </Card>
@@ -114,11 +103,7 @@ export default function LearnPage() {
               </Group>
               <Text fw={600} size="lg" mt="xs">
                 {(() => {
-                  const percent =
-                    ((userStats.lessonsCompleted / userStats.totalLessons +
-                      userStats.practiceCompleted / userStats.totalPractice) /
-                      2) *
-                    100;
+                  const percent = overallProgress;
                   if (percent >= 90) return "Master";
                   if (percent >= 70) return "Advanced";
                   if (percent >= 40) return "Intermediate";

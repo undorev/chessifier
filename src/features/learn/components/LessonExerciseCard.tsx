@@ -8,6 +8,7 @@ interface LessonExerciseCardProps {
   description: string;
   difficulty?: "beginner" | "intermediate" | "advanced";
   isCompleted: boolean;
+  disabled?: boolean;
   onClick: () => void;
   showDifficulty?: boolean;
 }
@@ -19,6 +20,7 @@ export function LessonExerciseCard({
   isCompleted,
   onClick,
   showDifficulty = false,
+  disabled = false,
 }: LessonExerciseCardProps) {
   const { t } = useTranslation();
 
@@ -63,6 +65,7 @@ export function LessonExerciseCard({
           onClick={onClick}
           color={isCompleted ? "green" : "blue"}
           rightSection={<IconChevronRight size={14} />}
+          disabled={disabled}
         >
           {isCompleted ? t("Common.Review") : t("Lessons.StartExercise")}
         </Button>

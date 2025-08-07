@@ -30,6 +30,7 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
 import { CategoryCard } from "./components/CategoryCard";
 import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
@@ -75,6 +76,7 @@ export default function PracticePage() {
     selectedCategory,
     selectedExercise,
     currentFen,
+    setCurrentFen,
     message,
     showHint,
     handleCategorySelect,
@@ -91,10 +93,26 @@ export default function PracticePage() {
           ...userStats.completedPractice,
           [categoryId]: [...prevCompleted, exerciseId],
         };
+
+        let totalPoints = 0;
+        for (const [catId, exIds] of Object.entries(updatedCompleted)) {
+          const category = practiceCategories.find((c) => c.id === catId);
+          if (category) {
+            for (const exId of exIds) {
+              const exercise = category.exercises.find((ex) => ex.id === exId);
+              if (exercise && exercise.points) {
+                totalPoints += exercise.points;
+              }
+            }
+          }
+        }
+
         setUserStats({
           completedPractice: updatedCompleted,
           practiceCompleted: Object.values(updatedCompleted).reduce((sum, arr) => sum + arr.length, 0),
-        });
+          totalPoints,
+        });        
+
         const category = practiceCategories.find((c) => c.id === categoryId);
         if (category && updatedCompleted[categoryId]?.length === category.exercises.length) {
           setCompletedCategoryTitle(category.title);
@@ -116,7 +134,11 @@ export default function PracticePage() {
 
   const handleMove = (orig: string, dest: string) => {
     if (!selectedExercise || !selectedCategory) return;
-    handleMoveBase(orig, dest, selectedExercise.correctMoves);
+    const move = `${orig}${dest}`;
+    handleMoveBase(orig, dest, selectedExercise.correctMoves, () => {
+      const newFen = applyUciMoveToFen(currentFen, move);
+      if (newFen) setCurrentFen(newFen);
+    });
   };
 
   const filteredCategories = practiceCategories.filter((category) => {
@@ -224,14 +246,14 @@ export default function PracticePage() {
                     variant="light"
                     onClick={() => {
                       if (selectedExercise) {
-                          const currentCategoryIndex = practiceCategories.findIndex((c) => c.id === selectedCategory.id);
-                          if (currentCategoryIndex >= 0) {
-                              clearSelection();
-                              handleCategorySelect(practiceCategories[currentCategoryIndex]);
-                          }
+                        const currentCategoryIndex = practiceCategories.findIndex((c) => c.id === selectedCategory.id);
+                        if (currentCategoryIndex >= 0) {
+                          clearSelection();
+                          handleCategorySelect(practiceCategories[currentCategoryIndex]);
+                        }
                       } else {
-                          handleCategorySelect(null);
-                          navigate({ to: "/learn/practice" });
+                        handleCategorySelect(null);
+                        navigate({ to: "/learn/practice" });
                       }
                     }}
                     aria-label="Back to Practice"
@@ -290,7 +312,8 @@ export default function PracticePage() {
               <Title order={4}>Exercises ({selectedCategory.exercises.length})</Title>
               <Stack gap="md">
                 {selectedCategory.exercises.map((exercise, index) => {
-                  const isCompleted = userStats.completedPractice?.[selectedCategory.id]?.includes(exercise.id) || false;
+                  const isCompleted =
+                    userStats.completedPractice?.[selectedCategory.id]?.includes(exercise.id) || false;
                   return (
                     <PracticeExerciseCard
                       key={exercise.id}
