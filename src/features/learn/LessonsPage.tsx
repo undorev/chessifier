@@ -16,7 +16,7 @@ import {
 } from "@mantine/core";
 import { IconArrowBackUp, IconBulb, IconCheck, IconClock, IconX } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
 import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
@@ -45,6 +45,7 @@ export interface Exercise {
   description: string;
   fen: string;
   correctMoves: string[];
+  disabled?: boolean;
 }
 
 export default function LessonsPage() {
@@ -227,6 +228,7 @@ export default function LessonsPage() {
                       id={exercise.id}
                       title={`${index + 1}. ${exercise.title}`}
                       description={exercise.description}
+                      disabled={exercise?.disabled}
                       isCompleted={isCompleted}
                       onClick={() => handleExerciseSelect(exercise)}
                     />

@@ -71,7 +71,7 @@ export function LessonCard({
             {getDifficultyIcon(lesson.difficulty)}
           </ThemeIcon>
           <Badge color={getDifficultyColor(lesson.difficulty)} variant="light" size="sm">
-            {completionPercentage}%
+            {completionPercentage || 0}%
           </Badge>
         </Group>
 
@@ -85,7 +85,7 @@ export function LessonCard({
 
           {lesson.tags && (
             <Group gap="xs" mb="md">
-              {lesson.tags.slice(0, 2).map((tag) => (
+              {lesson.tags.map((tag) => (
                 <Badge key={tag} size="xs" variant="outline" color="gray">
                   {tag}
                 </Badge>
@@ -99,7 +99,7 @@ export function LessonCard({
             <Group gap="xs">
               <IconClock size={16} />
               <Text size="xs" c="dimmed">
-                {lesson.estimatedTime || 15} min
+                {lesson.estimatedTime || 0} min
               </Text>
             </Group>
             <Text size="xs" c="dimmed">
