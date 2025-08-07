@@ -72,8 +72,9 @@
         "title": "Pawn Appétit",
         "maximized": true,
         "visible": false,
-        "decorations": true,
-        "minWidth": 800
+        "decorations": false,
+        "minWidth": 800,
+        "minimizable": true
       }
     ],
     "security": {
