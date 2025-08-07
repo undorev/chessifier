@@ -40,7 +40,7 @@ function GameCard({ game, file, mutate }: { game: NormalizedGame; file: string; 
                       id: game.id,
                     },
                   });
-                  navigate({ to: "/" });
+                  navigate({ to: "/boards" });
                 }}
               >
                 <IconZoomCheck size="1.2rem" stroke={1.5} />
