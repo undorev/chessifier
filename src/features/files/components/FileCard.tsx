@@ -58,7 +58,7 @@ function FileCard({
       srcInfo: selected,
       gameNumber: page,
     });
-    navigate({ to: "/" });
+    navigate({ to: "/boards" });
   }
 
   return (
