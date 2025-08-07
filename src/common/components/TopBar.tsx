@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useColorScheme } from "@mantine/hooks";
 import { Spotlight, type SpotlightActionData, type SpotlightActionGroupData, spotlight } from "@mantine/spotlight";
-import { IconSearch, IconSettings } from "@tabler/icons-react";
+import { IconMoon, IconSearch, IconSettings, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { useAtomValue } from "jotai";
@@ -78,8 +78,34 @@ const Icons = {
   ),
 };
 
-function getActions(navigate: any, t: any): (SpotlightActionGroupData | SpotlightActionData)[] {
+function getActions(navigate: any, setColorScheme: any, t: any): (SpotlightActionGroupData | SpotlightActionData)[] {
   return [
+    {
+      group: "Switch theme",
+      actions: [
+        {
+          id: "light",
+          label: t("Settings.Appearance.Theme.Light"),
+          description: "Switch to light theme",
+          onClick: () => setColorScheme("light"),
+          leftSection: <IconSun size={24} stroke={1.5} />,
+        },
+        {
+          id: "dark",
+          label: t("Settings.Appearance.Theme.Dark"),
+          description: "Switch to dark theme",
+          onClick: () => setColorScheme("dark"),
+          leftSection: <IconMoon size={24} stroke={1.5} />,
+        },
+        {
+          id: "auto",
+          label: t("Settings.Appearance.Theme.Auto"),
+          description: "Follow the system's color scheme",
+          onClick: () => setColorScheme("auto"),
+          leftSection: <IconSunMoon size={24} stroke={1.5} />,
+        },
+      ],
+    },
     {
       group: "Pages",
       actions: linksdata.map((link) => {
@@ -113,7 +139,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
   const isNative = useAtomValue(nativeBarAtom);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { colorScheme } = useMantineColorScheme();
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
   const osColorScheme = useColorScheme();
   const [maximized, setMaximized] = useState(true);
 
@@ -197,7 +223,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
           </Group>
         </UnstyledButton>
         <Spotlight
-          actions={getActions(navigate, t)}
+          actions={getActions(navigate, setColorScheme, t)}
           shortcut="mod + P"
           nothingFound="Nothing found..."
           highlightQuery
