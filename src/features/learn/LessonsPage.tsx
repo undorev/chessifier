@@ -17,8 +17,8 @@ import {
 import { IconArrowBackUp, IconBulb, IconCheck, IconClock, IconX } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
-
 import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
 import { CompletionModal } from "./components/CompletionModal";
 import { LessonCard } from "./components/LessonCard";
@@ -26,7 +26,6 @@ import { LessonExerciseCard } from "./components/LessonExerciseCard";
 import { LinearProgress } from "./components/ProgressIndicator";
 import { lessons } from "./constants/lessons";
 import { useExerciseState } from "./hooks/useExerciseState";
-import { type ProgressData, useProgress } from "./hooks/useProgress";
 
 export interface Lesson {
   id: string;
@@ -49,46 +48,19 @@ export interface Exercise {
 }
 
 export default function LessonsPage() {
-  const { setUserStats } = useUserStatsStore();
   const navigate = useNavigate();
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedLessonTitle, setCompletedLessonTitle] = useState("");
 
-  const calculateOverallProgress = (allProgress: Record<string, ProgressData>): number => {
-    let totalExercises = 0;
-    let completedExercises = 0;
-
-    lessons.forEach((lesson) => {
-      totalExercises += lesson.exercises.length;
-      const progress = allProgress[lesson.id] || { exercisesCompleted: [] };
-      completedExercises += progress.exercisesCompleted.length;
-    });
-
-    setUserStats({
-      lessonsCompleted: completedExercises,
-      totalLessons: totalExercises,
-    });
-
-    return totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
-  };
-
-  const {
-    progress: lessonProgress,
-    updateExerciseCompletion,
-    loadAllProgress,
-  } = useProgress({
-    prefix: "lesson_progress",
-    calculateOverallProgress,
-  });
+  const { userStats, setUserStats } = useUserStatsStore();
 
   const {
     selectedCategory: selectedLesson,
     selectedExercise,
     currentFen,
+    setCurrentFen,
     message,
     showHint,
-    lastCorrectMove,
-    showingCorrectAnimation,
     handleCategorySelect: handleLessonSelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
@@ -97,26 +69,32 @@ export default function LessonsPage() {
   } = useExerciseState<Exercise, Lesson>({
     initialFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     onExerciseComplete: (lessonId, exerciseId) => {
-      const lesson = lessons.find((l) => l.id === lessonId);
-      if (!lesson) return;
-
-      updateExerciseCompletion(lessonId, exerciseId, lesson.exercises.length, (completedLessonId) => {
-        const completedLesson = lessons.find((l) => l.id === completedLessonId);
-        if (completedLesson) {
-          setCompletedLessonTitle(completedLesson.title);
+      const prevCompleted = userStats.completedExercises?.[lessonId] || [];
+      if (!prevCompleted.includes(exerciseId)) {
+        const updatedCompleted = {
+          ...userStats.completedExercises,
+          [lessonId]: [...prevCompleted, exerciseId],
+        };
+        setUserStats({
+          completedExercises: updatedCompleted,
+          lessonsCompleted: Object.values(updatedCompleted).reduce((sum, arr) => sum + arr.length, 0),
+        });
+        const lesson = lessons.find((l) => l.id === lessonId);
+        if (lesson && updatedCompleted[lessonId]?.length === lesson.exercises.length) {
+          setCompletedLessonTitle(lesson.title);
           setShowCompletionModal(true);
         }
-      });
+      }
     },
   });
 
-  useEffect(() => {
-    loadAllProgress(lessons.map((lesson) => lesson.id));
-  }, []);
-
   const handleMove = (orig: string, dest: string) => {
     if (!selectedExercise || !selectedLesson) return;
-    handleMoveBase(orig, dest, selectedExercise.correctMoves);
+    const move = `${orig}${dest}`;
+    handleMoveBase(orig, dest, selectedExercise.correctMoves, () => {
+      const newFen = applyUciMoveToFen(currentFen, move);
+      if (newFen) setCurrentFen(newFen);
+    });
   };
 
   return (
@@ -143,6 +121,7 @@ export default function LessonsPage() {
                 size="md"
                 onClick={() => navigate({ to: "/learn" })}
                 aria-label="Back to Learn"
+                title="Back to Learn"
               >
                 <IconArrowBackUp size={20} />
               </ActionIcon>
@@ -152,17 +131,20 @@ export default function LessonsPage() {
             </Group>
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
-              {lessons.map((lesson) => (
-                <LessonCard
-                  key={lesson.id}
-                  lesson={lesson}
-                  progress={{
-                    completed: lessonProgress[lesson.id]?.exercisesCompleted.length || 0,
-                    total: lesson.exercises.length,
-                  }}
-                  onClick={() => handleLessonSelect(lesson)}
-                />
-              ))}
+              {lessons.map((lesson) => {
+                const completedCount = userStats.completedExercises?.[lesson.id]?.length || 0;
+                return (
+                  <LessonCard
+                    key={lesson.id}
+                    lesson={lesson}
+                    progress={{
+                      completed: completedCount,
+                      total: lesson.exercises.length,
+                    }}
+                    onClick={() => handleLessonSelect(lesson)}
+                  />
+                );
+              })}
             </SimpleGrid>
           </>
         ) : (
@@ -173,13 +155,19 @@ export default function LessonsPage() {
                   <ActionIcon
                     variant="light"
                     onClick={() => {
-                      const currentLessonIndex = lessons.findIndex((l) => l.id === selectedLesson.id);
-                      if (currentLessonIndex >= 0) {
-                        clearSelection();
-                        handleLessonSelect(lessons[currentLessonIndex]);
+                      if (selectedExercise) {
+                        const currentLessonIndex = lessons.findIndex((l) => l.id === selectedLesson.id);
+                        if (currentLessonIndex >= 0) {
+                          clearSelection();
+                          handleLessonSelect(lessons[currentLessonIndex]);
+                        }
+                      } else {
+                        handleLessonSelect(null);
+                        navigate({ to: "/learn/lessons" });
                       }
                     }}
-                    aria-label="Back to lessons"
+                    aria-label="Back to Lessons"
+                    title="Back to Lessons"
                   >
                     <IconArrowBackUp size={20} />
                   </ActionIcon>
@@ -193,7 +181,7 @@ export default function LessonsPage() {
                 </Group>
 
                 <LinearProgress
-                  completed={lessonProgress[selectedLesson.id]?.exercisesCompleted.length || 0}
+                  completed={userStats.completedExercises?.[selectedLesson.id]?.length || 0}
                   total={selectedLesson.exercises.length}
                   size="md"
                   width={200}
@@ -232,8 +220,7 @@ export default function LessonsPage() {
               <Title order={4}>Exercises ({selectedLesson.exercises.length})</Title>
               <SimpleGrid cols={1} spacing="md">
                 {selectedLesson.exercises.map((exercise, index) => {
-                  const isCompleted = lessonProgress[selectedLesson.id]?.exercisesCompleted.includes(exercise.id);
-
+                  const isCompleted = userStats.completedExercises?.[selectedLesson.id]?.includes(exercise.id) || false;
                   return (
                     <LessonExerciseCard
                       key={exercise.id}
@@ -252,8 +239,6 @@ export default function LessonsPage() {
               <ChessExerciseBoardWithProvider
                 fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                 onMove={handleMove}
-                lastCorrectMove={lastCorrectMove}
-                showingCorrectAnimation={showingCorrectAnimation}
                 readOnly={!selectedExercise}
               />
 

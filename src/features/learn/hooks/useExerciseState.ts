@@ -22,21 +22,17 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   const [currentFen, setCurrentFen] = useState<string>(initialFen);
   const [message, setMessage] = useState<string>("");
   const [showHint, setShowHint] = useState<boolean>(false);
-  const [lastCorrectMove, setLastCorrectMove] = useState<{ from: string; to: string } | null>(null);
-  const [showingCorrectAnimation, setShowingCorrectAnimation] = useState<boolean>(false);
 
   const resetState = useCallback(() => {
     setMessage("");
     setShowHint(false);
-    setLastCorrectMove(null);
-    setShowingCorrectAnimation(false);
   }, []);
 
   const handleCategorySelect = useCallback(
-    (category: C) => {
+    (category: C | null) => {
       setSelectedCategory(category);
       setSelectedExercise(null);
-      setCurrentFen(category.exercises[0]?.fen || initialFen);
+      setCurrentFen(category?.exercises[0]?.fen || initialFen);
       resetState();
     },
     [initialFen, resetState],
@@ -45,7 +41,7 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   const handleExerciseSelect = useCallback(
     (exercise: T) => {
       setSelectedExercise(exercise);
-      setCurrentFen(exercise.fen);
+      setCurrentFen(exercise?.fen);
       resetState();
     },
     [resetState],
@@ -60,12 +56,6 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
 
       if (isCorrect) {
         setMessage("Correct!");
-        setLastCorrectMove({ from: orig, to: dest });
-        setShowingCorrectAnimation(true);
-
-        setTimeout(() => {
-          setShowingCorrectAnimation(false);
-        }, 2000);
 
         if (onCorrectMove) {
           onCorrectMove();
@@ -76,7 +66,6 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
         }
       } else {
         setMessage("Incorrect. Try again.");
-        setLastCorrectMove(null);
       }
     },
     [selectedCategory, selectedExercise, onExerciseComplete],
@@ -99,8 +88,6 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
     currentFen,
     message,
     showHint,
-    lastCorrectMove,
-    showingCorrectAnimation,
 
     setCurrentFen,
     handleCategorySelect,

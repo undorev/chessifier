@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useUserStatsStore } from "../../state/userStatsStore";
 
-function calculateCurrentStreak(completionDates: string[]): number {
+function calculateCurrentStreak(completionDates: string[]): number {    
   if (!completionDates || completionDates.length === 0) return 0;
   const dateSet = new Set(completionDates.map((date) => date.slice(0, 10)));
   let streak = 0;
