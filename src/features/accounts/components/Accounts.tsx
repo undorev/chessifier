@@ -1,8 +1,8 @@
-import { Autocomplete, Button, Checkbox, Group, InputWrapper, Modal, Stack, TextInput } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { Alert, Autocomplete, Button, Checkbox, Group, InputWrapper, Modal, Stack, TextInput } from "@mantine/core";
+import { IconInfoCircle, IconPlus } from "@tabler/icons-react";
 import { listen } from "@tauri-apps/api/event";
 import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DatabaseInfo } from "@/bindings";
 import { commands } from "@/bindings";
 import AccountCards from "@/common/components/AccountCards";
@@ -23,33 +23,39 @@ function Accounts() {
   }, []);
   const [open, setOpen] = useState(false);
 
-  function addChessComSession(alias: string, session: ChessComSession) {
-    setSessions((sessions) => {
-      const newSessions = sessions.filter((s) => s.chessCom?.username !== session.username);
-      return [
-        ...newSessions,
-        {
-          chessCom: session,
-          player: alias,
-          updatedAt: Date.now(),
-        },
-      ];
-    });
-  }
+  const addChessComSession = useCallback(
+    (alias: string, session: ChessComSession) => {
+      setSessions((sessions) => {
+        const newSessions = sessions.filter((s) => s.chessCom?.username !== session.username);
+        return [
+          ...newSessions,
+          {
+            chessCom: session,
+            player: alias,
+            updatedAt: Date.now(),
+          },
+        ];
+      });
+    },
+    [setSessions],
+  );
 
-  function addLichessSession(alias: string, session: LichessSession) {
-    setSessions((sessions) => {
-      const newSessions = sessions.filter((s) => s.lichess?.username !== session.username);
-      return [
-        ...newSessions,
-        {
-          lichess: session,
-          player: alias,
-          updatedAt: Date.now(),
-        },
-      ];
-    });
-  }
+  const addLichessSession = useCallback(
+    (alias: string, session: LichessSession) => {
+      setSessions((sessions) => {
+        const newSessions = sessions.filter((s) => s.lichess?.username !== session.username);
+        return [
+          ...newSessions,
+          {
+            lichess: session,
+            player: alias,
+            updatedAt: Date.now(),
+          },
+        ];
+      });
+    },
+    [setSessions],
+  );
 
   async function addChessCom(player: string, username: string) {
     const p = player !== "" ? player : username;
@@ -67,15 +73,18 @@ function Accounts() {
     addLichessSession(p, { username, account });
   }
 
-  async function onLichessAuthentication(token: string) {
-    const player = sessionStorage.getItem("lichess_player_alias") || "";
-    sessionStorage.removeItem("lichess_player_alias");
-    const account = await getLichessAccount({ token });
-    if (!account) return;
-    const username = account.username;
-    const p = player !== "" ? player : username;
-    addLichessSession(p, { accessToken: token, username: username, account });
-  }
+  const onLichessAuthentication = useCallback(
+    async (token: string) => {
+      const player = sessionStorage.getItem("lichess_player_alias") || "";
+      sessionStorage.removeItem("lichess_player_alias");
+      const account = await getLichessAccount({ token });
+      if (!account) return;
+      const username = account.username;
+      const p = player !== "" ? player : username;
+      addLichessSession(p, { accessToken: token, username: username, account });
+    },
+    [addLichessSession],
+  );
 
   async function addLichess(player: string, username: string, withLogin: boolean) {
     if (withLogin) {
@@ -96,7 +105,7 @@ function Accounts() {
     }
 
     listen_for_code();
-  }, [setSessions]);
+  }, [onLichessAuthentication]);
 
   return (
     <>
@@ -182,6 +191,13 @@ function AccountModal({
                 }
               />
             </Group>
+            {website === "chesscom" && (
+              <Alert mt="xs" color="yellow" icon={<IconInfoCircle size={16} />}>
+                Due to limitations of the Chess.com Public API, the total games count may not include all game types. In
+                particular, bot games are excluded from the downloadable archives and won’t be reflected in the total
+                count.
+              </Alert>
+            )}
           </InputWrapper>
 
           <TextInput
