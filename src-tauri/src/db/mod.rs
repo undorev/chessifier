@@ -194,7 +194,7 @@ pub fn insert_to_db(db: &mut SqliteConnection, game: &TempGame) -> Result<()> {
         0
     };
 
-    let ply_count = (game.moves.len()) as i32;
+    let ply_count = game.tree.count_main_line_moves() as i32;
     let final_material = pgn::get_material_count(game.position.board());
     let minimal_white_material = game.material_count.white.min(final_material.white) as i32;
     let minimal_black_material = game.material_count.black.min(final_material.black) as i32;

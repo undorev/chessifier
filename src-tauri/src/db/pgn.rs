@@ -42,6 +42,15 @@ impl GameTree {
     pub fn push(&mut self, node: GameTreeNode) {
         self.0.push(node);
     }
+
+    pub fn count_main_line_moves(&self) -> usize {
+        self.0.iter()
+            .filter_map(|node| match node {
+                GameTreeNode::Move(_) => Some(1),
+                _ => None,
+            })
+            .sum()
+    }
  
     pub fn encode(&self, bytes: &mut Vec<u8>, position: Option<Chess>) {
         let mut cur_position = position.unwrap_or_default();
@@ -399,6 +408,40 @@ mod test {
             );
             assert_eq!(game.tree.to_string(), pgn);
         }
+    }
+
+    #[test]
+    fn test_count_main_line_moves() {
+        // Test 1: Empty game tree
+        let empty_tree = GameTree::new();
+        assert_eq!(empty_tree.count_main_line_moves(), 0);
+
+        // Test 2: Simple game with 11 moves (1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O b5 6.Bb3)
+        let pgn = "1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O b5 6.Bb3";
+        let mut reader = BufferedReader::new_cursor(&pgn[..]);
+        let mut importer = Importer::new(None);
+        let game = reader.read_game(&mut importer).unwrap().flatten().unwrap();
+        
+        // Should have 11 half-moves (plies)
+        assert_eq!(game.tree.count_main_line_moves(), 11);
+
+        // Test 3: Game with variations should only count main line
+        let pgn_with_variation = "1.e4 e5 2.Nf3 ( 2.Bc4 c6 ) 2...Nc6";
+        let mut reader2 = BufferedReader::new_cursor(&pgn_with_variation[..]);
+        let mut importer2 = Importer::new(None);
+        let game2 = reader2.read_game(&mut importer2).unwrap().flatten().unwrap();
+        
+        // Should have 4 half-moves in main line (1.e4 e5 2.Nf3 Nc6), ignoring the variation (2.Bc4 c6)
+        assert_eq!(game2.tree.count_main_line_moves(), 4);
+
+        // Test 4: Game with comments and annotations
+        let pgn_with_annotations = "1.e4 e5 2.Nf3 Nc6 $1 {Good move}";
+        let mut reader3 = BufferedReader::new_cursor(&pgn_with_annotations[..]);
+        let mut importer3 = Importer::new(None);
+        let game3 = reader3.read_game(&mut importer3).unwrap().flatten().unwrap();
+        
+        // Should have 4 half-moves, ignoring the annotation and comment
+        assert_eq!(game3.tree.count_main_line_moves(), 4);
     }
 
     #[test]
