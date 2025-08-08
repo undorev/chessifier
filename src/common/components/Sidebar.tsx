@@ -6,7 +6,7 @@ import {
   IconDatabase,
   IconFiles,
   IconKeyboard,
-  IconLayoutGrid,
+  IconLayoutDashboard,
   IconSchool,
   IconSettings,
   IconUsers,
@@ -42,7 +42,7 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
 }
 
 export const linksdata = [
-  { icon: IconLayoutGrid, label: "Dashboard", url: "/" },
+  { icon: IconLayoutDashboard, label: "Dashboard", url: "/" },
   { icon: IconChess, label: "Board", url: "/boards" },
   { icon: IconCpu, label: "Engines", url: "/engines" },
   {

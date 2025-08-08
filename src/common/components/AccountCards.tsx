@@ -1,5 +1,6 @@
 import { Accordion, Paper, ScrollArea, Stack } from "@mantine/core";
 import { useAtom, useAtomValue } from "jotai";
+import { useEffect, useState } from "react";
 import type { DatabaseInfo } from "@/bindings";
 import { AccountCard } from "@/features/accounts/components/AccountCard";
 import { sessionsAtom } from "@/state/atoms";
@@ -30,11 +31,27 @@ function AccountCards({
     ),
   }));
 
+  // Main account selection state
+  const [mainAccount, setMainAccount] = useState<string | null>(null);
+  useEffect(() => {
+    if (mainAccount) {
+      localStorage.setItem("mainAccount", mainAccount);
+    }
+  }, [mainAccount]);
+
   return (
     <ScrollArea offsetScrollbars>
       <Stack>
         {playerSessions.map(({ name, sessions }) => (
-          <PlayerSession key={name} name={name} sessions={sessions} databases={databases} setDatabases={setDatabases} />
+          <PlayerSession
+            key={name}
+            name={name}
+            sessions={sessions}
+            databases={databases}
+            setDatabases={setDatabases}
+            isMain={mainAccount === name}
+            setMain={() => setMainAccount(name)}
+          />
         ))}
       </Stack>
     </ScrollArea>
@@ -46,11 +63,15 @@ function PlayerSession({
   sessions,
   databases,
   setDatabases,
+  isMain,
+  setMain,
 }: {
   name: string;
   sessions: Session[];
   databases: DatabaseInfo[];
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
+  isMain?: boolean;
+  setMain?: () => void;
 }) {
   const [, setSessions] = useAtom(sessionsAtom);
 
@@ -68,6 +89,8 @@ function PlayerSession({
             databases={databases}
             setDatabases={setDatabases}
             setSessions={setSessions}
+            isMain={isMain}
+            setMain={setMain}
           />
         ))}
       </Accordion>
@@ -81,12 +104,16 @@ function LichessOrChessCom({
   databases,
   setDatabases,
   setSessions,
+  isMain,
+  setMain,
 }: {
   name: string;
   session: Session;
   databases: DatabaseInfo[];
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
   setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
+  isMain?: boolean;
+  setMain?: () => void;
 }) {
   if (session.lichess?.account) {
     const account = session.lichess.account;
@@ -153,6 +180,8 @@ function LichessOrChessCom({
           );
         }}
         stats={stats}
+        isMain={isMain}
+        setMain={setMain}
       />
     );
   }
@@ -202,6 +231,8 @@ function LichessOrChessCom({
           );
         }}
         setDatabases={setDatabases}
+        isMain={isMain}
+        setMain={setMain}
       />
     );
   }
