@@ -34,6 +34,7 @@ import { getMainLine } from "@/utils/chess";
 import { positionFromFen } from "@/utils/chessops";
 import type { TimeControlField } from "@/utils/clock";
 import type { LocalEngine } from "@/utils/engines";
+import { saveGameRecord } from "@/utils/gameRecords";
 import { type GameHeaders, treeIteratorMainLine } from "@/utils/treeReducer";
 import EngineSettingsForm from "../panels/analysis/EngineSettingsForm";
 import Board from "./Board";
@@ -430,6 +431,31 @@ function BoardGame() {
       setResult("1-0");
     }
   }, [gameState, blackTime, setGameState, setResult]);
+
+  useEffect(() => {
+    if (gameState === "gameOver" && headers.result && headers.result !== "*") {
+      const record = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        white: {
+          type: players.white.type,
+          name: players.white.type === "human" ? players.white.name : players.white.engine?.name,
+          engine: players.white.type === "engine" ? players.white.engine?.path : undefined,
+        },
+        black: {
+          type: players.black.type,
+          name: players.black.type === "human" ? players.black.name : players.black.engine?.name,
+          engine: players.black.type === "engine" ? players.black.engine?.path : undefined,
+        },
+        result: headers.result,
+        timeControl: headers.time_control || `${headers.white_time_control || ""},${headers.black_time_control || ""}`,
+        timestamp: Date.now(),
+        moves: getMainLine(root, headers.variant === "Chess960"),
+        variant: headers.variant ?? undefined,
+        fen: lastNode.fen,
+      };
+      saveGameRecord(record);
+    }
+  }, [gameState, headers.result, players, root, headers, saveGameRecord]);
 
   function decrementTime() {
     if (gameState === "playing") {
