@@ -97,6 +97,8 @@ pub fn update_game(conn: &mut SqliteConnection, id: i32, data: &UpdateGame) -> R
     let mut moves: Vec<u8> = Vec::new();
     tree.encode(&mut moves, None);
 
+    let ply_count = tree.count_main_line_moves() as i32;
+
     diesel::update(games::dsl::games)
         .filter(games::id.eq(id))
         .set((
@@ -113,7 +115,7 @@ pub fn update_game(conn: &mut SqliteConnection, id: i32, data: &UpdateGame) -> R
             games::result.eq(data.result.to_string()),
             games::time_control.eq(&data.time_control),
             games::eco.eq(&data.eco),
-            games::ply_count.eq(data.ply_count),
+            games::ply_count.eq(ply_count),
             games::moves.eq(&moves)
         ))
         .execute(conn)?;
