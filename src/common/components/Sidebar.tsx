@@ -5,15 +5,17 @@ import {
   IconCpu,
   IconDatabase,
   IconFiles,
-  IconHome,
   IconKeyboard,
+  IconLayoutGrid,
   IconSchool,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import cx from "clsx";
+import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
+import { hideDashboardOnStartupAtom } from "@/state/atoms";
 import * as classes from "./Sidebar.css";
 
 interface NavbarLinkProps {
@@ -40,7 +42,7 @@ function NavbarLink({ url, icon: Icon, label }: NavbarLinkProps) {
 }
 
 export const linksdata = [
-  { icon: IconHome, label: "Home", url: "/" },
+  { icon: IconLayoutGrid, label: "Dashboard", url: "/" },
   { icon: IconChess, label: "Board", url: "/boards" },
   { icon: IconCpu, label: "Engines", url: "/engines" },
   {
@@ -56,8 +58,14 @@ export const linksdata = [
 export function SideBar() {
   const matcesRoute = useMatchRoute();
   const { t } = useTranslation();
+  const [hideDashboardOnStartup] = useAtom(hideDashboardOnStartupAtom);
 
-  const links = linksdata.map((link) => <NavbarLink {...link} label={t(`SideBar.${link.label}`)} key={link.label} />);
+  const links = linksdata
+    .filter((link) => {
+      if (hideDashboardOnStartup && link.url === "/") return false;
+      return link;
+    })
+    .map((link) => <NavbarLink {...link} label={t(`SideBar.${link.label}`)} key={link.label} />);
 
   return (
     <>

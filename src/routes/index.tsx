@@ -1,7 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
-import HomePage from "@/features/home/HomePage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { getDefaultStore } from "jotai";
+import DashboardPage from "@/features/dashboard/DashboardPage";
+import { hideDashboardOnStartupAtom } from "@/state/atoms";
 
 export const Route = createFileRoute("/")({
-  component: HomePage,
+  component: DashboardPage,
   loader: ({ context: { loadDirs } }) => loadDirs(),
+  beforeLoad: () => {
+    const store = getDefaultStore();
+    const hide = store.get(hideDashboardOnStartupAtom);
+    if (hide) {
+      throw redirect({ to: "/boards" });
+    }
+    return null;
+  },
 });

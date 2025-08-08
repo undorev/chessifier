@@ -12,6 +12,7 @@ import {
   enableBoardScrollAtom,
   eraseDrawablesOnClickAtom,
   forcedEnPassantAtom,
+  hideDashboardOnStartupAtom,
   minimumGamesAtom,
   moveInputAtom,
   moveMethodAtom,
@@ -479,6 +480,15 @@ export default function Page() {
                       setIsNative(val === "Native");
                     }}
                   />
+                </Group>
+                <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
+                  <div data-searchable>
+                    <Text>{t("Settings.Appearance.hideDashboardOnStartup")}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t("Settings.Appearance.hideDashboardOnStartup.Desc")}
+                    </Text>
+                  </div>
+                  <SettingsSwitch atom={hideDashboardOnStartupAtom} />
                 </Group>
                 <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                   <div data-searchable>

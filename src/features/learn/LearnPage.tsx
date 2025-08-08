@@ -31,7 +31,7 @@ export default function LearnPage() {
       id: "lessons",
       icon: <IconBook size={32} />,
       title: t("Lessons.Title"),
-      description: t("Home.Card.Learn.Desc"),
+      description: t("Dashboard.Card.Learn.Desc"),
       label: t("Lessons.StartLesson"),
       progress: { completed: userStats.lessonsCompleted, total: userStats.totalLessons },
       color: "blue",
