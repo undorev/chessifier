@@ -179,6 +179,12 @@ function RootLayout() {
       },
     ],
     [keyMap.OPEN_FILE.keys, openNewFile],
+    [
+      keyMap.APP_RELOAD.keys,
+      () => {
+        location.reload();
+      },
+    ],
     [keyMap.EXIT_APP.keys, () => exit(0)],
   ]);
 
@@ -202,6 +208,7 @@ function RootLayout() {
           {
             label: t("Menu.File.Exit"),
             id: "exit",
+            shortcut: keyMap.EXIT_APP.keys,
             action: () => exit(0),
           },
         ],
@@ -212,7 +219,7 @@ function RootLayout() {
           {
             label: t("Menu.View.Reload"),
             id: "reload",
-            shortcut: "Ctrl+R",
+            shortcut: keyMap.APP_RELOAD.keys,
             action: () => location.reload(),
           },
         ],

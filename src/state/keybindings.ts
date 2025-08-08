@@ -5,7 +5,9 @@ const keys = {
   // === File Operations ===
   OPEN_FILE: { name: "Open File", keys: "mod+o" },
   SAVE_FILE: { name: "Save File", keys: "mod+s" },
-  EXIT_APP: { name: "Exit Chessifier", keys: "mod+shift+q" },
+  APP_RELOAD: { name: "Reload", keys: "mod+r" },
+  EXIT_APP: { name: "Exit Chessifier", keys: "mod+q" },
+  SPOTLIGHT_SEARCH: { name: "Spotlight Search", keys: "mod+k" },
 
   // === Board Tabs ===
   NEW_BOARD_TAB: { name: "New board tab", keys: "mod+t" },

@@ -15,10 +15,11 @@ import { Spotlight, type SpotlightActionData, type SpotlightActionGroupData, spo
 import { IconMoon, IconSearch, IconSettings, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { type JSX, type SVGProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { nativeBarAtom } from "@/state/atoms";
+import { keyMapAtom } from "@/state/keybindings";
 import { linksdata } from "./Sidebar";
 import * as classes from "./TopBar.css";
 
@@ -142,6 +143,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const osColorScheme = useColorScheme();
   const [maximized, setMaximized] = useState(true);
+  const [keyMap] = useAtom(keyMapAtom);
 
   return (
     <Group h="100%">
@@ -215,16 +217,16 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
           <Group w="100%">
             <IconSearch size={14} stroke={1.5} color="var(--mantine-color-dimmed)" />
             <Text pr="200px" c="dimmed" size="sm">
-              Spotlight Search
+              {keyMap.SPOTLIGHT_SEARCH.name}
             </Text>
             <Kbd size="xs" style={{ borderWidth: "1px" }}>
-              mod + P
+              {keyMap.SPOTLIGHT_SEARCH.keys}
             </Kbd>
           </Group>
         </UnstyledButton>
         <Spotlight
           actions={getActions(navigate, setColorScheme, t)}
-          shortcut="mod + P"
+          shortcut={keyMap.SPOTLIGHT_SEARCH.keys}
           nothingFound="Nothing found..."
           highlightQuery
           searchProps={{
