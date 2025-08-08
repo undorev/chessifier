@@ -15,7 +15,13 @@ function AccountCards({
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
 }) {
   const sessions = useAtomValue(sessionsAtom);
-  const playerNames = Array.from(new Set(sessions.map((s) => s.player ?? s.lichess?.username ?? s.chessCom?.username)));
+  const playerNames = Array.from(
+    new Set(
+      sessions
+        .map((s) => s.player ?? s.lichess?.username ?? s.chessCom?.username)
+        .filter((n): n is string => typeof n === "string" && n.length > 0),
+    ),
+  );
 
   const playerSessions = playerNames.map((name) => ({
     name,
@@ -28,13 +34,7 @@ function AccountCards({
     <ScrollArea offsetScrollbars>
       <Stack>
         {playerSessions.map(({ name, sessions }) => (
-          <PlayerSession
-            key={name}
-            name={name!}
-            sessions={sessions}
-            databases={databases}
-            setDatabases={setDatabases}
-          />
+          <PlayerSession key={name} name={name} sessions={sessions} databases={databases} setDatabases={setDatabases} />
         ))}
       </Stack>
     </ScrollArea>
@@ -59,7 +59,10 @@ function PlayerSession({
       <Accordion multiple chevronSize={14} chevronPosition="left">
         {sessions.map((session, i) => (
           <LichessOrChessCom
-            key={i}
+            key={
+              session.lichess?.account.id ??
+              (session.chessCom ? `chesscom:${session.chessCom.username}` : `session:${i}`)
+            }
             name={name}
             session={session}
             databases={databases}
@@ -160,13 +163,18 @@ function LichessOrChessCom({
         totalGames += stat.record.win + stat.record.loss + stat.record.draw;
       }
     }
+
+    const database = databases.find((db) => db.filename === `${session.chessCom?.username}_chesscom.db3`) ?? null;
+    if (database && database.type === "success") {
+      totalGames = Math.max(totalGames, database.game_count ?? 0);
+    }
     return (
       <AccountCard
         key={session.chessCom.username}
         name={name}
         type="chesscom"
         title={session.chessCom.username}
-        database={databases.find((db) => db.filename === `${session.chessCom?.username}_chesscom.db3`) ?? null}
+        database={database}
         updatedAt={session.updatedAt}
         total={totalGames}
         stats={getStats(session.chessCom.stats)}
