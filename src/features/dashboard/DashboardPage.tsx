@@ -1,4 +1,4 @@
-import { AreaChart } from "@mantine/charts";
+import { BarChart } from "@mantine/charts";
 import type { MantineColor } from "@mantine/core";
 import {
   Avatar,
@@ -25,7 +25,6 @@ import {
   IconBolt,
   IconBook2,
   IconBrain,
-  IconChartLine,
   IconChess,
   IconClock,
   IconFlame,
@@ -35,12 +34,29 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { activeTabAtom, tabsAtom } from "@/state/atoms";
+import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
 import { genID, type Tab } from "@/utils/tabs";
+
+function getChessTitle(rating: number): string {
+  if (rating >= 2500) return "Grandmaster";
+  if (rating >= 2200) return "International Master";
+  if (rating >= 2000) return "Expert";
+  if (rating >= 1800) return "Class A";
+  if (rating >= 1600) return "Class B";
+  if (rating >= 1400) return "Class C";
+  if (rating >= 1200) return "Class D";
+  if (rating >= 1000) return "Class E";
+  if (rating >= 800) return "Class F";
+  if (rating >= 600) return "Class G";
+  if (rating >= 400) return "Class H";
+  if (rating >= 200) return "Class I";
+  if (rating >= 100) return "Class J";
+  return "Class K";
+}
 
 export default function DashboardPage() {
   const [isFirstOpen, setIsFirstOpen] = useState(false);
@@ -59,22 +75,49 @@ export default function DashboardPage() {
   const [_tabs, setTabs] = useAtom(tabsAtom);
   const [_activeTab, setActiveTab] = useAtom(activeTabAtom);
 
-  const user = {
-    name: "John Doe",
-    handle: "@grossmeister",
-    rating: 2700,
-    title: "GrossMeister",
-  };
+  const sessions = useAtomValue(sessionsAtom);
+  const [mainAccountName, setMainAccountName] = useState<string | null>(null);
+  useEffect(() => {
+    const stored = localStorage.getItem("mainAccount");
+    setMainAccountName(stored);
+  }, []);
 
-  const ratingHistory = [
-    { day: "Mon", rating: 2700 },
-    { day: "Tue", rating: 2700 },
-    { day: "Wed", rating: 2700 },
-    { day: "Thu", rating: 2700 },
-    { day: "Fri", rating: 2700 },
-    { day: "Sat", rating: 2700 },
-    { day: "Sun", rating: 2700 },
-  ];
+  const mainSession = sessions.find(
+    (s) =>
+      s.player === mainAccountName ||
+      s.lichess?.username === mainAccountName ||
+      s.chessCom?.username === mainAccountName,
+  );
+
+  let user = {
+    name: mainAccountName ?? "No main account",
+    handle: "",
+    rating: 0,
+  };
+  let ratingHistory: { blitz?: number; rapid?: number; bullet?: number } = {};
+  if (mainSession?.lichess?.account) {
+    const acc = mainSession.lichess.account;
+    user = {
+      name: acc.username,
+      handle: `@${acc.username}`,
+      rating: acc.perfs?.blitz?.rating ?? acc.perfs?.rapid?.rating ?? 0,
+    };
+    const blitz = acc.perfs?.blitz?.rating;
+    const rapid = acc.perfs?.rapid?.rating;
+    const bullet = acc.perfs?.bullet?.rating;
+    ratingHistory = { blitz, rapid, bullet };
+  } else if (mainSession?.chessCom?.stats) {
+    const stats = mainSession.chessCom.stats;
+    user = {
+      name: mainSession.chessCom.username,
+      handle: `@${mainSession.chessCom.username}`,
+      rating: stats.chess_blitz?.last?.rating ?? stats.chess_rapid?.last?.rating ?? 0,
+    };
+    const blitz = stats.chess_blitz?.last?.rating;
+    const rapid = stats.chess_rapid?.last?.rating;
+    const bullet = stats.chess_bullet?.last?.rating;
+    ratingHistory = { blitz, rapid, bullet };
+  }
 
   const [recentGames, setRecentGames] = useState<GameRecord[]>([]);
   useEffect(() => {
@@ -140,22 +183,64 @@ export default function DashboardPage() {
       icon: <IconClock />,
       title: "Classical",
       description: "Play classical chess games",
-      onClick: () => navigate({ to: "/boards" }),
-      color: "blue",
+      onClick: () => {
+        const uuid = genID();
+        setTabs((prev: Tab[]) => {
+          return [
+            ...prev,
+            {
+              value: uuid,
+              name: "Classical",
+              type: "play",
+            },
+          ];
+        });
+        setActiveTab(uuid);
+        navigate({ to: "/boards" });
+      },
+      color: "blue.6",
     },
     {
       icon: <IconStopwatch />,
       title: "Rapid",
       description: "Engage in rapid chess matches",
-      onClick: () => navigate({ to: "/boards" }),
-      color: "green",
+      onClick: () => {
+        const uuid = genID();
+        setTabs((prev: Tab[]) => {
+          return [
+            ...prev,
+            {
+              value: uuid,
+              name: "Rapid",
+              type: "play",
+            },
+          ];
+        });
+        setActiveTab(uuid);
+        navigate({ to: "/boards" });
+      },
+      color: "teal.6",
     },
     {
       icon: <IconBolt />,
       title: "Blitz",
       description: "Play fast-paced blitz games",
-      onClick: () => navigate({ to: "/boards" }),
-      color: "red",
+      onClick: () => {
+        const uuid = genID();
+        setTabs((prev: Tab[]) => {
+          return [
+            ...prev,
+            {
+              value: uuid,
+              name: "Blitz",
+              type: "play",
+            },
+          ];
+        });
+        setActiveTab(uuid);
+        navigate({ to: "/boards" });
+      },
+      color: "yellow.6",
     },
   ];
 
@@ -201,7 +286,7 @@ export default function DashboardPage() {
                 <Group gap={6}>
                   <Text fw={700}>{user.name}</Text>
                   <Badge color="yellow" variant="light">
-                    {user.title}
+                    {getChessTitle(user.rating)}
                   </Badge>
                 </Group>
                 <Text size="sm" c="dimmed">
@@ -210,34 +295,38 @@ export default function DashboardPage() {
               </Box>
             </Group>
             <Divider my="md" />
-            <Group align="flex-end" justify="space-between">
-              <Stack gap={2}>
-                <Text size="xs" c="dimmed">
-                  Rating
-                </Text>
-                <Text fw={700} fz="xl">
-                  {user.rating}
-                </Text>
-              </Stack>
-              <ThemeIcon color="teal" variant="light" size={36}>
-                <IconChartLine size={18} />
-              </ThemeIcon>
+            <Group justify="space-between">
+              {ratingHistory.blitz && (
+                <Stack gap={2} p="lg" align="center">
+                  <Text size="xs" c="yellow.6">
+                    Blitz
+                  </Text>
+                  <Text fw={700} fz="xl">
+                    {ratingHistory.blitz}
+                  </Text>
+                </Stack>
+              )}
+              {ratingHistory.rapid && (
+                <Stack gap={2} p="lg" align="center">
+                  <Text size="xs" c="teal.6">
+                    Rapid
+                  </Text>
+                  <Text fw={700} fz="xl">
+                    {ratingHistory.rapid}
+                  </Text>
+                </Stack>
+              )}
+              {ratingHistory.bullet && (
+                <Stack gap={2} p="lg" align="center">
+                  <Text size="xs" c="blue.6">
+                    Bullet
+                  </Text>
+                  <Text fw={700} fz="xl">
+                    {ratingHistory.bullet}
+                  </Text>
+                </Stack>
+              )}
             </Group>
-            <Box mt="sm">
-              <AreaChart
-                h={120}
-                data={ratingHistory}
-                dataKey="day"
-                series={[{ name: "rating", color: "teal.6" }]}
-                withLegend={false}
-                curveType="monotone"
-                gridAxis="none"
-                xAxisProps={{ hide: true }}
-                yAxisProps={{ hide: true }}
-                strokeWidth={2}
-                fillOpacity={0.25}
-              />
-            </Box>
           </Card>
         </Grid.Col>
 
@@ -253,10 +342,12 @@ export default function DashboardPage() {
               {quickActions.map((qa) => (
                 <Card key={qa.title} withBorder radius="md" p="md">
                   <Stack gap={8} align="flex-start">
-                    <ThemeIcon variant="light" color={qa.color} size={42} radius="md">
-                      {qa.icon}
-                    </ThemeIcon>
-                    <Text fw={600}>{qa.title}</Text>
+                    <Group>
+                      <ThemeIcon variant="light" color={qa.color} size={42} radius="md">
+                        {qa.icon}
+                      </ThemeIcon>
+                      <Text fw={600}>{qa.title}</Text>
+                    </Group>
                     <Text size="sm" c="dimmed">
                       {qa.description}
                     </Text>
@@ -357,7 +448,12 @@ export default function DashboardPage() {
           <Card withBorder p="lg" radius="md" h="100%">
             <Group justify="space-between" mb="sm">
               <Text fw={700}>Puzzles</Text>
-              <Button size="xs" variant="light" onClick={() => navigate({ to: "/boards" })} leftSection={<IconPuzzle size={16} />}>
+              <Button
+                size="xs"
+                variant="light"
+                onClick={() => navigate({ to: "/boards" })}
+                leftSection={<IconPuzzle size={16} />}
+              >
                 Solve now
               </Button>
             </Group>
@@ -382,18 +478,16 @@ export default function DashboardPage() {
                 <Text size="sm" c="dimmed" mb={6}>
                   This week
                 </Text>
-                <AreaChart
+                <BarChart
                   h={120}
                   data={puzzleStats.history}
                   dataKey="day"
                   series={[{ name: "solved", color: "yellow.6" }]}
                   withLegend={false}
-                  curveType="monotone"
                   gridAxis="none"
                   xAxisProps={{ hide: true }}
                   yAxisProps={{ hide: true }}
-                  strokeWidth={2}
-                  fillOpacity={0.25}
+                  barProps={{ radius: 4 }}
                 />
               </Box>
             </Group>

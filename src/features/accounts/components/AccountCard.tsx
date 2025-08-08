@@ -19,6 +19,8 @@ import {
   IconArrowRight,
   IconArrowUpRight,
   IconCheck,
+  IconCircle,
+  IconCircleCheck,
   IconDownload,
   IconEdit,
   type IconProps,
@@ -57,6 +59,8 @@ interface AccountCardProps {
   reload: () => void;
   setDatabases: (databases: DatabaseInfo[]) => void;
   token?: string;
+  isMain?: boolean;
+  setMain?: () => void;
 }
 
 export function AccountCard({
@@ -72,6 +76,8 @@ export function AccountCard({
   setDatabases,
   token,
   setSessions,
+  isMain,
+  setMain,
 }: AccountCardProps) {
   const items = stats.map((stat) => {
     let color = "gray.5";
@@ -208,11 +214,12 @@ export function AccountCard({
                     {name}
                   </Text>
                 )}
-                <Group wrap="nowrap">
+                <Group>
                   <Text size="xs" fw="bold" c="dimmed">
                     {title}
                   </Text>
-
+                </Group>
+                <Group wrap="nowrap">
                   <Group gap="3px">
                     <Text size="xs" fw="bold" c="dimmed">
                       {total}
@@ -237,6 +244,11 @@ export function AccountCard({
             </Group>
           </Accordion.Control>
           <Group gap="xs" className={moduleClasses.accordionActions}>
+            <Tooltip label={isMain ? "Main account" : "Set as main account"}>
+              <ActionIcon size="sm" onClick={setMain} aria-label={isMain ? "Main account" : "Set as main account"}>
+                {isMain ? <IconCircleCheck /> : <IconCircle />}
+              </ActionIcon>
+            </Tooltip>
             {edit ? (
               <ActionIcon
                 size="sm"
