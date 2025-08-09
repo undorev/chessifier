@@ -39,6 +39,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
+import { getPuzzleStats } from "@/utils/puzzleStreak";
 import { genID, type Tab } from "@/utils/tabs";
 
 function getChessTitle(rating: number): string {
@@ -124,19 +125,21 @@ export default function DashboardPage() {
     getRecentGames(10).then(setRecentGames);
   }, []);
 
-  const puzzleStats = {
-    currentStreak: 7,
-    target: 30,
-    history: [
-      { day: "Mon", solved: 3 },
-      { day: "Tue", solved: 2 },
-      { day: "Wed", solved: 4 },
-      { day: "Thu", solved: 1 },
-      { day: "Fri", solved: 5 },
-      { day: "Sat", solved: 2 },
-      { day: "Sun", solved: 3 },
-    ],
-  };
+  const [puzzleStats, setPuzzleStats] = useState(() => getPuzzleStats());
+  useEffect(() => {
+    const update = () => setPuzzleStats(getPuzzleStats());
+    const onVisibility = () => {
+      if (!document.hidden) update();
+    };
+    window.addEventListener("storage", update);
+    window.addEventListener("focus", update);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("storage", update);
+      window.removeEventListener("focus", update);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   const suggestions = [
     { id: "l1", title: "Blunder Check: Hanging Pieces", tag: "Tactics", difficulty: "Beginner" },

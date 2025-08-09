@@ -122,7 +122,7 @@ function Databases() {
       {error && <Text ta="center">Error loading databases: {error}</Text>}
       {personalInfo &&
         (personalInfo.length === 0 ? (
-          <>
+          <Stack>
             <Flex justify="center">
               <Select
                 value={name}
@@ -141,7 +141,7 @@ function Databases() {
             <Text ta="center" fw="bold" my="auto" fz="lg">
               No databases found
             </Text>
-          </>
+          </Stack>
         ) : (
           <PersonalPlayerCard
             name={name}
