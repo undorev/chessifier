@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Pawn Appetit",
-  "version": "0.2.0",
+  "version": "0.3.0-alpha",
   "mainBinaryName": "pawn-appetit",
   "identifier": "com.pawnappetit",
   "bundle": {
@@ -13,7 +13,13 @@
       "digestAlgorithm": "sha256",
       "timestampUrl": ""
     },
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
     "linux": {
       "deb": {
         "depends": []
@@ -73,7 +79,9 @@
     ],
     "security": {
       "assetProtocol": {
-        "scope": ["**"],
+        "scope": [
+          "**"
+        ],
         "enable": true
       },
       "csp": "default-src 'self'; img-src 'self' asset: data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://github.com"
