@@ -296,7 +296,7 @@ function BoardGame() {
   const setResult = useStore(store, (s) => s.setResult);
   const appendMove = useStore(store, (s) => s.appendMove);
 
-  const [_, setTabs] = useAtom(tabsAtom);
+  const [tabs, setTabs] = useAtom(tabsAtom);
 
   const boardRef = useRef(null);
   const [gameState, setGameState] = useAtom(currentGameStateAtom);
@@ -311,6 +311,22 @@ function BoardGame() {
   const [pos, error] = useMemo(() => {
     return positionFromFen(lastNode.fen);
   }, [lastNode.fen]);
+
+  const activeTabData = tabs?.find((tab) => tab.value === activeTab);
+
+  useEffect(() => {
+    if (activeTabData?.meta?.timeControl) {
+      const { timeControl } = activeTabData.meta;
+      setPlayer1Settings((prev) => ({
+        ...prev,
+        timeControl,
+      }));
+      setPlayer2Settings((prev) => ({
+        ...prev,
+        timeControl,
+      }));
+    }
+  }, [activeTabData]);
 
   useEffect(() => {
     if (pos?.isEnd()) {

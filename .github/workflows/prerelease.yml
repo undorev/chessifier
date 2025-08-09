@@ -70,7 +70,7 @@ jobs:
           CI: false
         with:
           tagName: ${{ github.ref_name }}-beta
-          releaseName: "v__VERSION__-beta"
+          releaseName: ${{ github.ref_name }}-beta
           releaseBody: "See the assets to download and install this version."
           releaseDraft: false
           prerelease: true

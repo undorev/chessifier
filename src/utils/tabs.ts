@@ -25,6 +25,14 @@ export const tabSchema = z.object({
   type: z.enum(["new", "play", "analysis", "puzzles"]),
   gameNumber: z.number().nullish(),
   source: entitySourceMetadataSchema.nullish(),
+  meta: z
+    .object({
+      timeControl: z.object({
+        seconds: z.number(),
+        increment: z.number(),
+      }),
+    })
+    .optional(),
 });
 
 export type Tab = z.infer<typeof tabSchema>;

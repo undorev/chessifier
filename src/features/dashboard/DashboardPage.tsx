@@ -195,6 +195,12 @@ export default function DashboardPage() {
               value: uuid,
               name: "Classical",
               type: "play",
+              meta: {
+                timeControl: {
+                  seconds: 30 * 60 * 1000,
+                  increment: 0,
+                },
+              },
             },
           ];
         });
@@ -206,7 +212,7 @@ export default function DashboardPage() {
     {
       icon: <IconStopwatch />,
       title: "Rapid",
-      description: "Engage in rapid chess matches",
+      description: "Play quick-paced rapid games",
       onClick: () => {
         const uuid = genID();
         setTabs((prev: Tab[]) => {
@@ -216,6 +222,12 @@ export default function DashboardPage() {
               value: uuid,
               name: "Rapid",
               type: "play",
+              meta: {
+                timeControl: {
+                  seconds: 10 * 60 * 1000,
+                  increment: 0,
+                },
+              },
             },
           ];
         });
@@ -237,6 +249,12 @@ export default function DashboardPage() {
               value: uuid,
               name: "Blitz",
               type: "play",
+              meta: {
+                timeControl: {
+                  seconds: 3 * 60 * 1000,
+                  increment: 0,
+                },
+              },
             },
           ];
         });
@@ -244,6 +262,33 @@ export default function DashboardPage() {
         navigate({ to: "/boards" });
       },
       color: "yellow.6",
+    },
+    {
+      icon: <IconBolt />,
+      title: "Bullet",
+      description: "Play ultra-fast bullet games",
+      onClick: () => {
+        const uuid = genID();
+        setTabs((prev: Tab[]) => {
+          return [
+            ...prev,
+            {
+              value: uuid,
+              name: "Bullet",
+              type: "play",
+              meta: {
+                timeControl: {
+                  seconds: 1 * 60 * 1000,
+                  increment: 0,
+                },
+              },
+            },
+          ];
+        });
+        setActiveTab(uuid);
+        navigate({ to: "/boards" });
+      },
+      color: "blue.6",
     },
   ];
 
@@ -279,10 +324,10 @@ export default function DashboardPage() {
       </Card>
 
       <Grid>
-        <Grid.Col span={{ base: 12, md: 4 }}>
+        <Grid.Col span={{ base: 12, md: 3 }}>
           <Card withBorder p="lg" radius="md" h="100%">
             <Group>
-              <Avatar size={56} radius="xl" src={undefined}>
+              <Avatar size={40} radius="xl" src={undefined}>
                 {user.name[0]}
               </Avatar>
               <Box>
@@ -300,7 +345,7 @@ export default function DashboardPage() {
             <Divider my="md" />
             <Group justify="space-between">
               {ratingHistory.blitz && (
-                <Stack gap={2} p="lg" align="center">
+                <Stack gap={2} p="md" align="center">
                   <Text size="xs" c="yellow.6">
                     Blitz
                   </Text>
@@ -310,7 +355,7 @@ export default function DashboardPage() {
                 </Stack>
               )}
               {ratingHistory.rapid && (
-                <Stack gap={2} p="lg" align="center">
+                <Stack gap={2} p="md" align="center">
                   <Text size="xs" c="teal.6">
                     Rapid
                   </Text>
@@ -320,7 +365,7 @@ export default function DashboardPage() {
                 </Stack>
               )}
               {ratingHistory.bullet && (
-                <Stack gap={2} p="lg" align="center">
+                <Stack gap={2} p="md" align="center">
                   <Text size="xs" c="blue.6">
                     Bullet
                   </Text>
@@ -333,15 +378,9 @@ export default function DashboardPage() {
           </Card>
         </Grid.Col>
 
-        <Grid.Col span={{ base: 12, md: 8 }}>
+        <Grid.Col span={{ base: 12, md: 9 }}>
           <Card withBorder p="lg" radius="md" h="100%">
-            <Group justify="space-between" mb="md">
-              <Text fw={700}>Quick actions</Text>
-              <Text size="sm" c="dimmed">
-                Jump in with one click
-              </Text>
-            </Group>
-            <SimpleGrid cols={{ base: 3, sm: 3, lg: 3 }}>
+            <SimpleGrid cols={{ base: 4, sm: 4, lg: 4 }}>
               {quickActions.map((qa) => (
                 <Card key={qa.title} withBorder radius="md" p="md">
                   <Stack gap={8} align="flex-start">
