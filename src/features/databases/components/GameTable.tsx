@@ -224,7 +224,7 @@ function GameTable() {
                 id: record.id,
               },
             });
-            navigate({ to: "/" });
+            navigate({ to: "/boards" });
           }}
           columns={[
             {

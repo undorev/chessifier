@@ -152,7 +152,7 @@ function TournamentCard({ tournament, file }: { tournament: Event; file: string 
                             id: game.id,
                           },
                         });
-                        navigate({ to: "/" });
+                        navigate({ to: "/boards" });
                       }}
                     >
                       <IconEye size="1rem" stroke={1.5} />
