@@ -35,6 +35,13 @@ export async function saveGameRecord(record: GameRecord) {
   }
   records.unshift(record);
   await writeTextFile(file, JSON.stringify(records));
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new Event("games:updated"));
+    } catch {
+      // ignore
+    }
+  }
 }
 
 export async function getRecentGames(limit = 20): Promise<GameRecord[]> {
@@ -46,5 +53,23 @@ export async function getRecentGames(limit = 20): Promise<GameRecord[]> {
     return records.slice(0, limit);
   } catch {
     return [];
+  }
+}
+
+export async function countGamesOnDate(date: Date = new Date()): Promise<number> {
+  const dir = await appDataDir();
+  const file = await resolve(dir, FILENAME);
+  try {
+    const text = await readTextFile(file);
+    const records: GameRecord[] = JSON.parse(text);
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    const d = date.getDate();
+    return records.filter((r) => {
+      const dt = new Date(r.timestamp);
+      return dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d;
+    }).length;
+  } catch {
+    return 0;
   }
 }

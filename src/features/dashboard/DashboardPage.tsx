@@ -37,9 +37,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { lessons } from "@/features/learn/constants/lessons";
+import { practiceCategories } from "@/features/learn/constants/practiceCategories";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
+import { useUserStatsStore } from "@/state/userStatsStore";
+import { type Achievement, getAchievements } from "@/utils/achievements";
+import { type DailyGoal, getDailyGoals } from "@/utils/dailyGoals";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
-import { getPuzzleStats } from "@/utils/puzzleStreak";
+import { getPuzzleStats, getTodayPuzzleCount } from "@/utils/puzzleStreak";
 import { genID, type Tab } from "@/utils/tabs";
 
 function getChessTitle(rating: number): string {
@@ -141,17 +146,139 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const suggestions = [
-    { id: "l1", title: "Blunder Check: Hanging Pieces", tag: "Tactics", difficulty: "Beginner" },
-    { id: "l2", title: "Endgame Basics: King & Pawn", tag: "Endgames", difficulty: "Intermediate" },
-    { id: "l3", title: "Opening Explorer: Queen's Gambit", tag: "Openings", difficulty: "All" },
-  ];
+  const userStats = useUserStatsStore((s) => s.userStats);
 
-  const goals = [
-    { id: "g", label: "Play 2 games", current: 1, total: 2 },
-    { id: "p", label: "Solve 10 puzzles", current: 6, total: 10 },
-    { id: "l", label: "Finish 1 lesson", current: 0, total: 1 },
-  ];
+  type Suggestion = {
+    id: string;
+    title: string;
+    tag: "Lessons" | "Openings" | "Endgames" | "Tactics";
+    difficulty: string;
+    to?: string;
+    onClick?: () => void;
+  };
+
+  const suggestions: Suggestion[] = (() => {
+    const picked: Suggestion[] = [];
+
+    try {
+      const nextLesson = lessons.find((l) => {
+        const done = userStats.completedExercises?.[l.id]?.length ?? 0;
+        return (l.exercises?.length ?? 0) > 0 && done < (l.exercises?.length ?? 0);
+      });
+      if (nextLesson) {
+        picked.push({
+          id: `lesson:${nextLesson.id}`,
+          title: `Continue: ${nextLesson.title}`,
+          tag: "Lessons",
+          difficulty: nextLesson.difficulty?.toString?.().replace(/^./, (c) => c.toUpperCase()) ?? "All",
+          to: "/learn/lessons",
+        });
+      }
+    } catch {}
+
+    try {
+      const withExercises = practiceCategories.filter((c) => (c.exercises?.length ?? 0) > 0);
+      const scored = withExercises
+        .map((c) => {
+          const done = userStats.completedPractice?.[c.id]?.length ?? 0;
+          const total = c.exercises?.length ?? 0;
+          return { c, ratio: total ? done / total : 1, total, done };
+        })
+        .sort((a, b) => a.ratio - b.ratio || a.total - b.total);
+      const target = scored[0]?.c;
+      if (target) {
+        const group = target.group ?? "";
+        const tag: Suggestion["tag"] = /Endgames/i.test(group)
+          ? "Endgames"
+          : /Checkmates|Tactics/i.test(group)
+            ? "Tactics"
+            : "Lessons";
+        picked.push({
+          id: `practice:${target.id}`,
+          title: `Practice: ${target.title}`,
+          tag,
+          difficulty: "All",
+          to: "/learn/practice",
+        });
+      }
+    } catch {}
+
+    try {
+      const today = getTodayPuzzleCount();
+      if (today < 5) {
+        picked.push({
+          id: `puzzles:streak`,
+          title: today === 0 ? "Start today’s puzzle streak" : "Keep the streak: solve more puzzles",
+          tag: "Tactics",
+          difficulty: "All",
+          to: "/learn/practice",
+        });
+      }
+    } catch {}
+
+    try {
+      const last: GameRecord | undefined = recentGames?.[0];
+      if (last) {
+        const isUserWhite = last.white.type === "human";
+        const userLost = (isUserWhite && last.result === "0-1") || (!isUserWhite && last.result === "1-0");
+        if (userLost) {
+          picked.push({
+            id: `analyze:${last.id}`,
+            title: "Analyze your last game",
+            tag: "Lessons",
+            difficulty: "All",
+            onClick: () => {
+              const uuid = genID();
+              setTabs((prev: Tab[]) => [...prev, { value: uuid, name: "Analyze", type: "analysis" }]);
+              setActiveTab(uuid);
+              navigate({ to: "/boards" });
+            },
+          });
+        }
+      }
+    } catch {}
+
+    while (picked.length < 3) {
+      const fallbackId = `fallback:${picked.length}`;
+      picked.push({
+        id: fallbackId,
+        title: "Explore popular openings",
+        tag: "Openings",
+        difficulty: "All",
+        to: "/learn/practice",
+      });
+    }
+
+    return picked.slice(0, 3);
+  })();
+  const [goals, setGoals] = useState<DailyGoal[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const g = await getDailyGoals();
+      const a = await getAchievements();
+      if (mounted) {
+        setGoals(g);
+        setAchievements(a);
+      }
+    };
+    load();
+    const update = () => load();
+    window.addEventListener("storage", update);
+    window.addEventListener("focus", update);
+    window.addEventListener("puzzles:updated", update);
+    window.addEventListener("games:updated", update);
+    const unsubscribe = useUserStatsStore.subscribe(() => update());
+    return () => {
+      mounted = false;
+      window.removeEventListener("storage", update);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("puzzles:updated", update);
+      window.removeEventListener("games:updated", update);
+      unsubscribe();
+    };
+  }, []);
 
   const PLAY_CHESS = {
     icon: <IconChess size={50} />,
@@ -579,7 +706,11 @@ export default function DashboardPage() {
                   </Group>
                   <Button
                     variant="light"
-                    onClick={() => navigate({ to: "/learn" })}
+                    onClick={() => {
+                      if (s.onClick) s.onClick();
+                      else if (s.to) navigate({ to: s.to });
+                      else navigate({ to: "/learn" });
+                    }}
                     rightSection={<IconArrowRight size={16} />}
                   >
                     Start
@@ -619,9 +750,11 @@ export default function DashboardPage() {
               <Badge color="yellow" variant="light" leftSection={<IconFlame size={14} />}>
                 Streak {puzzleStats.currentStreak}
               </Badge>
-              <Badge color="teal" variant="light" leftSection={<IconTrophy size={14} />}>
-                Achievement: Tactician
-              </Badge>
+              {achievements.map((a) => (
+                <Badge key={a.id} color="teal" variant="light" leftSection={<IconTrophy size={14} />}>
+                  Achievement: {a.label}
+                </Badge>
+              ))}
             </Group>
           </Card>
         </Grid.Col>

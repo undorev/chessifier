@@ -44,6 +44,11 @@ export function recordPuzzleSolved(at: Date = new Date()) {
   const key = dateKey(at);
   solves[key] = (solves[key] ?? 0) + 1;
   writeSolves(solves);
+  try {
+    window.dispatchEvent(new Event("puzzles:updated"));
+  } catch {
+    // noop for non-browser env
+  }
 }
 
 export function getPuzzleStats(options?: { days?: number; target?: number }) {
@@ -71,3 +76,9 @@ export function getPuzzleStats(options?: { days?: number; target?: number }) {
 }
 
 export type PuzzleStats = ReturnType<typeof getPuzzleStats>;
+
+export function getTodayPuzzleCount(d: Date = new Date()): number {
+  const solves = readSolves();
+  const key = dateKey(d);
+  return solves[key] ?? 0;
+}

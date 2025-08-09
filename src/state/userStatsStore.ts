@@ -10,6 +10,7 @@ export interface UserStats {
   totalPractice: number;
   totalPoints: number;
   completionDates: string[];
+  lessonCompletionDates: string[];
   completedExercises: { [lessonId: string]: string[] };
   completedPractice: { [categoryId: string]: string[] };
 }
@@ -21,7 +22,7 @@ interface UserStatsState {
 
 export const useUserStatsStore = create<UserStatsState>()(
   persist(
-    (set) => ({
+  (set) => ({
       userStats: {
         lessonsCompleted: 0,
         totalLessons: lessons.reduce((sum, lesson) => sum + lesson.exercises.length, 0),
@@ -29,33 +30,37 @@ export const useUserStatsStore = create<UserStatsState>()(
         totalPractice: practiceCategories.reduce((sum, cat) => sum + cat.exercises.length, 0),
         totalPoints: 0,
         completionDates: [],
+        lessonCompletionDates: [],
         completedExercises: {},
         completedPractice: {},
       },
       setUserStats: (stats) =>
         set((state) => {
-          const updatedStats = { ...state.userStats, ...stats };
+          const todayISO = new Date().toISOString();
+          const prev = state.userStats;
 
-          const addCompletionDate = () => {
-            const today = new Date().toISOString();
-            if (!updatedStats.completionDates.includes(today)) {
-              updatedStats.completionDates.push(today);
-            }
-          };
+          const mergeUnique = (a: string[], b: string[] | undefined) =>
+            Array.from(new Set([...(a || []), ...((b as string[]) || [])]));
 
-          if (stats.completedExercises) {
-            Object.entries(stats.completedExercises).forEach(([_, exercises]) => {
-              exercises.forEach(() => addCompletionDate());
-            });
+          const updated: UserStats = {
+            ...prev,
+            ...stats,
+            completionDates: stats.completionDates
+              ? Array.from(new Set([...(prev.completionDates || []), ...stats.completionDates]))
+              : prev.completionDates,
+            lessonCompletionDates: stats.lessonCompletionDates
+              ? mergeUnique(prev.lessonCompletionDates, stats.lessonCompletionDates)
+              : prev.lessonCompletionDates,
+            completedExercises: stats.completedExercises ? { ...prev.completedExercises, ...stats.completedExercises } : prev.completedExercises,
+            completedPractice: stats.completedPractice ? { ...prev.completedPractice, ...stats.completedPractice } : prev.completedPractice,
+          } as UserStats;
+
+          if (stats.completedExercises || stats.completedPractice) {
+            const hasToday = updated.completionDates.some((d) => d.slice(0, 10) === todayISO.slice(0, 10));
+            if (!hasToday) updated.completionDates = [...updated.completionDates, todayISO];
           }
 
-          if (stats.completedPractice) {
-            Object.entries(stats.completedPractice).forEach(([_, exercises]) => {
-              exercises.forEach(() => addCompletionDate());
-            });
-          }
-
-          return { userStats: updatedStats };
+          return { userStats: updated };
         }),
     }),
     {

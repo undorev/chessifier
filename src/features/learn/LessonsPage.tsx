@@ -84,6 +84,11 @@ export default function LessonsPage() {
         if (lesson && updatedCompleted[lessonId]?.length === lesson.exercises.length) {
           setCompletedLessonTitle(lesson.title);
           setShowCompletionModal(true);
+          const today = new Date().toISOString();
+          setUserStats({
+            completionDates: [...(userStats.completionDates || []), today],
+            lessonCompletionDates: [today],
+          });
         }
       }
     },
