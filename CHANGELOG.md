@@ -1,5 +1,68 @@
 # Chessifier
 
+## v0.3.0-alpha
+
+### ✨ Features
+
+* **User Progress & Stats**
+
+  * Added **lesson completion date tracking** and **achievement recording**
+  * Implemented **user progress tracking** for lessons and practice sessions
+  * Added **puzzle streak counter** to track consecutive days completed
+* **Gameplay Enhancements**
+
+  * Added **time control metadata** support for various game types
+  * Integrated a **lightweight custom chess engine** for move validation and FEN updates
+* **Dashboard**
+
+  * Added **dashboard page** with the ability to **hide on app startup** (WIP)
+  * Updated dashboard with **user ratings** and **main account selection**
+* **UI & Navigation**
+
+  * Added **theme switching options** to spotlight search
+  * Improved Databases, Engines, and Accounts pages with **search and sorting functionality**
+
+### 🛠 Improvements & Refactors
+
+* **Lesson & Practice**
+
+  * Refined **lesson and practice sections** with better tracking and UI updates
+* **Accounts**
+
+  * Added **alert for Chess.com API limitations**
+  * Improved total games count calculation
+* **Game Import**
+
+  * Corrected **ply count parsing** by fixing move parsing logic
+* **UI Interaction**
+
+  * Enabled **window dragging and minimize action**
+  * Improved **navigation paths** for board-related components
+* **Shortcuts**
+
+  * Revised **spotlight, reload, and exit shortcuts** for better usability
+
+### 🐛 Fixes
+
+* Fixed **decode\_move** failure handling to prevent crashes
+* Fixed **external image loading in production** by updating CSP and allowlist
+* Fixed **window behavior** issues on minimize and drag
+* Corrected various **lesson and practice bugs** in the Learn section
+
+### 📚 Documentation
+
+* Added `CONTRIBUTING_TRANSLATIONS.md` with guidelines for translation updates
+* Added **Code of Conduct**, **Security Policy**, and **PR template**
+* Updated `README` with new **screenshots section**
+* Updated **Italian translation** with missing keys and typo fixes — thanks to [gm-m](https://github.com/gm-m) for their first contribution 🎉
+
+### 🧹 Chores
+
+* Added script to **automatically update missing translation keys**
+* Updated workflow files for consistency and clarity 👷
+* Updated screenshots
+* Updated dependencies
+
 ## v0.2.0
 
 ### ✨ Features
