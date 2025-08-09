@@ -1,4 +1,4 @@
-import { Accordion, Paper, ScrollArea, Stack } from "@mantine/core";
+import { Accordion, Alert, Paper, ScrollArea, Stack } from "@mantine/core";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import type { DatabaseInfo } from "@/bindings";
@@ -11,9 +11,13 @@ import type { Session } from "@/utils/session";
 function AccountCards({
   databases,
   setDatabases,
+  query = "",
+  sortBy = "name",
 }: {
   databases: DatabaseInfo[];
   setDatabases: React.Dispatch<React.SetStateAction<DatabaseInfo[]>>;
+  query?: string;
+  sortBy?: "name" | "elo";
 }) {
   const sessions = useAtomValue(sessionsAtom);
   const playerNames = Array.from(
@@ -31,8 +35,51 @@ function AccountCards({
     ),
   }));
 
-  // Main account selection state
+  function bestRatingForSession(s: Session): number {
+    if (s.lichess?.account?.perfs) {
+      const p = s.lichess.account.perfs;
+      const ratings = [p.bullet?.rating, p.blitz?.rating, p.rapid?.rating, p.classical?.rating].filter(
+        (x): x is number => typeof x === "number",
+      );
+      if (ratings.length) return Math.max(...ratings);
+    }
+    if (s.chessCom?.stats) {
+      const arr = getStats(s.chessCom.stats);
+      if (arr.length) return Math.max(...arr.map((a) => a.value));
+    }
+    return -1;
+  }
+
+  function bestRatingForPlayer(sessions: Session[]): number {
+    const vals = sessions.map(bestRatingForSession).filter((v) => v >= 0);
+    return vals.length ? Math.max(...vals) : -1;
+  }
+
+  const q = query.trim().toLowerCase();
+  const filteredAndSorted = playerSessions
+    .filter(({ name, sessions }) => {
+      if (!q) return true;
+      const usernames = sessions
+        .map((s) => s.lichess?.username || s.chessCom?.username || "")
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return name.toLowerCase().includes(q) || usernames.includes(q);
+    })
+    .sort((a, b) => {
+      if (sortBy === "name") return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      const ra = bestRatingForPlayer(a.sessions);
+      const rb = bestRatingForPlayer(b.sessions);
+      return rb - ra;
+    });
+
   const [mainAccount, setMainAccount] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("mainAccount");
+    setMainAccount(stored);
+  }, []);
+
   useEffect(() => {
     if (mainAccount) {
       localStorage.setItem("mainAccount", mainAccount);
@@ -42,17 +89,23 @@ function AccountCards({
   return (
     <ScrollArea offsetScrollbars>
       <Stack>
-        {playerSessions.map(({ name, sessions }) => (
-          <PlayerSession
-            key={name}
-            name={name}
-            sessions={sessions}
-            databases={databases}
-            setDatabases={setDatabases}
-            isMain={mainAccount === name}
-            setMain={() => setMainAccount(name)}
-          />
-        ))}
+        {filteredAndSorted.length === 0 ? (
+          <Alert title="No accounts found" color="gray" variant="light">
+            Try adjusting your search or add a new account.
+          </Alert>
+        ) : (
+          filteredAndSorted.map(({ name, sessions }) => (
+            <PlayerSession
+              key={name}
+              name={name}
+              sessions={sessions}
+              databases={databases}
+              setDatabases={setDatabases}
+              isMain={mainAccount === name}
+              setMain={() => setMainAccount(name)}
+            />
+          ))
+        )}
       </Stack>
     </ScrollArea>
   );

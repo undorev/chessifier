@@ -1,4 +1,4 @@
-import { Flex, Progress, Select, Text } from "@mantine/core";
+import { Flex, Progress, Select, Stack, Text } from "@mantine/core";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import useSWRImmutable from "swr/immutable";
@@ -111,13 +111,13 @@ function Databases() {
   return (
     <>
       {isLoading && databases && (
-        <>
+        <Stack>
           <Text ta="center" fw="bold" my="auto" fz="lg">
             Processing Games...
           </Text>
 
           <Progress value={progress} />
-        </>
+        </Stack>
       )}
       {error && <Text ta="center">Error loading databases: {error}</Text>}
       {personalInfo &&

@@ -1,5 +1,7 @@
 import {
   ActionIcon,
+  Alert,
+  Badge,
   Box,
   Button,
   Center,
@@ -16,21 +18,21 @@ import {
   SimpleGrid,
   Space,
   Stack,
+  Switch,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconCloud, IconCpu, IconPhotoPlus, IconPlus } from "@tabler/icons-react";
+import { IconArrowsSort, IconCloud, IconCpu, IconPhotoPlus, IconPlus, IconSearch } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
-import { match, P } from "ts-pattern";
-import { commands } from "@/bindings";
+import { commands, type UciOptionConfig } from "@/bindings";
 import GenericCard from "@/common/components/GenericCard";
 import * as classes from "@/common/components/GenericCard.css";
 import GoModeInput from "@/common/components/GoModeInput";
@@ -48,6 +50,8 @@ export default function EnginesPage() {
 
   const [engines, setEngines] = useAtom(enginesAtom);
   const [opened, setOpened] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "elo">("name");
   const { selected } = Route.useSearch();
   const navigate = useNavigate();
   const setSelected = (v: number | null) => {
@@ -57,56 +61,106 @@ export default function EnginesPage() {
 
   const selectedEngine = selected !== undefined ? engines[selected] : null;
 
+  const filteredIndices = useMemo<number[]>(() => {
+    const indices = engines
+      .map((_, i) => i)
+      .filter((i) => {
+        const e = engines[i];
+        if (!query.trim()) return true;
+        const q = query.toLowerCase();
+        const extra = e.type === "local" ? (e.version ?? "") : "";
+        const hay = [e.name, e.type === "local" ? e.path : e.url, extra].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    return indices.sort((a, b) => {
+      const ea = engines[a];
+      const eb = engines[b];
+      if (sortBy === "name") return ea.name.toLowerCase().localeCompare(eb.name.toLowerCase());
+      const eloA = ea.type === "local" ? (ea.elo ?? -1) : -1;
+      const eloB = eb.type === "local" ? (eb.elo ?? -1) : -1;
+      return eloB - eloA;
+    });
+  }, [engines, query, sortBy]);
+
   return (
-    <Stack h="100%" px="lg" pb="lg">
+    <Stack h="100%">
       <AddEngine opened={opened} setOpened={setOpened} />
-      <Group align="baseline" py="sm">
+      <Group align="center" pl="lg" py="sm">
         <Title>{t("Engines.Title")}</Title>
         <OpenFolderButton base="AppDir" folder="engines" />
       </Group>
-      <Group grow flex={1} style={{ overflow: "hidden" }} align="start">
-        <ScrollArea h="100%" offsetScrollbars>
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: "md", md: "sm" }}>
-            {engines.map((item, i) => {
-              const stats =
-                item.type === "local"
-                  ? [
-                      {
-                        label: "ELO",
-                        value: item.elo ? item.elo.toString() : "??",
-                      },
-                    ]
-                  : [{ label: "Type", value: "Cloud" }];
-              if (item.type === "local" && item.version) {
-                stats.push({
-                  label: t("Common.Version"),
-                  value: item.version,
-                });
-              }
-              return (
-                <GenericCard
-                  id={i}
-                  key={item.name}
-                  isSelected={selected === i}
-                  setSelected={setSelected}
-                  error={undefined}
-                  content={<EngineName engine={item} stats={stats} />}
-                />
-              );
-            })}
-            <Box className={classes.card} h="177px" component="button" type="button" onClick={() => setOpened(true)}>
-              <Stack gap={0} justify="center" w="100%" h="100%">
-                <Text mb={10}>{t("Common.AddNew")}</Text>
-                <Box>
-                  <IconPlus size="1.3rem" />
-                </Box>
-              </Stack>
-            </Box>
-          </SimpleGrid>
-        </ScrollArea>
+      <Group grow flex={1} style={{ overflow: "hidden" }} align="start" px="md" pb="md">
+        <Stack>
+          <Group wrap="wrap" gap="xs" justify="space-between">
+            <Group>
+              <TextInput
+                aria-label="Search engines"
+                placeholder="Search engines..."
+                leftSection={<IconSearch size="1rem" />}
+                value={query}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+                w={{ base: "100%", sm: 260 }}
+              />
+              <Button
+                variant="default"
+                leftSection={<IconArrowsSort size="1rem" />}
+                onClick={() => setSortBy((s) => (s === "name" ? "elo" : "name"))}
+                aria-label={`Sort by ${sortBy === "name" ? "elo" : "name"}`}
+              >
+                Sort: {sortBy === "name" ? "Name" : "ELO"}
+              </Button>
+            </Group>
+            <Button size="xs" leftSection={<IconPlus size="1rem" />} onClick={() => setOpened(true)} mr="sm">
+              {t("Common.AddNew")}
+            </Button>
+          </Group>
+          <ScrollArea h="calc(100vh - 190px)" offsetScrollbars aria-live="polite">
+            {filteredIndices.length === 0 ? (
+              <Alert title="No engines found" color="gray" variant="light">
+                Try adjusting your search or add a new engine.
+              </Alert>
+            ) : (
+              <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: "md", md: "sm" }}>
+                {filteredIndices.map((i: number) => {
+                  const item = engines[i];
+                  const stats =
+                    item.type === "local"
+                      ? [
+                          {
+                            label: "ELO",
+                            value: item.elo ? item.elo.toString() : "??",
+                          },
+                        ]
+                      : [{ label: "Type", value: "Cloud" }];
+                  if (item.type === "local" && item.version) {
+                    stats.push({
+                      label: t("Common.Version"),
+                      value: item.version,
+                    });
+                  }
+                  return (
+                    <GenericCard
+                      id={i}
+                      key={`${item.name}-${i}`}
+                      isSelected={selected === i}
+                      setSelected={setSelected}
+                      error={undefined}
+                      content={<EngineName engine={item} stats={stats} />}
+                    />
+                  );
+                })}
+              </SimpleGrid>
+            )}
+          </ScrollArea>
+        </Stack>
         <Paper withBorder p="md" h="100%">
           {!selectedEngine || selected === undefined ? (
-            <Text ta="center">{t("Engines.Settings.NoEngine")}</Text>
+            <Stack align="center" justify="center" h="100%">
+              <Text ta="center">{t("Engines.Settings.NoEngine")}</Text>
+              <Text c="dimmed" size="sm" ta="center">
+                Tip: Select an engine to edit its settings.
+              </Text>
+            </Stack>
           ) : selectedEngine.type === "local" ? (
             <EngineSettings selected={selected} setSelected={setSelected} />
           ) : (
@@ -126,7 +180,7 @@ export default function EnginesPage() {
                 }}
               />
 
-              <Checkbox
+              <Switch
                 label={t("Common.Enabled")}
                 checked={!!selectedEngine.loaded}
                 onChange={(e) => {
@@ -203,41 +257,67 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
   }
 
   useEffect(() => {
-    if (options) {
-      const settings = [...(engine.settings || [])];
-      const missing = requiredEngineSettings.filter((field) => !settings.find((setting) => setting.name === field));
-      for (const field of requiredEngineSettings) {
-        if (!settings.find((setting) => setting.name === field)) {
-          const option = options.options.find((option) => option.value.name === field);
-          if (option) {
-            // @ts-ignore
-            settings.push({ name: field, value: option.value.default });
-          }
+    if (!options) return;
+    const settings = [...(engine.settings || [])];
+    const missing = requiredEngineSettings.filter((field) => !settings.find((setting) => setting.name === field));
+    for (const field of requiredEngineSettings) {
+      if (!settings.find((setting) => setting.name === field)) {
+        const opt = options.options.find((o) => o.value.name === field);
+        if (opt) {
+          // @ts-ignore
+          settings.push({ name: field, value: opt.value.default });
         }
       }
-      if (missing.length > 0) {
-        setEngine({ ...engine, settings });
-      }
     }
-  }, [options]);
+    if (missing.length > 0) {
+      setEngines(async (prev) => {
+        const copy = [...(await prev)];
+        copy[selected] = { ...(copy[selected] as LocalEngine), settings };
+        return copy;
+      });
+    }
+  }, [options, engine.settings, selected, setEngines]);
+  type UciOptionWithCurrent =
+    | {
+        type: "spin";
+        value: { name: string; default: bigint | null; min: bigint | null; max: bigint | null; value: number };
+      }
+    | { type: "combo"; value: { name: string; default: string | null; var: string[]; value: string } }
+    | { type: "string"; value: { name: string; default: string | null; value: string | null } }
+    | { type: "check"; value: { name: string; default: boolean | null; value: boolean } };
 
-  const completeOptions: any =
+  const completeOptions: UciOptionWithCurrent[] =
     options?.options
-      .filter((option) => option.type !== "button")
-      .map((option) => {
-        const setting = engine.settings?.find((setting) => setting.name === option.value.name);
-        return {
-          ...option,
-          value: {
-            ...option.value,
-            value:
-              setting?.value !== undefined
-                ? setting.value
-                : // @ts-ignore
-                  option.value.default,
-          },
-        };
-      }) || [];
+      .map((option: UciOptionConfig): UciOptionWithCurrent | null => {
+        const setting = engine.settings?.find((s) => s.name === option.value.name);
+        switch (option.type) {
+          case "spin": {
+            const cur =
+              typeof setting?.value === "number" ? (setting.value as number) : Number(option.value.default ?? 0);
+            return { type: "spin", value: { ...option.value, value: cur } };
+          }
+          case "combo": {
+            const cur =
+              typeof setting?.value === "string"
+                ? (setting.value as string)
+                : (option.value.default ?? option.value.var[0] ?? "");
+            return { type: "combo", value: { ...option.value, value: cur } };
+          }
+          case "string": {
+            const cur = typeof setting?.value === "string" ? (setting.value as string) : (option.value.default ?? null);
+            return { type: "string", value: { ...option.value, value: cur } };
+          }
+          case "check": {
+            const opt = option as Extract<UciOptionConfig, { type: "check" }>;
+            const cur =
+              typeof setting?.value === "boolean" ? (setting.value as boolean) : Boolean(opt.value.default ?? false);
+            return { type: "check", value: { ...opt.value, value: cur } };
+          }
+          case "button":
+            return null;
+        }
+      })
+      .filter((x): x is UciOptionWithCurrent => x !== null) || [];
 
   function changeImage() {
     open({
@@ -307,7 +387,7 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
                 }
               />
             </Group>
-            <Checkbox
+            <Switch
               label={t("Common.Enabled")}
               checked={!!engine.loaded}
               onChange={(e) => setEngine({ ...engine, loaded: e.currentTarget.checked })}
@@ -340,22 +420,24 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
         <Divider variant="dashed" label={t("Engines.Settings.AdvancedSettings")} />
         <SimpleGrid cols={2}>
           {completeOptions
-            .filter((option: { type: string }) => option.type !== "check")
-            .map((option: any) => {
-              return match(option)
-                .with({ type: "spin", value: P.select() }, (v: any) => {
+            .filter((option) => option.type !== "check")
+            .map((option) => {
+              switch (option.type) {
+                case "spin": {
+                  const v = option.value;
                   return (
                     <NumberInput
                       key={v.name}
                       label={v.name}
-                      min={Number(v.min)}
-                      max={Number(v.max)}
+                      min={Number(v.min ?? 0)}
+                      max={Number(v.max ?? 0)}
                       value={Number(v.value)}
-                      onChange={(e) => setSetting(v.name, e, Number(v.default))}
+                      onChange={(e) => setSetting(v.name, e as number, Number(v.default ?? 0))}
                     />
                   );
-                })
-                .with({ type: "combo", value: P.select() }, (v: any) => {
+                }
+                case "combo": {
+                  const v = option.value;
                   return (
                     <Select
                       key={v.name}
@@ -365,8 +447,9 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
                       onChange={(e) => setSetting(v.name, e, v.default)}
                     />
                   );
-                })
-                .with({ type: "string", value: P.select() }, (v: any) => {
+                }
+                case "string": {
+                  const v = option.value;
                   if (v.name.toLowerCase().includes("file")) {
                     const file = v.value ? new File([v.value], v.value) : null;
                     return (
@@ -376,9 +459,7 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
                         label={v.name}
                         value={file}
                         onClick={async () => {
-                          const selected = await open({
-                            multiple: false,
-                          });
+                          const selected = await open({ multiple: false });
                           if (!selected) return;
                           setSetting(v.name, selected as string, v.default);
                         }}
@@ -398,30 +479,21 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
                       onChange={(e) => setSetting(v.name, e.currentTarget.value, v.default)}
                     />
                   );
-                })
-                .otherwise(() => null);
+                }
+              }
             })}
         </SimpleGrid>
         <SimpleGrid cols={2}>
           {completeOptions
-            .filter((option: any) => option.type === "check")
-            .map((o: any) => {
-              return (
-                <Checkbox
-                  key={o.value.name}
-                  label={o.value.name}
-                  checked={!!o.value.value}
-                  onChange={(e) =>
-                    setSetting(
-                      o.value.name,
-                      e.currentTarget.checked,
-                      // @ts-ignore
-                      o.value.default,
-                    )
-                  }
-                />
-              );
-            })}
+            .filter((option) => option.type === "check")
+            .map((o) => (
+              <Checkbox
+                key={o.value.name}
+                label={o.value.name}
+                checked={!!o.value.value}
+                onChange={(e) => setSetting(o.value.name, e.currentTarget.checked, o.value.default)}
+              />
+            ))}
         </SimpleGrid>
 
         <Group justify="end">
@@ -558,23 +630,42 @@ function EngineName({ engine, stats }: { engine: Engine; stats?: { label: string
       </Box>
 
       <Stack flex="1" gap={0}>
-        <Text fw="bold" lineClamp={1} c={hasError ? "red" : undefined}>
-          {engine.name} {hasError ? "(file missing)" : ""}
-        </Text>
-        <Text size="xs" c="dimmed" style={{ wordWrap: "break-word" }} lineClamp={1}>
-          {engine.type === "local" ? engine.path.split(/\/|\\/).slice(-1)[0] : engine.url}
-        </Text>
+        <Stack gap="xs">
+          <Group align="center" gap="xs" wrap="wrap">
+            <Text fw="bold" lineClamp={1} c={hasError ? "red" : undefined}>
+              {engine.name} {hasError ? "(file missing)" : ""}
+            </Text>
+            {engine.type === "local" && engine.version && (
+              <Badge size="xs" variant="light" color="teal">
+                v{engine.version}
+              </Badge>
+            )}
+          </Group>
+          <Group>
+            {!!engine.loaded && (
+              <Badge size="xs" variant="outline" color="green">
+                Enabled
+              </Badge>
+            )}
+            <Badge size="xs" variant="light" color={engine.type === "local" ? "blue" : "grape"}>
+              {engine.type === "local" ? "Local" : "Cloud"}
+            </Badge>
+          </Group>
+          <Text size="xs" c="dimmed" style={{ wordWrap: "break-word" }} lineClamp={1}>
+            {engine.type === "local" ? engine.path.split(/\/|\\/).slice(-1)[0] : engine.url}
+          </Text>
+        </Stack>
 
-        <Group>
+        <Group justify="space-between">
           {stats?.map((stat) => (
-            <Box key={stat.label}>
+            <Stack key={stat.label} gap="0" align="center">
               <Text size="xs" c="dimmed" fw="bold" className={classes.label} mt="1rem">
                 {stat.label}
               </Text>
               <Text fw={700} size="lg" style={{ lineHeight: 1 }}>
                 {stat.value}
               </Text>
-            </Box>
+            </Stack>
           ))}
         </Group>
       </Stack>

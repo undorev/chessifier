@@ -129,7 +129,7 @@ function OpponentForm({
 
       {opponent.type === "human" && (
         <TextInput
-          label="Name"
+          placeholder="Name"
           value={opponent.name ?? ""}
           onChange={(e) => setOpponent((prev) => ({ ...prev, name: e.target.value }))}
         />
@@ -612,13 +612,12 @@ function BoardGame() {
                   </Group>
                 </Box>
 
-                <Checkbox
-                  label="Same time control"
-                  checked={sameTimeControl}
-                  onChange={(e) => setSameTimeControl(e.target.checked)}
-                />
-
-                <Group>
+                <Group justify="space-between">
+                  <Checkbox
+                    label="Same time control"
+                    checked={sameTimeControl}
+                    onChange={(e) => setSameTimeControl(e.target.checked)}
+                  />
                   <Button onClick={startGame} disabled={error !== null}>
                     Start game
                   </Button>

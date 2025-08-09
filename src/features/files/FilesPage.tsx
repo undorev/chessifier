@@ -1,4 +1,4 @@
-import { Button, Center, Chip, Group, Input, Stack, Text, Title } from "@mantine/core";
+import { Button, Center, Chip, Group, Input, Paper, Stack, Text, Title } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { IconPlus, IconSearch, IconX } from "@tabler/icons-react";
@@ -147,13 +147,15 @@ function FilesPage() {
           />
         </Stack>
 
-        {selected ? (
-          <FileCard selected={selected} games={games} setGames={setGames} toggleEditModal={toggleEditModal} />
-        ) : (
-          <Center h="100%">
-            <Text>No file selected</Text>
-          </Center>
-        )}
+        <Paper withBorder p="md" h="100%">
+          {selected ? (
+            <FileCard selected={selected} games={games} setGames={setGames} toggleEditModal={toggleEditModal} />
+          ) : (
+            <Center h="100%">
+              <Text>No file selected</Text>
+            </Center>
+          )}
+        </Paper>
       </Group>
     </Stack>
   );
