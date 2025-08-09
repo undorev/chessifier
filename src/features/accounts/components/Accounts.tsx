@@ -1,5 +1,5 @@
 import { Alert, Autocomplete, Button, Checkbox, Group, InputWrapper, Modal, Stack, TextInput } from "@mantine/core";
-import { IconInfoCircle, IconPlus } from "@tabler/icons-react";
+import { IconArrowsSort, IconInfoCircle, IconPlus, IconSearch } from "@tabler/icons-react";
 import { listen } from "@tauri-apps/api/event";
 import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -22,6 +22,8 @@ function Accounts() {
     getDatabases().then((dbs) => setDatabases(dbs));
   }, []);
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "elo">("name");
 
   const addChessComSession = useCallback(
     (alias: string, session: ChessComSession) => {
@@ -109,12 +111,30 @@ function Accounts() {
 
   return (
     <>
-      <AccountCards databases={databases} setDatabases={setDatabases} />
-      <Group>
-        <Button rightSection={<IconPlus size="1rem" />} onClick={() => setOpen(true)}>
+      <Group wrap="wrap" gap="xs" justify="space-between">
+        <Group>
+          <TextInput
+            aria-label="Search accounts"
+            placeholder="Search accounts..."
+            leftSection={<IconSearch size="1rem" />}
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            w={{ base: "100%", sm: 260 }}
+          />
+          <Button
+            variant="default"
+            leftSection={<IconArrowsSort size="1rem" />}
+            onClick={() => setSortBy((s) => (s === "name" ? "elo" : "name"))}
+            aria-label={`Sort by ${sortBy === "name" ? "elo" : "name"}`}
+          >
+            Sort: {sortBy === "name" ? "Name" : "ELO"}
+          </Button>
+        </Group>
+        <Button size="xs" leftSection={<IconPlus size="1rem" />} onClick={() => setOpen(true)} mr="sm">
           Add Account
         </Button>
       </Group>
+      <AccountCards databases={databases} setDatabases={setDatabases} query={query} sortBy={sortBy} />
       <AccountModal open={open} setOpen={setOpen} addLichess={addLichess} addChessCom={addChessCom} />
     </>
   );
