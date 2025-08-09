@@ -168,7 +168,7 @@ function OpeningDetail({ opening, totalGames, color }: { opening: OpeningStats; 
               setActiveTab,
               position: Array(countMainPly(tree.root)).fill(0),
             });
-            navigate({ to: "/" });
+            navigate({ to: "/boards" });
           }}
         >
           {opening.name}

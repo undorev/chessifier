@@ -198,7 +198,7 @@ function Table({
         srcInfo: record,
         gameNumber: 0,
       });
-      navigate({ to: "/" });
+      navigate({ to: "/boards" });
     },
     [selected, setActiveTab, setTabs, navigate],
   );
