@@ -12,6 +12,7 @@ import { TreeStateContext } from "@/common/components/TreeStateContext";
 import { jumpToNextPuzzleAtom, showCoordinatesAtom } from "@/state/atoms";
 import { chessboard } from "@/styles/Chessboard.css";
 import { positionFromFen } from "@/utils/chessops";
+import { recordPuzzleSolved } from "@/utils/puzzleStreak";
 import type { Completion, Puzzle } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/treeReducer";
 import PromotionModal from "../boards/PromotionModal";
@@ -29,7 +30,10 @@ function PuzzleBoard({
   generatePuzzle: (db: string) => void;
   db: string | null;
 }) {
-  const store = useContext(TreeStateContext)!;
+  const store = useContext(TreeStateContext);
+  if (!store) {
+    throw new Error("PuzzleBoard must be used within a TreeStateContext provider");
+  }
   const root = useStore(store, (s) => s.root);
   const position = useStore(store, (s) => s.position);
   const makeMove = useStore(store, (s) => s.makeMove);
@@ -66,7 +70,7 @@ function PuzzleBoard({
     : "white";
   const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
 
-  const dests = chessgroundDests(pos!);
+  const dests = pos ? chessgroundDests(pos) : new Map();
   const turn = pos?.turn || "white";
   const showCoordinates = useAtomValue(showCoordinatesAtom);
 
@@ -80,8 +84,9 @@ function PuzzleBoard({
 
     if (puzzle.moves[currentMove] === uci || newPos.isCheckmate()) {
       if (currentMove === puzzle.moves.length - 1) {
-        if (puzzle.completion !== "incorrect") {
+        if (puzzle.completion === "incomplete") {
           changeCompletion("correct");
+          recordPuzzleSolved();
         }
         setEnded(false);
 
@@ -146,11 +151,13 @@ function PuzzleBoard({
             dests: dests,
             events: {
               after: (orig, dest) => {
-                const from = parseSquare(orig)!;
-                const to = parseSquare(dest)!;
+                const from = parseSquare(orig);
+                const to = parseSquare(dest);
+                if (!from || !to) return;
                 const move: NormalMove = { from, to };
                 if (
-                  pos?.board.get(from)?.role === "pawn" &&
+                  pos &&
+                  pos.board.get(from)?.role === "pawn" &&
                   ((dest[1] === "8" && turn === "white") || (dest[1] === "1" && turn === "black"))
                 ) {
                   setPendingMove(move);
