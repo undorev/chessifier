@@ -279,7 +279,7 @@ function RootLayout() {
 
   const { data: menu } = useSWRImmutable(["menu", menuActions], () => createMenu(menuActions));
 
-  useEffect(() => {    
+  useEffect(() => {
     if (!menu) return;
     if (isNative) {
       menu.setAsAppMenu();

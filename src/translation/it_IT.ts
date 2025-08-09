@@ -128,11 +128,11 @@ export const it_IT = {
     "SideBar.Learn": "Impara",
     "SideBar.Settings": "Impostazioni",
     "SideBar.KeyboardShortcuts": "Scorciatoie da tastiera",
-    
+
     "Dashboard.Card.Learn.Title": "Impara gli scacchi",
     "Dashboard.Card.Learn.Desc": "Lezioni interattive per imparare gli scacchi dalle basi fino alle strategie avanzate",
     "Dashboard.Card.Learn.Button": "Inizia a imparare",
-    
+
     "Lessons.Title": "Lezioni di scacchi",
     "Lessons.SelectToBegin": "Seleziona una lezione per iniziare a imparare gli scacchi",
     "Lessons.Difficulty.Beginner": "Principiante",
@@ -154,7 +154,7 @@ export const it_IT = {
     "Lessons.ExercisesCompleted": "esercizi completati",
     "Lessons.LessonCompleted": "Congratulazioni! Hai completato {{lesson}}!",
     "Lessons.CompletionMessage": "Hai completato con successo tutti gli esercizi di questa lezione. Continua così!",
-    
+
     "Practice.Title": "Allenamento di scacchi",
     "Practice.Description": "Migliora le tue abilità di scacchi con esercizi mirati",
     "Practice.SelectExercise": "Seleziona un esercizio per iniziare ad allenarti",
@@ -191,25 +191,30 @@ export const it_IT = {
     "Dashboard.Card.ImportGame.Desc": "Importa una partita da un file PGN",
     "Dashboard.Card.ImportGame.Button": "Importa",
     "Dashboard.Card.Puzzle.Title": "Puzzle tattici",
-    "Dashboard.Card.Puzzle.Desc": "Affina le tue abilità di scacchi con puzzle tattici e migliora il riconoscimento dei pattern",
+    "Dashboard.Card.Puzzle.Desc":
+      "Affina le tue abilità di scacchi con puzzle tattici e migliora il riconoscimento dei pattern",
     "Dashboard.Card.Puzzle.Button": "Risolvi",
-    
+
     "Dashboard.Card.Analyze.Title": "Analisi della scacchiera",
     "Dashboard.Card.Analyze.Desc": "Analizza posizioni, partite e varianti con potenti motori di scacchi.",
     "Dashboard.Card.Analyze.Button": "Analizza",
     "Dashboard.Card.Database.Title": "Accesso al database",
-    "Dashboard.Card.Database.Desc": "Esplora vasti database di scacchi e studia le partite dei maestri per approfondire la tua comprensione.",
+    "Dashboard.Card.Database.Desc":
+      "Esplora vasti database di scacchi e studia le partite dei maestri per approfondire la tua comprensione.",
     "Dashboard.Card.Database.Button": "Sfoglia",
     "Dashboard.Card.Engine.Title": "Integrazione motori",
-    "Dashboard.Card.Engine.Desc": "Aggiungi e gestisci più motori di scacchi per personalizzare la tua configurazione di analisi e migliorare la flessibilità.",
+    "Dashboard.Card.Engine.Desc":
+      "Aggiungi e gestisci più motori di scacchi per personalizzare la tua configurazione di analisi e migliorare la flessibilità.",
     "Dashboard.Card.Engine.Button": "Gestisci",
     "Dashboard.Card.Account.Title": "Account",
-    "Dashboard.Card.Account.Desc": "Importa le tue partite e statistiche collegando il tuo account Chess.com o Lichess per un'analisi personalizzata.",
+    "Dashboard.Card.Account.Desc":
+      "Importa le tue partite e statistiche collegando il tuo account Chess.com o Lichess per un'analisi personalizzata.",
     "Dashboard.Card.Account.Button": "Connetti",
     "Dashboard.Card.Import.Title": "Importa",
-    "Dashboard.Card.Import.Desc": "Carica e modifica file PGN per analizzare le tue partite o studiare posizioni specifiche con pieno controllo.",
+    "Dashboard.Card.Import.Desc":
+      "Carica e modifica file PGN per analizzare le tue partite o studiare posizioni specifiche con pieno controllo.",
     "Dashboard.Card.Import.Button": "Importa",
-    
+
     "Board.Action.TogglePawnStructureView": "Attiva/disattiva vista struttura pedoni",
     "Board.Action.TakeSnapshot": "Cattura istantanea",
     "Board.Action.AnalyzeGame": "Analizza partita",
@@ -260,9 +265,11 @@ export const it_IT = {
     "Board.Analysis.Analyze": "Analizza",
     "Board.Analysis.Advantage": "Vantaggio",
     "Board.Analysis.Accuracy": "Precisione",
-    "Board.Analysis.EnableWDL": "Devi abilitare UCI_ShowWDL nelle impostazioni del motore per utilizzare questa funzione.",
+    "Board.Analysis.EnableWDL":
+      "Devi abilitare UCI_ShowWDL nelle impostazioni del motore per utilizzare questa funzione.",
     "Board.Practice.ResetOpeningData.Title": "Reimposta dati di apertura",
-    "Board.Practice.ResetOpeningData.Desc": 'Sei sicuro di voler reimpostare i dati di apertura per "{{fileName}}"? Tutti i progressi di apprendimento andranno persi.',
+    "Board.Practice.ResetOpeningData.Desc":
+      'Sei sicuro di voler reimpostare i dati di apertura per "{{fileName}}"? Tutti i progressi di apprendimento andranno persi.',
     "Board.Database.Local": "Locale",
     "Board.Database.LichessAll": "Lichess Tutto",
     "Board.Database.LichessMaster": "Lichess Masters",
@@ -330,7 +337,7 @@ export const it_IT = {
     "Databases.Settings.ExportPGN": "Esporta in PGN",
     "Databases.Delete.Title": "Elimina database",
     "Databases.Delete.Message": "Sei sicuro di voler eliminare questo database?",
-    
+
     "Errors.EmptyBoard": "Scacchiera vuota",
     "Errors.InvalidKings": "Numero di re non valido",
     "Errors.OppositeCheck": "Scacco opposto",
@@ -341,7 +348,7 @@ export const it_IT = {
     "Errors.InvalidFen": "FEN non valido",
     "Errors.InvalidTurn": "Turno non valido",
     "Errors.Unknown": "Errore sconosciuto",
-    
+
     "Fen.Start": "Inizio",
     "Fen.Empty": "Vuoto",
     "Fen.White": "Bianco",
@@ -365,7 +372,7 @@ export const it_IT = {
     "Files.Search": "Cerca file",
     "Files.Game.Delete.Title": "Rimuovi partita",
     "Files.Game.Delete.Desc": "Sei sicuro di voler rimuovere questa partita?",
-    
+
     "Menu.MarkAsStart": "Segna come inizio",
     "Menu.PromoteToMainLine": "Promuovi a linea principale",
     "Menu.PromoteVariation": "Promuovi variante",

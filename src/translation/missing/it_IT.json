@@ -1,0 +1,8 @@
+{
+  "Errors.InvalidFullmoves": "Invalid fullmove number",
+  "Errors.InvalidHaldmoves": "Invalid halfmove number",
+  "Errors.InvalidPockets": "Invalid pockets",
+  "Errors.InvalidRemainingChecks": "Invalid remaining checks",
+  "Settings.Appearance.hideDashboardOnStartup": "Hide Dashboard on Startup",
+  "Settings.Appearance.hideDashboardOnStartup.Desc": "Open Boards instead of Dashboard when the app starts"
+}

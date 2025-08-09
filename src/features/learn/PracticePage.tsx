@@ -111,7 +111,7 @@ export default function PracticePage() {
           completedPractice: updatedCompleted,
           practiceCompleted: Object.values(updatedCompleted).reduce((sum, arr) => sum + arr.length, 0),
           totalPoints,
-        });        
+        });
 
         const category = practiceCategories.find((c) => c.id === categoryId);
         if (category && updatedCompleted[categoryId]?.length === category.exercises.length) {
