@@ -115,12 +115,9 @@ export const boardImageAtom = atomWithStorage<string>("board-image", "gray.svg")
 export const primaryColorAtom = atomWithStorage<MantineColor>("mantine-primary-color", "blue");
 export const sessionsAtom = atomWithStorage<Session[]>("sessions", []);
 export const nativeBarAtom = atomWithStorage<boolean>("native-bar", false);
-export const hideDashboardOnStartupAtom = atomWithStorage<boolean>(
-  "hide-home-on-startup",
-  false,
-  undefined,
-  { getOnInit: true },
-);
+export const hideDashboardOnStartupAtom = atomWithStorage<boolean>("hide-home-on-startup", false, undefined, {
+  getOnInit: true,
+});
 
 // Database
 

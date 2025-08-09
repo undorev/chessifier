@@ -14,7 +14,8 @@ export const practiceCategories: PracticeCategory[] = [
       {
         id: "mate-queen-rook",
         title: "Queen and rook mate",
-        description: "Use your queen and rook to restrict the king and deliver checkmate. Mate in 3 if played perfectly.",
+        description:
+          "Use your queen and rook to restrict the king and deliver checkmate. Mate in 3 if played perfectly.",
         difficulty: "beginner",
         fen: "8/8/2k5/8/8/4K3/8/Q6R w - - 0 1",
         correctMoves: [],

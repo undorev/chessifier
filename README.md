@@ -143,7 +143,7 @@ The binary will be available in your current directory.
 | 🇨🇳 CN | 🟡 73% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
 
-📢 Want to help translate? See [CONTRIBUTING.md](./CONTRIBUTING.md).
+📢 Want to help translate? See [CONTRIBUTING_TRANSLATIONS.md](./CONTRIBUTING_TRANSLATIONS.md) and [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## 📦 Changelog
 
