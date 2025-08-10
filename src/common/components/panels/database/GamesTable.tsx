@@ -39,7 +39,7 @@ function GamesTable({ games, loading }: { games: NormalizedGame[]; loading: bool
                   pgn: game.moves,
                   headers: game,
                 });
-                navigate({ to: "/" });
+                navigate({ to: "/boards" });
               }}
             >
               <IconEye size="1rem" stroke={1.5} />
