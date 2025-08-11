@@ -30,6 +30,7 @@ use sysinfo::SystemExt;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager, Window};
 use tauri_plugin_log::{};
+use tauri_plugin_aptabase::EventTracker;
 
 use crate::chess::{
     analyze_game, get_engine_config, get_engine_logs, kill_engine, kill_engines, stop_engine,
@@ -96,6 +97,32 @@ const REQUIRED_DIRS: &[(BaseDirectory, &str)] = &[
 
 const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
     &[(BaseDirectory::AppData, "engines/engines.json", "[]")];
+
+fn track_first_run(app: &AppHandle) -> Result<(), String> {
+    let flag_path = app
+        .path()
+        .resolve("first_run_completed", BaseDirectory::AppData)
+        .map_err(|e| format!("Failed to resolve first-run flag path: {}", e))?;
+
+    if !Path::new(&flag_path).exists() {
+        log::info!("First run detected. Tracking 'app_init' and creating flag file.");
+        let _ = app.track_event("app_init", None);
+        std::fs::write(&flag_path, b"1").map_err(|e| {
+            format!(
+                "Failed to write first-run flag file {}: {}",
+                flag_path.to_string_lossy(),
+                e
+            )
+        })?;
+    } else {
+        log::info!(
+            "First-run flag exists at {}. Skipping 'app_init' tracking.",
+            flag_path.to_string_lossy()
+        );
+    }
+
+    Ok(())
+}
 
 /// Ensures that all required directories exist, creating them if necessary
 ///
@@ -177,7 +204,8 @@ async fn close_splashscreen(window: Window) -> Result<(), String> {
     Ok(())
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let specta_builder = tauri_specta::Builder::new()
         .commands(tauri_specta::collect_commands!(
             close_splashscreen,
@@ -260,7 +288,7 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_aptabase::Builder::new("A-EU-4052319954").build())
         .setup(move |app| {
             log::info!("Setting up application");
 
@@ -282,8 +310,9 @@ fn main() {
             app.handle()
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
 
-            log::info!("Finished rust initialization");
-
+            let _ = log::info!("Finished rust initialization");
+            // Track 'app_started' once on first run only; ignore errors to avoid blocking startup
+            let _ = track_first_run(&app.handle());
             Ok(())
         })
         .manage(AppState::default())
