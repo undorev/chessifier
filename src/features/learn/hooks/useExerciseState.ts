@@ -4,18 +4,23 @@ interface ExerciseBase {
   id: string;
   title: string;
   description: string;
-  fen: string;
+  fen?: string;
 }
 
-interface UseExerciseStateOptions<T extends ExerciseBase, C extends { id: string; exercises: T[] }> {
+interface UseExerciseStateOptions {
   initialFen?: string;
   onExerciseComplete?: (categoryId: string, exerciseId: string) => void;
+  completeOnCorrectMove?: boolean;
 }
 
 export function useExerciseState<T extends ExerciseBase, C extends { id: string; exercises: T[] }>(
-  options: UseExerciseStateOptions<T, C> = {},
+  options: UseExerciseStateOptions = {},
 ) {
-  const { initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", onExerciseComplete } = options;
+  const {
+    initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    onExerciseComplete,
+    completeOnCorrectMove = true,
+  } = options;
 
   const [selectedCategory, setSelectedCategory] = useState<C | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<T | null>(null);
@@ -41,7 +46,7 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   const handleExerciseSelect = useCallback(
     (exercise: T) => {
       setSelectedExercise(exercise);
-      setCurrentFen(exercise?.fen);
+      if (exercise?.fen) setCurrentFen(exercise.fen);
       resetState();
     },
     [resetState],
@@ -61,14 +66,14 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
           onCorrectMove();
         }
 
-        if (onExerciseComplete) {
+        if (completeOnCorrectMove && onExerciseComplete) {
           onExerciseComplete(selectedCategory.id, selectedExercise.id);
         }
       } else {
         setMessage("Incorrect. Try again.");
       }
     },
-    [selectedCategory, selectedExercise, onExerciseComplete],
+    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove],
   );
 
   const toggleHint = useCallback(() => {
