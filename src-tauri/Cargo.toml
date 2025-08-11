@@ -70,6 +70,7 @@ tauri-plugin-log = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
 regex = "1.11.1"
+tauri-plugin-aptabase = "1.0.0"
 
 [features]
 # by default Tauri runs in production mode
