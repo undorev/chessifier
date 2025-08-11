@@ -342,9 +342,9 @@ export default function Page() {
                 </Text>
                 <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
                   <div data-searchable>
-                    <Text>{t("Settings.Anarchy.ForcedChessifier")}</Text>
+                    <Text>{t("Settings.Anarchy.ForcedEnPassant")}</Text>
                     <Text size="xs" c="dimmed">
-                      {t("Settings.Anarchy.ForcedChessifier.Desc")}
+                      {t("Settings.Anarchy.ForcedEnPassant.Desc")}
                     </Text>
                   </div>
                   <SettingsSwitch atom={forcedEnPassantAtom} />
