@@ -22,7 +22,7 @@ interface UserStatsState {
 
 export const useUserStatsStore = create<UserStatsState>()(
   persist(
-  (set) => ({
+    (set) => ({
       userStats: {
         lessonsCompleted: 0,
         totalLessons: lessons.reduce((sum, lesson) => sum + lesson.exercises.length, 0),
@@ -51,8 +51,12 @@ export const useUserStatsStore = create<UserStatsState>()(
             lessonCompletionDates: stats.lessonCompletionDates
               ? mergeUnique(prev.lessonCompletionDates, stats.lessonCompletionDates)
               : prev.lessonCompletionDates,
-            completedExercises: stats.completedExercises ? { ...prev.completedExercises, ...stats.completedExercises } : prev.completedExercises,
-            completedPractice: stats.completedPractice ? { ...prev.completedPractice, ...stats.completedPractice } : prev.completedPractice,
+            completedExercises: stats.completedExercises
+              ? { ...prev.completedExercises, ...stats.completedExercises }
+              : prev.completedExercises,
+            completedPractice: stats.completedPractice
+              ? { ...prev.completedPractice, ...stats.completedPractice }
+              : prev.completedPractice,
           } as UserStats;
 
           if (stats.completedExercises || stats.completedPractice) {

@@ -14,7 +14,15 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { IconArrowBackUp, IconBulb, IconCheck, IconClock, IconX } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconBulb,
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconClock,
+  IconX,
+} from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
@@ -43,8 +51,9 @@ export interface Exercise {
   id: string;
   title: string;
   description: string;
-  fen: string;
-  correctMoves: string[];
+  variations?: { fen: string; correctMoves: string[] }[];
+  fen?: string;
+  correctMoves?: string[];
   disabled?: boolean;
 }
 
@@ -67,8 +76,10 @@ export default function LessonsPage() {
     handleMove: handleMoveBase,
     toggleHint: handleShowHint,
     clearSelection,
+    resetState,
   } = useExerciseState<Exercise, Lesson>({
     initialFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    completeOnCorrectMove: false,
     onExerciseComplete: (lessonId, exerciseId) => {
       const prevCompleted = userStats.completedExercises?.[lessonId] || [];
       if (!prevCompleted.includes(exerciseId)) {
@@ -94,13 +105,86 @@ export default function LessonsPage() {
     },
   });
 
+  const [variationIndex, setVariationIndex] = useState<number>(0);
+
+  const getActiveVariation = () => {
+    if (!selectedExercise) return null;
+    if (selectedExercise.variations && selectedExercise.variations.length > 0) {
+      return selectedExercise.variations[variationIndex] || selectedExercise.variations[0];
+    }
+    // fallback for legacy data
+    if (selectedExercise.fen && selectedExercise.correctMoves) {
+      return { fen: selectedExercise.fen, correctMoves: selectedExercise.correctMoves };
+    }
+    return null;
+  };
+
   const handleMove = (orig: string, dest: string) => {
     if (!selectedExercise || !selectedLesson) return;
+    const activeVar = getActiveVariation();
+    if (!activeVar) return;
     const move = `${orig}${dest}`;
-    handleMoveBase(orig, dest, selectedExercise.correctMoves, () => {
+    handleMoveBase(orig, dest, activeVar.correctMoves, () => {
       const newFen = applyUciMoveToFen(currentFen, move);
       if (newFen) setCurrentFen(newFen);
+      // if move is correct, proceed to next variation or complete exercise
+      const total = selectedExercise.variations?.length || 1;
+      if (variationIndex < total - 1) {
+        // move to next variation after a short delay
+        setTimeout(() => {
+          const nextIndex = variationIndex + 1;
+          setVariationIndex(nextIndex);
+          const nextVar = selectedExercise.variations?.[nextIndex] || activeVar;
+          if (nextVar?.fen) setCurrentFen(nextVar.fen);
+        }, 600);
+      } else {
+        // complete exercise
+        // call completion hook
+        // useExerciseState will not double-complete because completeOnCorrectMove is false
+        const lessonId = selectedLesson.id;
+        const exerciseId = selectedExercise.id;
+        // Manually trigger completion
+        setTimeout(() => {
+          // Safeguard: ensure we still have the same exercise selected when completing
+          if (selectedLesson?.id === lessonId && selectedExercise?.id === exerciseId) {
+            // emulate completion by calling onExerciseComplete via a noop move handler
+            // We can't call the internal option directly, so re-use the provided callback via a small trick:
+            // Trigger the completion by calling handleMoveBase with a sentinel that matches immediately and relies on the outer onExerciseComplete callback.
+            // However, since completeOnCorrectMove=false, handleMoveBase won't call completion.
+            // So we need to mark completion here explicitly by updating store as done earlier.
+            const prevCompleted = userStats.completedExercises?.[lessonId] || [];
+            if (!prevCompleted.includes(exerciseId)) {
+              const updatedCompleted = {
+                ...userStats.completedExercises,
+                [lessonId]: [...prevCompleted, exerciseId],
+              };
+              setUserStats({
+                completedExercises: updatedCompleted,
+                lessonsCompleted: Object.values(updatedCompleted).reduce((sum, arr) => sum + arr.length, 0),
+              });
+              const lesson = lessons.find((l) => l.id === lessonId);
+              if (lesson && updatedCompleted[lessonId]?.length === lesson.exercises.length) {
+                setCompletedLessonTitle(lesson.title);
+                setShowCompletionModal(true);
+                const todayStr = new Date().toISOString();
+                setUserStats({
+                  completionDates: [...(userStats.completionDates || []), todayStr],
+                  lessonCompletionDates: [todayStr],
+                });
+              }
+            }
+          }
+        }, 500);
+      }
     });
+  };
+
+  // When exercise changes, reset variation index and board FEN
+  const handleExerciseSelectWithReset = (exercise: Exercise) => {
+    setVariationIndex(0);
+    handleExerciseSelect(exercise);
+    const active = exercise.variations?.[0];
+    if (active?.fen) setCurrentFen(active.fen);
   };
 
   return (
@@ -235,7 +319,7 @@ export default function LessonsPage() {
                       description={exercise.description}
                       disabled={exercise?.disabled}
                       isCompleted={isCompleted}
-                      onClick={() => handleExerciseSelect(exercise)}
+                      onClick={() => handleExerciseSelectWithReset(exercise)}
                     />
                   );
                 })}
@@ -290,7 +374,7 @@ export default function LessonsPage() {
                           <Text fw={500}>Hint</Text>
                           <Text>
                             Try these moves:{" "}
-                            {selectedExercise.correctMoves.map((move) => (
+                            {(getActiveVariation()?.correctMoves || []).map((move) => (
                               <Badge key={move} mx={4} color="blue">
                                 {move.substring(0, 2)} → {move.substring(2)}
                               </Badge>
@@ -301,6 +385,48 @@ export default function LessonsPage() {
                     </Paper>
                   )}
                 </>
+              )}
+
+              {selectedExercise && (
+                <Group mt="xs" justify="space-between" align="center">
+                  <Group gap="xs">
+                    <ActionIcon
+                      variant="default"
+                      onClick={() => {
+                        if (!selectedExercise?.variations) return;
+                        const next = Math.max(0, variationIndex - 1);
+                        setVariationIndex(next);
+                        const v = selectedExercise.variations[next];
+                        if (v?.fen) setCurrentFen(v.fen);
+                        resetState();
+                      }}
+                      disabled={!selectedExercise?.variations || variationIndex === 0}
+                    >
+                      <IconChevronLeft size={18} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="default"
+                      onClick={() => {
+                        if (!selectedExercise?.variations) return;
+                        const total = selectedExercise.variations.length;
+                        const next = Math.min(total - 1, variationIndex + 1);
+                        setVariationIndex(next);
+                        const v = selectedExercise.variations[next];
+                        if (v?.fen) setCurrentFen(v.fen);
+                        resetState();
+                      }}
+                      disabled={
+                        !selectedExercise?.variations || variationIndex >= selectedExercise.variations.length - 1
+                      }
+                    >
+                      <IconChevronRight size={18} />
+                    </ActionIcon>
+                  </Group>
+                  <Text size="sm" c="dimmed">
+                    Variation {Math.min(variationIndex + 1, selectedExercise?.variations?.length || 1)} /{" "}
+                    {selectedExercise?.variations?.length || 1}
+                  </Text>
+                </Group>
               )}
             </Box>
           </Flex>
