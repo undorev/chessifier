@@ -53,7 +53,6 @@ export const lessons: Lesson[] = [
           "e4f3",
           "e4g2",
           "e4h1",
-          "e4a1",
         ],
       },
       {
@@ -89,7 +88,6 @@ export const lessons: Lesson[] = [
           "e4f3",
           "e4g2",
           "e4h1",
-          "e4a1",
         ],
       },
       {
