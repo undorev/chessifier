@@ -79,34 +79,33 @@ const Icons = {
   ),
 };
 
-function getActions(navigate: any, setColorScheme: any, t: any): (SpotlightActionGroupData | SpotlightActionData)[] {
+function getActions(
+  navigate: any,
+  colorScheme: any,
+  setColorScheme: any,
+  t: any,
+): (SpotlightActionGroupData | SpotlightActionData)[] {
+  const themeActions = [];
+
+  if (colorScheme === "light") {
+    themeActions.push({
+      id: "dark",
+      label: t("Settings.Appearance.Theme.Dark"),
+      description: "Switch to dark theme",
+      onClick: () => setColorScheme("dark"),
+      leftSection: <IconMoon size={24} stroke={1.5} />,
+    });
+  } else {
+    themeActions.push({
+      id: "light",
+      label: t("Settings.Appearance.Theme.Light"),
+      description: "Switch to light theme",
+      onClick: () => setColorScheme("light"),
+      leftSection: <IconSun size={24} stroke={1.5} />,
+    });
+  }
+
   return [
-    {
-      group: "Switch theme",
-      actions: [
-        {
-          id: "light",
-          label: t("Settings.Appearance.Theme.Light"),
-          description: "Switch to light theme",
-          onClick: () => setColorScheme("light"),
-          leftSection: <IconSun size={24} stroke={1.5} />,
-        },
-        {
-          id: "dark",
-          label: t("Settings.Appearance.Theme.Dark"),
-          description: "Switch to dark theme",
-          onClick: () => setColorScheme("dark"),
-          leftSection: <IconMoon size={24} stroke={1.5} />,
-        },
-        {
-          id: "auto",
-          label: t("Settings.Appearance.Theme.Auto"),
-          description: "Follow the system's color scheme",
-          onClick: () => setColorScheme("auto"),
-          leftSection: <IconSunMoon size={24} stroke={1.5} />,
-        },
-      ],
-    },
     {
       group: "Pages",
       actions: linksdata.map((link) => {
@@ -125,11 +124,31 @@ function getActions(navigate: any, setColorScheme: any, t: any): (SpotlightActio
       group: "Settings",
       actions: [
         {
+          id: "keybindings",
+          label: t("SideBar.KeyboardShortcuts"),
+          description: `Open ${t("SideBar.KeyboardShortcuts")} page`,
+          onClick: () => navigate({ to: "/settings/keyboard-shortcuts" }),
+          leftSection: <IconSettings size={24} stroke={1.5} />,
+        },
+        {
           id: "settings",
           label: t("SideBar.Settings"),
           description: `Open ${t("SideBar.Settings")} page`,
           onClick: () => navigate({ to: "/settings" }),
           leftSection: <IconSettings size={24} stroke={1.5} />,
+        },
+      ],
+    },
+    {
+      group: "Switch theme",
+      actions: [
+        ...themeActions,
+        {
+          id: "auto",
+          label: t("Settings.Appearance.Theme.Auto"),
+          description: "Follow the system's color scheme",
+          onClick: () => setColorScheme("auto"),
+          leftSection: <IconSunMoon size={24} stroke={1.5} />,
         },
       ],
     },
@@ -225,7 +244,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
           </Group>
         </UnstyledButton>
         <Spotlight
-          actions={getActions(navigate, setColorScheme, t)}
+          actions={getActions(navigate, colorScheme, setColorScheme, t)}
           shortcut={keyMap.SPOTLIGHT_SEARCH.keys}
           nothingFound="Nothing found..."
           highlightQuery
@@ -233,6 +252,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
             leftSection: <IconSearch size={20} stroke={1.5} />,
             placeholder: "Search...",
           }}
+          scrollable
         />
       </Group>
       {!isNative && (
