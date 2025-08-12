@@ -1,6 +1,6 @@
 [package]
 name = "pawn-appetit"
-version = "0.3.0-alpha"
+version = "0.3.0-beta"
 description = "A Modern Chess Database"
 authors = ["ChessKitchen Team"]
 license = "GPL-3.0-only"
