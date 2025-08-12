@@ -1,6 +1,6 @@
 {
   "name": "chessifier",
-  "version": "0.3.0-alpha",
+  "version": "0.3.0-beta",
   "type": "module",
   "scripts": {
     "start-vite": "vite",

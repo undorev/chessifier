@@ -1,5 +1,35 @@
 # Chessifier
 
+## v0.3.0-beta
+
+### ✨ Features
+
+* **Lessons & Practice**
+
+  * Updated **lessons structure** to support variations and improved exercise handling
+  * Added **checkmate-focused practice exercises** with robust detection and evaluation logic
+  * Enhanced **practice UI** for clearer feedback and hints
+  * Reorganized practice components into a **dedicated directory** for better maintainability
+
+* **Theme & UI**
+
+  * Refined **theme switching logic** for smoother and more reliable toggling
+
+### 🛠 Improvements & Refactors
+
+* **Settings**
+
+  * Corrected **Settings.Anarchy.ForcedChessifier** label to **EnPassant** - thanks to [dotneB](https://github.com/dotneB) for their first contribution 🎉
+
+### 🐛 Fixes
+
+* Fixed **lesson move errors** causing invalid move sets
+* Resolved **navigation bugs** that impacted board access and routing
+
+### 🧹 Chores
+
+* Refactored theme switcher and action handling code for better structure and future extensibility
+
 ## v0.3.0-alpha
 
 ### ✨ Features
