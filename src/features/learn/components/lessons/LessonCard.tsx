@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Card, Group, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconBook, IconChevronRight, IconClock, IconRocket, IconSchool, IconTarget } from "@tabler/icons-react";
-import type { Lesson } from "../LessonsPage";
+import type { Lesson } from "../../LessonsPage";
 
 export function LessonCard({
   lesson,

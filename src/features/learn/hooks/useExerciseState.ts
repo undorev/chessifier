@@ -1,15 +1,17 @@
 import { useCallback, useState } from "react";
+import { evaluateCheckmateMoves, type MoveEvaluation } from "@/utils/checkmateDetection";
 
 interface ExerciseBase {
   id: string;
   title: string;
   description: string;
   fen?: string;
+  stepsCount?: number;
 }
 
 interface UseExerciseStateOptions {
   initialFen?: string;
-  onExerciseComplete?: (categoryId: string, exerciseId: string) => void;
+  onExerciseComplete?: (categoryId: string, exerciseId: string, evaluation: MoveEvaluation) => void;
   completeOnCorrectMove?: boolean;
 }
 
@@ -26,18 +28,21 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   const [selectedExercise, setSelectedExercise] = useState<T | null>(null);
   const [currentFen, setCurrentFen] = useState<string>(initialFen);
   const [message, setMessage] = useState<string>("");
-  const [showHint, setShowHint] = useState<boolean>(false);
+  const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [startingFen, setStartingFen] = useState<string>(initialFen);
 
   const resetState = useCallback(() => {
     setMessage("");
-    setShowHint(false);
+    setMoveHistory([]);
   }, []);
 
   const handleCategorySelect = useCallback(
     (category: C | null) => {
       setSelectedCategory(category);
       setSelectedExercise(null);
-      setCurrentFen(category?.exercises[0]?.fen || initialFen);
+      const newFen = category?.exercises[0]?.fen || initialFen;
+      setCurrentFen(newFen);
+      setStartingFen(newFen);
       resetState();
     },
     [initialFen, resetState],
@@ -46,10 +51,12 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   const handleExerciseSelect = useCallback(
     (exercise: T) => {
       setSelectedExercise(exercise);
-      if (exercise?.fen) setCurrentFen(exercise.fen);
+      const newFen = exercise?.fen || initialFen;
+      setCurrentFen(newFen);
+      setStartingFen(newFen);
       resetState();
     },
-    [resetState],
+    [initialFen, resetState],
   );
 
   const handleMove = useCallback(
@@ -57,33 +64,62 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
       if (!selectedExercise || !selectedCategory) return;
 
       const move = `${orig}${dest}`;
-      const isCorrect = correctMoves.includes(move);
+      const newMoveHistory = [...moveHistory, move];
+      setMoveHistory(newMoveHistory);
 
-      if (isCorrect) {
-        setMessage("Correct!");
+      if (selectedExercise.stepsCount) {
+        const evaluation = evaluateCheckmateMoves(startingFen, newMoveHistory, selectedExercise.stepsCount);
+        setMessage(evaluation.message);
 
-        if (onCorrectMove) {
-          onCorrectMove();
-        }
+        if (evaluation.isCheckmate) {
+          if (onCorrectMove) {
+            onCorrectMove();
+          }
 
-        if (completeOnCorrectMove && onExerciseComplete) {
-          onExerciseComplete(selectedCategory.id, selectedExercise.id);
+          if (completeOnCorrectMove && onExerciseComplete) {
+            onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
+          }
         }
       } else {
-        setMessage("Incorrect. Try again.");
+        const isCorrect = correctMoves.includes(move);
+
+        if (isCorrect) {
+          setMessage("Correct!");
+
+          if (onCorrectMove) {
+            onCorrectMove();
+          }
+
+          if (completeOnCorrectMove && onExerciseComplete) {
+            const evaluation: MoveEvaluation = {
+              type: 'optimal',
+              moveCount: newMoveHistory.length,
+              isCheckmate: false,
+              message: "Correct!"
+            };
+            onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
+          }
+        } else {
+          setMessage("Incorrect. Try again.");
+        }
       }
     },
-    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove],
+    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove, moveHistory, startingFen],
   );
 
-  const toggleHint = useCallback(() => {
-    setShowHint((prev) => !prev);
-  }, []);
+  const resetExercise = useCallback(() => {
+    if (selectedExercise?.fen) {
+      setCurrentFen(selectedExercise.fen);
+      setStartingFen(selectedExercise.fen);
+    }
+    resetState();
+  }, [selectedExercise, resetState]);
 
   const clearSelection = useCallback(() => {
     setSelectedCategory(null);
     setSelectedExercise(null);
     setCurrentFen(initialFen);
+    setStartingFen(initialFen);
     resetState();
   }, [initialFen, resetState]);
 
@@ -92,14 +128,14 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
     selectedExercise,
     currentFen,
     message,
-    showHint,
+    moveHistory,
 
     setCurrentFen,
     handleCategorySelect,
     handleExerciseSelect,
     handleMove,
-    toggleHint,
     clearSelection,
     resetState,
+    resetExercise,
   };
 }

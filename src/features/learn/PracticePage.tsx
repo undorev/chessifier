@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Anchor,
-  Badge,
   Box,
   Breadcrumbs,
   Button,
@@ -10,34 +9,36 @@ import {
   Flex,
   Group,
   Paper,
+  Popover,
   SimpleGrid,
   Stack,
   Text,
   TextInput,
   ThemeIcon,
   Title,
-  Tooltip,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconArrowBackUp,
   IconBulb,
   IconCheck,
   IconClock,
+  IconRefresh,
   IconSearch,
   IconTarget,
   IconTrophy,
   IconX,
 } from "@tabler/icons-react";
 import { useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
-import { CategoryCard } from "./components/CategoryCard";
-import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
 import { CompletionModal } from "./components/CompletionModal";
-import { PracticeExerciseCard } from "./components/PracticeExerciseCard";
 import { LinearProgress } from "./components/ProgressIndicator";
-import { practiceCategories } from "./constants/practiceCategories";
+import PracticeBoardWithProvider from "./components/practice/PracticeBoard";
+import { PracticeCard } from "./components/practice/PracticeCard";
+import { PracticeExerciseCard } from "./components/practice/PracticeExerciseCard";
+import { practiceCategories } from "./constants/practices";
 import { useExerciseState } from "./hooks/useExerciseState";
 
 export interface PracticeExercise {
@@ -46,9 +47,10 @@ export interface PracticeExercise {
   description: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   fen: string;
-  correctMoves: string[];
+  correctMoves?: string[];
   points?: number;
   timeLimit?: number;
+  stepsCount?: number;
 }
 
 export interface PracticeCategory {
@@ -69,6 +71,7 @@ export default function PracticePage() {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedCategoryTitle, setCompletedCategoryTitle] = useState("");
   const { navigate } = useRouter();
+  const [opened, { close, open }] = useDisclosure(false);
 
   const { userStats, setUserStats } = useUserStatsStore();
 
@@ -78,15 +81,17 @@ export default function PracticePage() {
     currentFen,
     setCurrentFen,
     message,
-    showHint,
+    moveHistory,
     handleCategorySelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
-    toggleHint,
     clearSelection,
+    resetExercise,
   } = useExerciseState<PracticeExercise, PracticeCategory>({
     initialFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-    onExerciseComplete: (categoryId, exerciseId) => {
+    onExerciseComplete: (categoryId, exerciseId, evaluation) => {
+      console.log(`Exercise completed with evaluation:`, evaluation);
+      
       const prevCompleted = userStats.completedPractice?.[categoryId] || [];
       if (!prevCompleted.includes(exerciseId)) {
         const updatedCompleted = {
@@ -100,7 +105,7 @@ export default function PracticePage() {
           if (category) {
             for (const exId of exIds) {
               const exercise = category.exercises.find((ex) => ex.id === exId);
-              if (exercise && exercise.points) {
+              if (exercise?.points) {
                 totalPoints += exercise.points;
               }
             }
@@ -135,7 +140,7 @@ export default function PracticePage() {
   const handleMove = (orig: string, dest: string) => {
     if (!selectedExercise || !selectedCategory) return;
     const move = `${orig}${dest}`;
-    handleMoveBase(orig, dest, selectedExercise.correctMoves, () => {
+    handleMoveBase(orig, dest, selectedExercise?.correctMoves || [], () => {
       const newFen = applyUciMoveToFen(currentFen, move);
       if (newFen) setCurrentFen(newFen);
     });
@@ -208,7 +213,7 @@ export default function PracticePage() {
               {filteredCategories.map((category) => {
                 const completedCount = userStats.completedPractice?.[category.id]?.length || 0;
                 return (
-                  <CategoryCard
+                <PracticeCard
                     key={category.id}
                     category={category}
                     progress={{
@@ -328,10 +333,13 @@ export default function PracticePage() {
             </Stack>
 
             <Box flex={1}>
-              <ChessExerciseBoardWithProvider
+              <PracticeBoardWithProvider
                 fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
-                onMove={handleMove}
-                readOnly={!selectedExercise}
+                orientation="white"
+                engineColor="black"
+                onMove={(move) => console.log("Move made:", move)}
+                onPositionChange={(fen) => console.log("Position changed:", fen)}
+                onChessMove={handleMove}
               />
 
               {selectedExercise && (
@@ -339,11 +347,26 @@ export default function PracticePage() {
                   <Paper mt="md" p="md" withBorder>
                     <Group justify="space-between" align="center">
                       <Text>{selectedExercise.description}</Text>
-                      <Tooltip label="Show hint">
-                        <ActionIcon variant="light" color="yellow" onClick={toggleHint} disabled={showHint}>
-                          <IconBulb size={20} />
+                      <Group>
+                        <ActionIcon 
+                          variant="light" 
+                          color="blue" 
+                          onClick={resetExercise}
+                          title="Reset exercise"
+                        >
+                          <IconRefresh size={20} />
                         </ActionIcon>
-                      </Tooltip>
+                        <Popover position="top-end" shadow="md" opened={opened}>
+                          <Popover.Target>
+                            <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
+                              <IconBulb size={20} />
+                            </ActionIcon>
+                          </Popover.Target>
+                          <Popover.Dropdown style={{ pointerEvents: "none" }}>
+                            <Text>Look for the best move in this position. Consider all tactical motifs!</Text>
+                          </Popover.Dropdown>
+                        </Popover>
+                      </Group>
                     </Group>
                   </Paper>
 
@@ -352,29 +375,30 @@ export default function PracticePage() {
                       my="md"
                       p="md"
                       withBorder
-                      bg={message.includes("Correct") ? "rgba(0,128,0,0.1)" : "rgba(255,0,0,0.1)"}
+                      bg={message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? "rgba(0,128,0,0.1)" : message.includes("Checkmate") ? "rgba(255,165,0,0.1)" : "rgba(255,0,0,0.1)"}
                     >
                       <Group>
-                        {message.includes("Correct") ? (
+                        {message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? (
                           <IconCheck size={20} color="green" />
+                        ) : message.includes("Checkmate") ? (
+                          <IconTrophy size={20} color="orange" />
                         ) : (
                           <IconX size={20} color="red" />
                         )}
-                        <Text fw={500} c={message.includes("Correct") ? "green" : "red"}>
+                        <Text fw={500} c={message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? "green" : message.includes("Checkmate") ? "orange" : "red"}>
                           {message}
                         </Text>
                       </Group>
                     </Paper>
                   )}
 
-                  {showHint && (
-                    <Paper my="md" p="md" withBorder bg="rgba(255,223,0,0.1)">
+                  {selectedExercise?.stepsCount && (
+                    <Paper mt="md" p="md" withBorder bg="rgba(59, 130, 246, 0.1)">
                       <Group>
-                        <IconBulb size={20} color="yellow" />
-                        <Box>
-                          <Text fw={500}>Hint</Text>
-                          <Text>Look for the best move in this position. Consider all tactical motifs!</Text>
-                        </Box>
+                        <IconTarget size={20} color="blue" />
+                        <Text size="sm" c="blue">
+                          Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves: {moveHistory.length}
+                        </Text>
                       </Group>
                     </Paper>
                   )}

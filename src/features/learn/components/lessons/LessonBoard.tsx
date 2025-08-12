@@ -1,17 +1,16 @@
-import { Box, Paper } from "@mantine/core";
+import { Paper } from "@mantine/core";
 import { Chessground } from "@/chessground/Chessground";
 import { TreeStateProvider } from "@/common/components/TreeStateContext";
-import { chessboard } from "@/styles/Chessboard.css";
 import { calculateValidMoves } from "@/utils/chess-engine";
 import { positionFromFen } from "@/utils/chessops";
 
-interface ChessExerciseBoardProps {
+interface LessonBoardProps {
   fen: string;
   onMove?: (orig: string, dest: string) => void;
   readOnly?: boolean;
 }
 
-export function ChessExerciseBoard({ fen, onMove, readOnly = false }: ChessExerciseBoardProps) {
+export function LessonBoard({ fen, onMove, readOnly = false }: LessonBoardProps) {
   const [pos] = positionFromFen(fen);
   const turn = pos?.turn || "white";
 
@@ -19,7 +18,6 @@ export function ChessExerciseBoard({ fen, onMove, readOnly = false }: ChessExerc
 
   return (
     <Paper p="md" withBorder>
-      <Box className={chessboard}>
         <Chessground
           fen={fen}
           orientation="white"
@@ -36,15 +34,14 @@ export function ChessExerciseBoard({ fen, onMove, readOnly = false }: ChessExerc
           animation={{ enabled: true }}
           coordinates={true}
         />
-      </Box>
     </Paper>
   );
 }
 
-export default function ChessExerciseBoardWithProvider(props: ChessExerciseBoardProps) {
+export default function LessonBoardWithProvider(props: LessonBoardProps) {
   return (
     <TreeStateProvider>
-      <ChessExerciseBoard {...props} />
+      <LessonBoard {...props} />
     </TreeStateProvider>
   );
 }

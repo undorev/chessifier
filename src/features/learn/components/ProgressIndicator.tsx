@@ -1,38 +1,4 @@
-import { Center, Progress, RingProgress, Tooltip } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
-
-interface CircularProgressProps {
-  completed: number;
-  total: number;
-  size?: number;
-  thickness?: number;
-  tooltipLabel?: string;
-}
-
-export function CircularProgress({ completed, total, size = 40, thickness = 4, tooltipLabel }: CircularProgressProps) {
-  const percentage = total > 0 ? (completed / total) * 100 : 0;
-  const isComplete = percentage === 100;
-
-  const defaultTooltip = `${completed}/${total} ${completed === 1 ? "item" : "items"} completed`;
-
-  return (
-    <Tooltip label={tooltipLabel || defaultTooltip}>
-      <RingProgress
-        size={size}
-        thickness={thickness}
-        roundCaps
-        sections={[{ value: percentage, color: isComplete ? "green" : "blue" }]}
-        label={
-          isComplete ? (
-            <Center>
-              <IconCheck size={16} color="green" />
-            </Center>
-          ) : null
-        }
-      />
-    </Tooltip>
-  );
-}
+import { Progress, Tooltip } from "@mantine/core";
 
 interface LinearProgressProps {
   completed: number;

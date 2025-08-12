@@ -172,7 +172,7 @@ function Board({
 
     domtoimage.toBlob(refChildNode).then(async (blob) => {
       if (blob == null) return;
-      let documentsDirPath;
+      let documentsDirPath: any;
       try {
         documentsDirPath = await documentDir();
       } catch (e) {

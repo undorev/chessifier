@@ -1,8 +1,8 @@
 import { Badge, Box, Button, Card, Group, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconChevronRight, IconClock, IconTarget, IconTrophy } from "@tabler/icons-react";
-import type { PracticeCategory } from "../PracticePage";
+import type { PracticeCategory } from "../../PracticePage";
 
-export function CategoryCard({
+export function PracticeCard({
   category,
   progress,
   onClick,

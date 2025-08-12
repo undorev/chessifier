@@ -38,7 +38,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { lessons } from "@/features/learn/constants/lessons";
-import { practiceCategories } from "@/features/learn/constants/practiceCategories";
+import { practiceCategories } from "@/features/learn/constants/practices";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { useUserStatsStore } from "@/state/userStatsStore";
 import { type Achievement, getAchievements } from "@/utils/achievements";
