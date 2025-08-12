@@ -8,7 +8,7 @@ import {
   IconTarget,
   IconTrophy,
 } from "@tabler/icons-react";
-import type { PracticeExercise } from "../PracticePage";
+import type { PracticeExercise } from "../../PracticePage";
 
 export function PracticeExerciseCard({
   exercise,

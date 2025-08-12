@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { lessons } from "../features/learn/constants/lessons";
-import { practiceCategories } from "../features/learn/constants/practiceCategories";
+import { practiceCategories } from "../features/learn/constants/practices";
 
 export interface UserStats {
   lessonsCompleted: number;

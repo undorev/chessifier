@@ -8,12 +8,13 @@ import {
   Flex,
   Group,
   Paper,
+  Popover,
   SimpleGrid,
   Stack,
   Text,
   Title,
-  Tooltip,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconArrowBackUp,
   IconBulb,
@@ -27,10 +28,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
-import ChessExerciseBoardWithProvider from "./components/ChessExerciseBoard";
 import { CompletionModal } from "./components/CompletionModal";
-import { LessonCard } from "./components/LessonCard";
-import { LessonExerciseCard } from "./components/LessonExerciseCard";
+import LessonBoardWithProvider from "./components/lessons/LessonBoard";
+import { LessonCard } from "./components/lessons/LessonCard";
+import { LessonExerciseCard } from "./components/lessons/LessonExerciseCard";
 import { LinearProgress } from "./components/ProgressIndicator";
 import { lessons } from "./constants/lessons";
 import { useExerciseState } from "./hooks/useExerciseState";
@@ -61,6 +62,7 @@ export default function LessonsPage() {
   const navigate = useNavigate();
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedLessonTitle, setCompletedLessonTitle] = useState("");
+  const [opened, { close, open }] = useDisclosure(false);
 
   const { userStats, setUserStats } = useUserStatsStore();
 
@@ -70,11 +72,9 @@ export default function LessonsPage() {
     currentFen,
     setCurrentFen,
     message,
-    showHint,
     handleCategorySelect: handleLessonSelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
-    toggleHint: handleShowHint,
     clearSelection,
     resetState,
   } = useExerciseState<Exercise, Lesson>({
@@ -327,7 +327,7 @@ export default function LessonsPage() {
             </Stack>
 
             <Box flex={1}>
-              <ChessExerciseBoardWithProvider
+              <LessonBoardWithProvider
                 fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                 onMove={handleMove}
                 readOnly={!selectedExercise}
@@ -338,11 +338,23 @@ export default function LessonsPage() {
                   <Paper mt="md" p="md" withBorder>
                     <Group justify="space-between" align="center">
                       <Text>{selectedExercise.description}</Text>
-                      <Tooltip label="Show hint">
-                        <ActionIcon variant="light" color="yellow" onClick={handleShowHint} disabled={showHint}>
-                          <IconBulb size={20} />
-                        </ActionIcon>
-                      </Tooltip>
+                      <Popover position="top-end" shadow="md" opened={opened}>
+                        <Popover.Target>
+                          <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
+                            <IconBulb size={20} />
+                          </ActionIcon>
+                        </Popover.Target>
+                        <Popover.Dropdown style={{ pointerEvents: "none" }}>
+                          <Text mb="lg">Try these moves:</Text>
+                          <SimpleGrid cols={{ base: 3, sm: 3, lg: 3 }} spacing="md">
+                            {(getActiveVariation()?.correctMoves || []).map((move) => (
+                              <Badge key={move} color="blue">
+                                {move.substring(0, 2)} → {move.substring(2)}
+                              </Badge>
+                            ))}
+                          </SimpleGrid>
+                        </Popover.Dropdown>
+                      </Popover>
                     </Group>
                   </Paper>
 
@@ -362,25 +374,6 @@ export default function LessonsPage() {
                         <Text fw={500} c={message.includes("Correct") ? "green" : "red"}>
                           {message}
                         </Text>
-                      </Group>
-                    </Paper>
-                  )}
-
-                  {showHint && (
-                    <Paper my="md" p="md" withBorder bg="rgba(255,223,0,0.1)">
-                      <Group>
-                        <IconBulb size={20} color="yellow" />
-                        <Box>
-                          <Text fw={500}>Hint</Text>
-                          <Text>
-                            Try these moves:{" "}
-                            {(getActiveVariation()?.correctMoves || []).map((move) => (
-                              <Badge key={move} mx={4} color="blue">
-                                {move.substring(0, 2)} → {move.substring(2)}
-                              </Badge>
-                            ))}
-                          </Text>
-                        </Box>
                       </Group>
                     </Paper>
                   )}
