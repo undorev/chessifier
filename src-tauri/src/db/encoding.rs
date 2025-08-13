@@ -1,6 +1,4 @@
-use shakmaty::{
-    fen::Fen, san::SanPlus, CastlingMode, Chess, FromSetup, Move, Position, PositionError,
-};
+use shakmaty::{Chess, Move, Position};
 
 pub fn decode_move(byte: u8, chess: &Chess) -> Option<Move> {
     let legal_moves = chess.legal_moves();

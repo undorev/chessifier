@@ -17,7 +17,6 @@ use crate::{
     opening::get_opening_from_setup,
     AppState,
 };
-use chrono::{NaiveDate};
 use dashmap::DashMap;
 use diesel::{
     connection::{DefaultLoadingMode, SimpleConnection},
@@ -143,21 +142,6 @@ fn get_db_or_create(
     };
 
     Ok(pool.get()?)
-}
-
-#[derive(Debug)]
-pub struct MaterialColor {
-    white: u8,
-    black: u8,
-}
-
-impl Default for MaterialColor {
-    fn default() -> Self {
-        Self {
-            white: 39,
-            black: 39,
-        }
-    }
 }
 
 #[derive(Default, Debug, Serialize)]

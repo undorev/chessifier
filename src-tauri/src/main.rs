@@ -29,7 +29,6 @@ use specta_typescript::{BigIntExportBehavior, Typescript};
 use sysinfo::SystemExt;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager, Window};
-use tauri_plugin_log::{};
 use tauri_plugin_aptabase::EventTracker;
 
 use crate::chess::{
