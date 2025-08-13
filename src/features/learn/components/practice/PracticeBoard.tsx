@@ -90,7 +90,7 @@ function PracticeBoard({
     engineThinkingRef.current = true;
 
     try {
-      const goMode: GoMode = { t: "Time", c: 1_000 }; // 1 second think time
+      const goMode: GoMode = { t: "Time", c: 1_000 };
       const options: EngineOptions = {
         fen: currentFen,
         moves: [],
@@ -130,7 +130,6 @@ function PracticeBoard({
             const dests = pos.allDests();
             const legalDestinations = dests.get(uciMove.from);
             const isLegal = legalDestinations?.has(uciMove.to) ?? false;
-
 
             if (isLegal) {
               makeMove(uciMove as NormalMove);

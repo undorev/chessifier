@@ -3,7 +3,7 @@ import { parseFen } from "chessops/fen";
 import { applyUciMoveToFen } from "./applyUciMoveToFen";
 
 export interface MoveEvaluation {
-  type: 'optimal' | 'suboptimal' | 'incorrect';
+  type: "optimal" | "suboptimal" | "incorrect";
   moveCount: number;
   isCheckmate: boolean;
   message: string;
@@ -16,61 +16,57 @@ export interface MoveEvaluation {
  * @param targetStepsCount The expected number of moves to complete the exercise
  * @returns MoveEvaluation object with details about the move sequence
  */
-export function evaluateCheckmateMoves(
-  startingFen: string,
-  moves: string[],
-  targetStepsCount: number
-): MoveEvaluation {
+export function evaluateCheckmateMoves(startingFen: string, moves: string[], targetStepsCount: number): MoveEvaluation {
   let currentFen = startingFen;
-  
+
   // Apply each move to get the final position
   for (const move of moves) {
     const newFen = applyUciMoveToFen(currentFen, move);
     if (!newFen) {
       return {
-        type: 'incorrect',
+        type: "incorrect",
         moveCount: moves.length,
         isCheckmate: false,
-        message: 'Invalid move sequence'
+        message: "Invalid move sequence",
       };
     }
     currentFen = newFen;
   }
-  
+
   // Check if the final position is checkmate
   const isCheckmate = isPositionCheckmate(currentFen);
   const moveCount = moves.length;
-  
+
   if (!isCheckmate) {
     return {
-      type: 'incorrect',
+      type: "incorrect",
       moveCount,
       isCheckmate: false,
-      message: 'Position is not checkmate. Keep trying!'
+      message: "Position is not checkmate. Keep trying!",
     };
   }
-  
+
   // Position is checkmate, now evaluate based on move count
   if (moveCount === targetStepsCount) {
     return {
-      type: 'optimal',
+      type: "optimal",
       moveCount,
       isCheckmate: true,
-      message: `Perfect! Checkmate in ${moveCount} moves - optimal solution!`
+      message: `Perfect! Checkmate in ${moveCount} moves - optimal solution!`,
     };
   } else if (moveCount < targetStepsCount) {
     return {
-      type: 'optimal',
+      type: "optimal",
       moveCount,
       isCheckmate: true,
-      message: `Excellent! Checkmate in ${moveCount} moves - even better than expected!`
+      message: `Excellent! Checkmate in ${moveCount} moves - even better than expected!`,
     };
   } else {
     return {
-      type: 'suboptimal',
+      type: "suboptimal",
       moveCount,
       isCheckmate: true,
-      message: `Checkmate achieved in ${moveCount} moves, but there's a faster solution in ${targetStepsCount} moves. Try again for the optimal solution!`
+      message: `Checkmate achieved in ${moveCount} moves, but there's a faster solution in ${targetStepsCount} moves. Try again for the optimal solution!`,
     };
   }
 }
@@ -84,22 +80,22 @@ export function isPositionCheckmate(fen: string): boolean {
   try {
     const [setup, error] = parseFen(fen).unwrap(
       (v) => [v, null],
-      (e) => [null, e]
+      (e) => [null, e],
     );
-    
+
     if (error || !setup) {
       return false;
     }
-    
+
     const [pos, posError] = Chess.fromSetup(setup).unwrap(
       (v) => [v, null],
-      (e) => [null, e]
+      (e) => [null, e],
     );
-    
+
     if (posError || !pos) {
       return false;
     }
-    
+
     return pos.isCheckmate();
   } catch {
     return false;
@@ -115,22 +111,22 @@ export function isPositionInCheck(fen: string): boolean {
   try {
     const [setup, error] = parseFen(fen).unwrap(
       (v) => [v, null],
-      (e) => [null, e]
+      (e) => [null, e],
     );
-    
+
     if (error || !setup) {
       return false;
     }
-    
+
     const [pos, posError] = Chess.fromSetup(setup).unwrap(
       (v) => [v, null],
-      (e) => [null, e]
+      (e) => [null, e],
     );
-    
+
     if (posError || !pos) {
       return false;
     }
-    
+
     return pos.isCheck();
   } catch {
     return false;

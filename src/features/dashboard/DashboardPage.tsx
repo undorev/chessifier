@@ -38,7 +38,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { lessons } from "@/features/learn/constants/lessons";
-import { practiceCategories } from "@/features/learn/constants/practices";
+import { practices } from "@/features/learn/constants/practices";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { useUserStatsStore } from "@/state/userStatsStore";
 import { type Achievement, getAchievements } from "@/utils/achievements";
@@ -177,7 +177,7 @@ export default function DashboardPage() {
     } catch {}
 
     try {
-      const withExercises = practiceCategories.filter((c) => (c.exercises?.length ?? 0) > 0);
+      const withExercises = practices.filter((c) => (c.exercises?.length ?? 0) > 0);
       const scored = withExercises
         .map((c) => {
           const done = userStats.completedPractice?.[c.id]?.length ?? 0;

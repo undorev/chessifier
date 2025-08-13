@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { lessons } from "../features/learn/constants/lessons";
-import { practiceCategories } from "../features/learn/constants/practices";
+import { practices } from "../features/learn/constants/practices";
 
 export interface UserStats {
   lessonsCompleted: number;
@@ -27,7 +27,7 @@ export const useUserStatsStore = create<UserStatsState>()(
         lessonsCompleted: 0,
         totalLessons: lessons.reduce((sum, lesson) => sum + lesson.exercises.length, 0),
         practiceCompleted: 0,
-        totalPractice: practiceCategories.reduce((sum, cat) => sum + cat.exercises.length, 0),
+        totalPractice: practices.reduce((sum, cat) => sum + cat.exercises.length, 0),
         totalPoints: 0,
         completionDates: [],
         lessonCompletionDates: [],

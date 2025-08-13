@@ -36,33 +36,10 @@ import { useUserStatsStore } from "../../state/userStatsStore";
 import { CompletionModal } from "./components/CompletionModal";
 import { LinearProgress } from "./components/ProgressIndicator";
 import PracticeBoardWithProvider from "./components/practice/PracticeBoard";
-import { PracticeCard } from "./components/practice/PracticeCard";
-import { PracticeExerciseCard } from "./components/practice/PracticeExerciseCard";
-import { practiceCategories } from "./constants/practices";
+import { PracticeCard, type PracticeCardCategory } from "./components/practice/PracticeCard";
+import { PracticeExerciseCard, type PracticeExerciseCardExercise } from "./components/practice/PracticeExerciseCard";
+import { type PracticeCategory, type PracticeExercise, practices, uiConfig } from "./constants/practices";
 import { useExerciseState } from "./hooks/useExerciseState";
-
-export interface PracticeExercise {
-  id: string;
-  title: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  fen: string;
-  correctMoves?: string[];
-  points?: number;
-  timeLimit?: number;
-  stepsCount?: number;
-}
-
-export interface PracticeCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  exercises: PracticeExercise[];
-  estimatedTime?: number;
-  group?: string;
-}
 
 export default function PracticePage() {
   const GROUPS = ["All", "Checkmates", "Basic Tactics", "Intermediate Tactics", "Pawn Endgames", "Rook Endgames"];
@@ -76,35 +53,35 @@ export default function PracticePage() {
   const { userStats, setUserStats } = useUserStatsStore();
 
   const {
-    selectedCategory,
+    selectedCategory: selectedPractice,
     selectedExercise,
     currentFen,
     setCurrentFen,
     message,
     moveHistory,
-    handleCategorySelect,
+    handleCategorySelect: handlePracticeSelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
     clearSelection,
     resetExercise,
   } = useExerciseState<PracticeExercise, PracticeCategory>({
     initialFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-    onExerciseComplete: (categoryId, exerciseId, evaluation) => {
+    onExerciseComplete: (practiceId, exerciseId, evaluation) => {
       console.log(`Exercise completed with evaluation:`, evaluation);
-      
-      const prevCompleted = userStats.completedPractice?.[categoryId] || [];
+
+      const prevCompleted = userStats.completedPractice?.[practiceId] || [];
       if (!prevCompleted.includes(exerciseId)) {
         const updatedCompleted = {
           ...userStats.completedPractice,
-          [categoryId]: [...prevCompleted, exerciseId],
+          [practiceId]: [...prevCompleted, exerciseId],
         };
 
         let totalPoints = 0;
-        for (const [catId, exIds] of Object.entries(updatedCompleted)) {
-          const category = practiceCategories.find((c) => c.id === catId);
-          if (category) {
+        for (const [practiceId, exIds] of Object.entries(updatedCompleted)) {
+          const practice = practices.find((c) => c.id === practiceId);
+          if (practice) {
             for (const exId of exIds) {
-              const exercise = category.exercises.find((ex) => ex.id === exId);
+              const exercise = practice.exercises.find((ex) => ex.id === exId);
               if (exercise?.points) {
                 totalPoints += exercise.points;
               }
@@ -118,19 +95,22 @@ export default function PracticePage() {
           totalPoints,
         });
 
-        const category = practiceCategories.find((c) => c.id === categoryId);
-        if (category && updatedCompleted[categoryId]?.length === category.exercises.length) {
-          setCompletedCategoryTitle(category.title);
+        const practice = practices.find((c) => c.id === practiceId);
+        if (practice && updatedCompleted[practiceId]?.length === practice.exercises.length) {
+          setCompletedCategoryTitle(practice.title);
           setShowCompletionModal(true);
         }
       }
 
-      if (selectedCategory && selectedExercise) {
-        const currentIndex = selectedCategory.exercises.findIndex((ex) => ex.id === selectedExercise.id);
-        if (currentIndex < selectedCategory.exercises.length - 1) {
+      if (selectedPractice && selectedExercise) {
+        const currentIndex = selectedPractice.exercises.findIndex(
+          (ex: PracticeExercise) => ex.id === selectedExercise.id,
+        );
+        if (currentIndex < selectedPractice.exercises.length - 1) {
           setTimeout(() => {
-            const nextExercise = selectedCategory.exercises[currentIndex + 1];
+            const nextExercise = selectedPractice.exercises[currentIndex + 1];
             handleExerciseSelect(nextExercise);
+            setCurrentFen(nextExercise?.gameData?.fen);
           }, 1500);
         }
       }
@@ -138,19 +118,20 @@ export default function PracticePage() {
   });
 
   const handleMove = (orig: string, dest: string) => {
-    if (!selectedExercise || !selectedCategory) return;
+    if (!selectedExercise || !selectedPractice) return;
     const move = `${orig}${dest}`;
-    handleMoveBase(orig, dest, selectedExercise?.correctMoves || [], () => {
+    handleMoveBase(orig, dest, selectedExercise?.gameData.correctMoves || [], () => {
       const newFen = applyUciMoveToFen(currentFen, move);
       if (newFen) setCurrentFen(newFen);
     });
   };
 
-  const filteredCategories = practiceCategories.filter((category) => {
-    const matchesGroup = activeTab === "All" || category.group === activeTab;
+  const filteredPractices = practices.filter((practice) => {
+    const practiceGroupName = uiConfig.groups[practice.group]?.label || practice.group;
+    const matchesGroup = activeTab === "All" || practiceGroupName === activeTab;
     const matchesSearch =
-      category.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchQuery.toLowerCase());
+      practice.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      practice.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesGroup && matchesSearch;
   });
 
@@ -170,7 +151,7 @@ export default function PracticePage() {
       />
 
       <Stack gap="sm" p="md">
-        {!selectedCategory ? (
+        {!selectedPractice ? (
           <>
             <Group gap="lg" align="center" mb="md">
               <ActionIcon
@@ -210,23 +191,42 @@ export default function PracticePage() {
             </Group>
 
             <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="lg">
-              {filteredCategories.map((category) => {
-                const completedCount = userStats.completedPractice?.[category.id]?.length || 0;
+              {filteredPractices.map((practice) => {
+                const completedCount = userStats.completedPractice?.[practice.id]?.length || 0;
                 return (
-                <PracticeCard
-                    key={category.id}
-                    category={category}
+                  <PracticeCard
+                    key={practice.id}
+                    category={{
+                      id: practice.id,
+                      title: practice.title,
+                      description: practice.description,
+                      icon: uiConfig.icons[practice.iconName] || uiConfig.icons.crown,
+                      color: practice.color,
+                      exercises: practice.exercises.map((exercise) => ({
+                        id: exercise.id,
+                        title: exercise.title,
+                        description: exercise.description,
+                        difficulty: exercise.difficulty,
+                        fen: exercise.gameData.fen,
+                        correctMoves: exercise.gameData.correctMoves ? [...exercise.gameData.correctMoves] : undefined,
+                        points: exercise.points,
+                        timeLimit: exercise.timeLimit,
+                        stepsCount: exercise.stepsCount,
+                      })),
+                      estimatedTime: practice.estimatedTime,
+                      group: uiConfig.groups[practice.group]?.label || practice.group,
+                    }}
                     progress={{
                       completed: completedCount,
-                      total: category.exercises.length,
+                      total: practice.exercises.length,
                     }}
-                    onClick={() => handleCategorySelect(category)}
+                    onClick={() => handlePracticeSelect(practice)}
                   />
                 );
               })}
             </SimpleGrid>
 
-            {filteredCategories.length === 0 && (
+            {filteredPractices.length === 0 && (
               <Paper p="xl" radius="md" withBorder>
                 <Center>
                   <Stack align="center">
@@ -251,13 +251,13 @@ export default function PracticePage() {
                     variant="light"
                     onClick={() => {
                       if (selectedExercise) {
-                        const currentCategoryIndex = practiceCategories.findIndex((c) => c.id === selectedCategory.id);
-                        if (currentCategoryIndex >= 0) {
+                        const currentPracticeIndex = practices.findIndex((c) => c.id === selectedPractice.id);
+                        if (currentPracticeIndex >= 0) {
                           clearSelection();
-                          handleCategorySelect(practiceCategories[currentCategoryIndex]);
+                          handlePracticeSelect(practices[currentPracticeIndex]);
                         }
                       } else {
-                        handleCategorySelect(null);
+                        handlePracticeSelect(null);
                         navigate({ to: "/learn/practice" });
                       }
                     }}
@@ -270,14 +270,14 @@ export default function PracticePage() {
                     <Anchor component="button" onClick={clearSelection}>
                       Practice
                     </Anchor>
-                    <Text>{selectedCategory.title}</Text>
+                    <Text>{selectedPractice.title}</Text>
                     {selectedExercise && <Text>{selectedExercise.title}</Text>}
                   </Breadcrumbs>
                 </Group>
 
                 <LinearProgress
-                  completed={userStats.completedPractice?.[selectedCategory.id]?.length || 0}
-                  total={selectedCategory.exercises.length}
+                  completed={userStats.completedPractice?.[selectedPractice.id]?.length || 0}
+                  total={selectedPractice.exercises.length}
                   size="md"
                   width={200}
                 />
@@ -287,45 +287,62 @@ export default function PracticePage() {
 
               <Paper p="lg" withBorder radius="md">
                 <Group gap="md" mb="md">
-                  <ThemeIcon size={40} variant="gradient" gradient={{ from: selectedCategory.color, to: "cyan" }}>
-                    {selectedCategory.icon}
+                  <ThemeIcon size={40} variant="gradient" gradient={{ from: selectedPractice.color, to: "cyan" }}>
+                    {uiConfig.icons[selectedPractice.iconName] || uiConfig.icons.crown}
                   </ThemeIcon>
                   <Box>
-                    <Title order={3}>{selectedCategory.title}</Title>
-                    <Text c="dimmed">{selectedCategory.description}</Text>
+                    <Title order={3}>{selectedPractice.title}</Title>
+                    <Text c="dimmed">{selectedPractice.description}</Text>
                   </Box>
                 </Group>
 
                 <Group gap="lg">
                   <Group gap="xs">
                     <IconTarget size={16} />
-                    <Text size="sm">{selectedCategory.exercises.length} exercises</Text>
+                    <Text size="sm">{selectedPractice.exercises.length} exercises</Text>
                   </Group>
                   <Group gap="xs">
                     <IconClock size={16} />
-                    <Text size="sm">{selectedCategory.estimatedTime} minutes</Text>
+                    <Text size="sm">{selectedPractice.estimatedTime} minutes</Text>
                   </Group>
                   <Group gap="xs">
                     <IconTrophy size={16} />
                     <Text size="sm">
-                      {selectedCategory.exercises.reduce((sum, ex) => sum + (ex.points || 0), 0)} points
+                      {selectedPractice.exercises.reduce(
+                        (sum: number, ex: PracticeExercise) => sum + (ex.points || 0),
+                        0,
+                      )}{" "}
+                      points
                     </Text>
                   </Group>
                 </Group>
               </Paper>
 
-              <Title order={4}>Exercises ({selectedCategory.exercises.length})</Title>
+              <Title order={4}>Exercises ({selectedPractice.exercises.length})</Title>
               <Stack gap="md">
-                {selectedCategory.exercises.map((exercise, index) => {
+                {selectedPractice.exercises.map((exercise: PracticeExercise, index: number) => {
                   const isCompleted =
-                    userStats.completedPractice?.[selectedCategory.id]?.includes(exercise.id) || false;
+                    userStats.completedPractice?.[selectedPractice.id]?.includes(exercise.id) || false;
                   return (
                     <PracticeExerciseCard
                       key={exercise.id}
-                      exercise={exercise}
+                      exercise={{
+                        id: exercise.id,
+                        title: exercise.title,
+                        description: exercise.description,
+                        difficulty: exercise.difficulty,
+                        fen: exercise.gameData.fen,
+                        correctMoves: exercise.gameData.correctMoves ? [...exercise.gameData.correctMoves] : undefined,
+                        points: exercise.points,
+                        timeLimit: exercise.timeLimit,
+                        stepsCount: exercise.stepsCount,
+                      }}
                       index={index}
                       isCompleted={isCompleted}
-                      onClick={() => handleExerciseSelect(exercise)}
+                      onClick={() => {
+                        handleExerciseSelect(exercise);
+                        setCurrentFen(exercise?.gameData?.fen);
+                      }}
                     />
                   );
                 })}
@@ -348,12 +365,7 @@ export default function PracticePage() {
                     <Group justify="space-between" align="center">
                       <Text>{selectedExercise.description}</Text>
                       <Group>
-                        <ActionIcon 
-                          variant="light" 
-                          color="blue" 
-                          onClick={resetExercise}
-                          title="Reset exercise"
-                        >
+                        <ActionIcon variant="light" color="blue" onClick={resetExercise} title="Reset exercise">
                           <IconRefresh size={20} />
                         </ActionIcon>
                         <Popover position="top-end" shadow="md" opened={opened}>
@@ -375,7 +387,13 @@ export default function PracticePage() {
                       my="md"
                       p="md"
                       withBorder
-                      bg={message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? "rgba(0,128,0,0.1)" : message.includes("Checkmate") ? "rgba(255,165,0,0.1)" : "rgba(255,0,0,0.1)"}
+                      bg={
+                        message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent")
+                          ? "rgba(0,128,0,0.1)"
+                          : message.includes("Checkmate")
+                            ? "rgba(255,165,0,0.1)"
+                            : "rgba(255,0,0,0.1)"
+                      }
                     >
                       <Group>
                         {message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? (
@@ -385,7 +403,16 @@ export default function PracticePage() {
                         ) : (
                           <IconX size={20} color="red" />
                         )}
-                        <Text fw={500} c={message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? "green" : message.includes("Checkmate") ? "orange" : "red"}>
+                        <Text
+                          fw={500}
+                          c={
+                            message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent")
+                              ? "green"
+                              : message.includes("Checkmate")
+                                ? "orange"
+                                : "red"
+                          }
+                        >
                           {message}
                         </Text>
                       </Group>

@@ -8,7 +8,18 @@ import {
   IconTarget,
   IconTrophy,
 } from "@tabler/icons-react";
-import type { PracticeExercise } from "../../PracticePage";
+
+export interface PracticeExerciseCardExercise {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  fen: string;
+  correctMoves?: string[];
+  points?: number;
+  timeLimit?: number;
+  stepsCount?: number;
+}
 
 export function PracticeExerciseCard({
   exercise,
@@ -16,7 +27,7 @@ export function PracticeExerciseCard({
   isCompleted,
   onClick,
 }: {
-  exercise: PracticeExercise;
+  exercise: PracticeExerciseCardExercise;
   index: number;
   isCompleted: boolean;
   onClick: () => void;
