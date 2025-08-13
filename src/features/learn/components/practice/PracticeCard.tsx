@@ -1,13 +1,33 @@
 import { Badge, Box, Button, Card, Group, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconChevronRight, IconClock, IconTarget, IconTrophy } from "@tabler/icons-react";
-import type { PracticeCategory } from "../../PracticePage";
+
+export interface PracticeCardCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+  exercises: Array<{
+    id: string;
+    title: string;
+    description: string;
+    difficulty: "beginner" | "intermediate" | "advanced";
+    fen: string;
+    correctMoves?: string[];
+    points?: number;
+    timeLimit?: number;
+    stepsCount?: number;
+  }>;
+  estimatedTime?: number;
+  group?: string;
+}
 
 export function PracticeCard({
   category,
   progress,
   onClick,
 }: {
-  category: PracticeCategory;
+  category: PracticeCardCategory;
   progress: { completed: number; total: number };
   onClick: () => void;
 }) {

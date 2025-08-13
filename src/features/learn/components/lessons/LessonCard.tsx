@@ -1,13 +1,30 @@
 import { Badge, Box, Button, Card, Group, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconBook, IconChevronRight, IconClock, IconRocket, IconSchool, IconTarget } from "@tabler/icons-react";
-import type { Lesson } from "../../LessonsPage";
+
+export interface LessonCardLesson {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  fen: string;
+  content: string;
+  exercises: Array<{
+    id: string;
+    title: string;
+    description: string;
+    variations?: { fen: string; correctMoves: string[] }[];
+    disabled?: boolean;
+  }>;
+  estimatedTime?: number;
+  tags?: string[];
+}
 
 export function LessonCard({
   lesson,
   progress,
   onClick,
 }: {
-  lesson: Lesson;
+  lesson: LessonCardLesson;
   progress: { completed: number; total: number };
   onClick: () => void;
 }) {

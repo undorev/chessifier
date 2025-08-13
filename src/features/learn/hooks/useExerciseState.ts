@@ -3,10 +3,15 @@ import { evaluateCheckmateMoves, type MoveEvaluation } from "@/utils/checkmateDe
 
 interface ExerciseBase {
   id: string;
-  title: string;
-  description: string;
+  title: string | { default: string };
+  description: string | { default: string };
   fen?: string;
   stepsCount?: number;
+}
+
+interface CategoryBase {
+  id: string;
+  exercises: readonly ExerciseBase[];
 }
 
 interface UseExerciseStateOptions {
@@ -15,7 +20,7 @@ interface UseExerciseStateOptions {
   completeOnCorrectMove?: boolean;
 }
 
-export function useExerciseState<T extends ExerciseBase, C extends { id: string; exercises: T[] }>(
+export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>(
   options: UseExerciseStateOptions = {},
 ) {
   const {
@@ -60,7 +65,7 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
   );
 
   const handleMove = useCallback(
-    (orig: string, dest: string, correctMoves: string[], onCorrectMove?: () => void) => {
+    (orig: string, dest: string, correctMoves: readonly string[], onCorrectMove?: () => void) => {
       if (!selectedExercise || !selectedCategory) return;
 
       const move = `${orig}${dest}`;
@@ -92,10 +97,10 @@ export function useExerciseState<T extends ExerciseBase, C extends { id: string;
 
           if (completeOnCorrectMove && onExerciseComplete) {
             const evaluation: MoveEvaluation = {
-              type: 'optimal',
+              type: "optimal",
               moveCount: newMoveHistory.length,
               isCheckmate: false,
-              message: "Correct!"
+              message: "Correct!",
             };
             onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
           }

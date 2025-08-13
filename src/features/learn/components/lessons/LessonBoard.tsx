@@ -18,22 +18,22 @@ export function LessonBoard({ fen, onMove, readOnly = false }: LessonBoardProps)
 
   return (
     <Paper p="md" withBorder>
-        <Chessground
-          fen={fen}
-          orientation="white"
-          turnColor={turn}
-          movable={{
-            free: !readOnly,
-            color: !readOnly ? turn : undefined,
-            showDests: true,
-            dests,
-            events: {
-              after: onMove,
-            },
-          }}
-          animation={{ enabled: true }}
-          coordinates={true}
-        />
+      <Chessground
+        fen={fen}
+        orientation="white"
+        turnColor={turn}
+        movable={{
+          free: !readOnly,
+          color: !readOnly ? turn : undefined,
+          showDests: true,
+          dests,
+          events: {
+            after: onMove,
+          },
+        }}
+        animation={{ enabled: true }}
+        coordinates={true}
+      />
     </Paper>
   );
 }
