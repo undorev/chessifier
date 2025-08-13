@@ -35,6 +35,7 @@ import PiecesSelect from "./components/PiecesSelect";
 import SettingsNumberInput from "./components/SettingsNumberInput";
 import SettingsSwitch from "./components/SettingsSwitch";
 import SoundSelect from "./components/SoundSelect";
+import TelemetrySettings from "./components/TelemetrySettings";
 import ThemeButton from "./components/ThemeButton";
 import VolumeSlider from "./components/VolumeSlider";
 import * as classes from "./SettingsPage.css";
@@ -635,6 +636,13 @@ export default function Page() {
             />
           </Group>
         ),
+      },
+      {
+        id: "telemetry",
+        title: "Telemetry",
+        description: "Help improve Chessifier by sharing anonymous usage data",
+        tab: "directories",
+        component: <TelemetrySettings className={classes.item} />,
       },
     ],
     [
