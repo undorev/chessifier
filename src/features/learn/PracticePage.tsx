@@ -56,7 +56,7 @@ export default function PracticePage() {
     currentFen,
     setCurrentFen,
     message,
-    moveHistory,
+    playerMoveCount,
     handleCategorySelect: handlePracticeSelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
@@ -417,7 +417,7 @@ export default function PracticePage() {
                           <IconTarget size={20} color="#1c7ed6" />
                           <Text size="sm" c="blue">
                             Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves:{" "}
-                            {moveHistory.length}
+                            {playerMoveCount}
                           </Text>
                         </Group>
                       </Paper>
