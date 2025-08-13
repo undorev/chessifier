@@ -168,7 +168,7 @@ export default function DashboardPage() {
       if (nextLesson) {
         picked.push({
           id: `lesson:${nextLesson.id}`,
-          title: `Continue: ${nextLesson.title}`,
+          title: `Continue: ${nextLesson.title.default}`,
           tag: "Lessons",
           difficulty: nextLesson.difficulty?.toString?.().replace(/^./, (c) => c.toUpperCase()) ?? "All",
           to: "/learn/lessons",
