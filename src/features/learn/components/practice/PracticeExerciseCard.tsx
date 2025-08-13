@@ -71,7 +71,7 @@ export function PracticeExerciseCard({
       onClick={onClick}
     >
       <Group justify="space-between" align="center">
-        <Group gap="md">
+        <Group gap="md" flex={1}>
           <ThemeIcon
             size={40}
             radius="md"
@@ -81,45 +81,44 @@ export function PracticeExerciseCard({
             {isCompleted ? <IconCheck size={20} /> : <Text fw={700}>{index + 1}</Text>}
           </ThemeIcon>
 
-          <Box>
-            <Group gap="xs" mb="xs">
+          <Box flex={1}>
+            <Group gap="xs" mb="xs" justify="space-between">
               <Text fw={600} size="sm">
                 {exercise.title}
               </Text>
-              <Badge
-                size="xs"
-                variant="light"
-                color={getDifficultyColor(exercise.difficulty)}
-                leftSection={getDifficultyIcon(exercise.difficulty)}
-              >
-                {exercise.difficulty}
-              </Badge>
+              <Group>
+                {exercise.timeLimit && (
+                  <Group gap="xs">
+                    <IconClock size={16} />
+                    <Text size="sm" c="dimmed">
+                      {Math.floor(exercise.timeLimit / 60)}:{(exercise.timeLimit % 60).toString().padStart(2, "0")}
+                    </Text>
+                  </Group>
+                )}
+                {exercise.points && (
+                  <Group gap="xs">
+                    <IconTrophy size={16} color="orange" />
+                    <Text size="sm" fw={500} c="orange">
+                      {exercise.points}
+                    </Text>
+                  </Group>
+                )}
+                <Badge
+                  size="xs"
+                  variant="light"
+                  color={getDifficultyColor(exercise.difficulty)}
+                  leftSection={getDifficultyIcon(exercise.difficulty)}
+                >
+                  {exercise.difficulty}
+                </Badge>
+              </Group>
             </Group>
             <Text size="xs" c="dimmed" lineClamp={2}>
               {exercise.description}
             </Text>
           </Box>
         </Group>
-
-        <Group gap="md">
-          {exercise.points && (
-            <Group gap="xs">
-              <IconTrophy size={16} color="orange" />
-              <Text size="sm" fw={500} c="orange">
-                {exercise.points}
-              </Text>
-            </Group>
-          )}
-          {exercise.timeLimit && (
-            <Group gap="xs">
-              <IconClock size={16} />
-              <Text size="sm" c="dimmed">
-                {Math.floor(exercise.timeLimit / 60)}:{(exercise.timeLimit % 60).toString().padStart(2, "0")}
-              </Text>
-            </Group>
-          )}
-          <IconChevronRight size={16} />
-        </Group>
+        <IconChevronRight size={16} />
       </Group>
     </Card>
   );
