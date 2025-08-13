@@ -40,11 +40,11 @@ function getActivePlayerFromFen(fen: string): "white" | "black" {
 function isActivePlayerMove(startingFen: string, moveIndex: number): boolean {
   const initialActivePlayer = getActivePlayerFromFen(startingFen);
   const isEvenIndex = moveIndex % 2 === 0;
-  
+
   if (initialActivePlayer === "white") {
     return isEvenIndex;
   } else {
-    return isEvenIndex;
+    return !isEvenIndex;
   }
 }
 
@@ -103,7 +103,7 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
       setMoveHistory(newMoveHistory);
 
       const isPlayerMove = isActivePlayerMove(startingFen, newMoveHistory.length - 1);
-      
+
       let newPlayerMoveHistory = playerMoveHistory;
       if (isPlayerMove) {
         newPlayerMoveHistory = [...playerMoveHistory, move];
@@ -114,7 +114,7 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
         const evaluation = evaluateCheckmateMoves(startingFen, newMoveHistory, selectedExercise.stepsCount);
         setMessage(evaluation.message);
 
-        if (evaluation.isCheckmate) {
+        if (evaluation.type !== "incorrect" && evaluation.isCheckmate) {
           if (onCorrectMove) {
             onCorrectMove();
           }
@@ -150,12 +150,20 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
               onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
             }
           } else {
-            setMessage("Incorrect. Try again.");
+            setMessage("That's not the best move. Try again!");
           }
         }
       }
     },
-    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove, moveHistory, playerMoveHistory, startingFen],
+    [
+      selectedCategory,
+      selectedExercise,
+      onExerciseComplete,
+      completeOnCorrectMove,
+      moveHistory,
+      playerMoveHistory,
+      startingFen,
+    ],
   );
 
   const resetExercise = useCallback(() => {

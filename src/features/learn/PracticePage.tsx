@@ -380,7 +380,7 @@ export default function PracticePage() {
                             ? "rgba(0,128,0,0.1)"
                             : message.includes("Checkmate")
                               ? "rgba(255,165,0,0.1)"
-                              : "rgba(255,0,0,0.1)"
+                              : "rgba(255, 238, 0, 0.1)"
                         }
                       >
                         <Group>
@@ -391,7 +391,7 @@ export default function PracticePage() {
                           ) : message.includes("Checkmate") ? (
                             <IconTrophy size={20} color="orange" />
                           ) : (
-                            <IconX size={20} color="red" />
+                            <IconX size={20} color="yellow" />
                           )}
                           <Text
                             fw={500}
@@ -402,7 +402,7 @@ export default function PracticePage() {
                                 ? "green"
                                 : message.includes("Checkmate")
                                   ? "orange"
-                                  : "red"
+                                  : "yellow"
                             }
                           >
                             {message}
@@ -416,8 +416,7 @@ export default function PracticePage() {
                         <Group>
                           <IconTarget size={20} color="#1c7ed6" />
                           <Text size="sm" c="blue">
-                            Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves:{" "}
-                            {playerMoveCount}
+                            Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves: {playerMoveCount}
                           </Text>
                         </Group>
                       </Paper>
