@@ -1,5 +1,15 @@
 # Chessifier
 
+## v0.3.1
+
+### ✨ Features
+
+* **Telemetry toggle in settings**
+
+### 🐛 Fixes
+
+* Fixed **next lesson title** - thanks [gm-m](https://github.com/gm-m) 🎉
+
 ## v0.3.0
 
 ### ✨ Features
