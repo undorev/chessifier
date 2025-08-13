@@ -4,7 +4,6 @@ import {
   Badge,
   Box,
   Breadcrumbs,
-  Divider,
   Flex,
   Group,
   Paper,
@@ -32,7 +31,6 @@ import { CompletionModal } from "./components/CompletionModal";
 import LessonBoardWithProvider from "./components/lessons/LessonBoard";
 import { LessonCard } from "./components/lessons/LessonCard";
 import { LessonExerciseCard } from "./components/lessons/LessonExerciseCard";
-import { LinearProgress } from "./components/ProgressIndicator";
 import { type Lesson, type LessonExercise, lessons } from "./constants/lessons";
 import { useExerciseState } from "./hooks/useExerciseState";
 
@@ -225,194 +223,181 @@ export default function LessonsPage() {
             </SimpleGrid>
           </>
         ) : (
-          <Flex gap="xl" align="flex-start">
-            <Stack gap="md" flex={1}>
-              <Group justify="space-between">
-                <Group gap="lg">
-                  <ActionIcon
-                    variant="light"
-                    onClick={() => {
-                      if (selectedExercise) {
-                        const currentLessonIndex = lessons.findIndex((l) => l.id === selectedLesson.id);
-                        if (currentLessonIndex >= 0) {
-                          clearSelection();
-                          handleLessonSelect(lessons[currentLessonIndex]);
-                        }
-                      } else {
-                        handleLessonSelect(null);
-                        navigate({ to: "/learn/lessons" });
+          <>
+            <Group justify="space-between">
+              <Group gap="lg">
+                <ActionIcon
+                  variant="light"
+                  onClick={() => {
+                    if (selectedExercise) {
+                      const currentLessonIndex = lessons.findIndex((l) => l.id === selectedLesson.id);
+                      if (currentLessonIndex >= 0) {
+                        clearSelection();
+                        handleLessonSelect(lessons[currentLessonIndex]);
                       }
-                    }}
-                    aria-label="Back to Lessons"
-                    title="Back to Lessons"
-                  >
-                    <IconArrowBackUp size={20} />
-                  </ActionIcon>
-                  <Breadcrumbs separator="→">
-                    <Anchor component="button" onClick={clearSelection}>
-                      Lessons
-                    </Anchor>
-                    <Text>{selectedLesson.title.default}</Text>
-                    {selectedExercise && <Text>{selectedExercise.title.default}</Text>}
-                  </Breadcrumbs>
-                </Group>
-
-                <LinearProgress
-                  completed={userStats.completedExercises?.[selectedLesson.id]?.length || 0}
-                  total={selectedLesson.exercises.length}
-                  size="md"
-                  width={200}
-                />
+                    } else {
+                      handleLessonSelect(null);
+                      navigate({ to: "/learn/lessons" });
+                    }
+                  }}
+                  aria-label="Back to Lessons"
+                  title="Back to Lessons"
+                >
+                  <IconArrowBackUp size={20} />
+                </ActionIcon>
+                <Breadcrumbs separator="→">
+                  <Anchor component="button" onClick={clearSelection}>
+                    Lessons
+                  </Anchor>
+                  <Text>{selectedLesson.title.default}</Text>
+                  {selectedExercise && <Text>{selectedExercise.title.default}</Text>}
+                </Breadcrumbs>
               </Group>
 
-              <Divider />
-
-              <Paper p="lg" withBorder radius="md">
-                <Stack gap="md">
-                  <Group>
-                    <Badge
-                      size="lg"
-                      variant="filled"
-                      color={
-                        selectedLesson.difficulty === "beginner"
-                          ? "green"
-                          : selectedLesson.difficulty === "intermediate"
-                            ? "blue"
-                            : "red"
-                      }
-                    >
-                      {selectedLesson.difficulty.charAt(0).toUpperCase() + selectedLesson.difficulty.slice(1)}
-                    </Badge>
-                    {selectedLesson.estimatedTime && (
-                      <Group gap="xs">
-                        <IconClock size={16} />
-                        <Text size="sm">{selectedLesson.estimatedTime} minutes</Text>
-                      </Group>
-                    )}
-                  </Group>
-                  <Text>
-                    {selectedLesson.content.introduction?.default || selectedLesson.content.theory?.default || ""}
-                  </Text>
-                </Stack>
-              </Paper>
-
-              <Title order={4}>Exercises ({selectedLesson.exercises.length})</Title>
-              <SimpleGrid cols={1} spacing="md">
-                {selectedLesson.exercises.map((exercise: LessonExercise, index: number) => {
-                  const isCompleted = userStats.completedExercises?.[selectedLesson.id]?.includes(exercise.id) || false;
-                  return (
-                    <LessonExerciseCard
-                      key={exercise.id}
-                      id={exercise.id}
-                      title={`${index + 1}. ${exercise.title.default}`}
-                      description={exercise.description.default}
-                      disabled={exercise?.disabled}
-                      isCompleted={isCompleted}
-                      onClick={() => handleExerciseSelectWithReset(exercise)}
-                    />
-                  );
-                })}
-              </SimpleGrid>
-            </Stack>
-
-            <Box flex={1}>
-              <LessonBoardWithProvider
-                fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
-                onMove={handleMove}
-                readOnly={!selectedExercise}
-              />
-
               {selectedExercise && (
-                <>
-                  <Paper mt="md" p="md" withBorder>
-                    <Group justify="space-between" align="center">
-                      <Text>{selectedExercise.description.default}</Text>
-                      <Popover position="top-end" shadow="md" opened={opened}>
-                        <Popover.Target>
-                          <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
-                            <IconBulb size={20} />
-                          </ActionIcon>
-                        </Popover.Target>
-                        <Popover.Dropdown style={{ pointerEvents: "none" }}>
-                          <Text mb="lg">Try these moves:</Text>
-                          <SimpleGrid cols={{ base: 3, sm: 3, lg: 3 }} spacing="md">
-                            {(getActiveVariation()?.correctMoves || []).map((move: string) => (
-                              <Badge key={move} color="blue">
-                                {move.substring(0, 2)} → {move.substring(2)}
-                              </Badge>
-                            ))}
-                          </SimpleGrid>
-                        </Popover.Dropdown>
-                      </Popover>
+                <Popover position="bottom-end" shadow="md" opened={opened}>
+                  <Popover.Target>
+                    <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
+                      <IconBulb size={20} />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown style={{ pointerEvents: "none" }}>
+                    <Text mb="lg">Try these moves:</Text>
+                    <SimpleGrid cols={{ base: 3, sm: 3, lg: 3 }} spacing="md">
+                      {(getActiveVariation()?.correctMoves || []).map((move: string) => (
+                        <Badge key={move} color="blue">
+                          {move.substring(0, 2)} → {move.substring(2)}
+                        </Badge>
+                      ))}
+                    </SimpleGrid>
+                  </Popover.Dropdown>
+                </Popover>
+              )}
+            </Group>
+
+            <Flex gap="xl" align="flex-start">
+              <Stack gap="md" flex={1}>
+                <Paper p="lg" withBorder radius="md">
+                  <Stack gap="md">
+                    <Group>
+                      <Badge
+                        size="lg"
+                        variant="filled"
+                        color={
+                          selectedLesson.difficulty === "beginner"
+                            ? "green"
+                            : selectedLesson.difficulty === "intermediate"
+                              ? "blue"
+                              : "red"
+                        }
+                      >
+                        {selectedLesson.difficulty.charAt(0).toUpperCase() + selectedLesson.difficulty.slice(1)}
+                      </Badge>
+                      {selectedLesson.estimatedTime && (
+                        <Group gap="xs">
+                          <IconClock size={16} />
+                          <Text size="sm">{selectedLesson.estimatedTime} minutes</Text>
+                        </Group>
+                      )}
+                    </Group>
+                    <Text>
+                      {selectedLesson.content.introduction?.default || selectedLesson.content.theory?.default || ""}
+                    </Text>
+                  </Stack>
+                </Paper>
+
+                <Title order={4}>Exercises ({selectedLesson.exercises.length})</Title>
+                <SimpleGrid cols={1} spacing="md">
+                  {selectedLesson.exercises.map((exercise: LessonExercise, index: number) => {
+                    const isCompleted =
+                      userStats.completedExercises?.[selectedLesson.id]?.includes(exercise.id) || false;
+                    return (
+                      <LessonExerciseCard
+                        key={exercise.id}
+                        id={exercise.id}
+                        title={`${index + 1}. ${exercise.title.default}`}
+                        description={exercise.description.default}
+                        disabled={exercise?.disabled}
+                        isCompleted={isCompleted}
+                        onClick={() => handleExerciseSelectWithReset(exercise)}
+                      />
+                    );
+                  })}
+                </SimpleGrid>
+              </Stack>
+
+              <Box flex={1}>
+                <LessonBoardWithProvider
+                  fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
+                  onMove={handleMove}
+                  readOnly={!selectedExercise}
+                />
+
+                {selectedExercise && message && (
+                  <Paper
+                    my="md"
+                    p="md"
+                    withBorder
+                    bg={message.includes("Correct") ? "rgba(0,128,0,0.1)" : "rgba(255,0,0,0.1)"}
+                  >
+                    <Group>
+                      {message.includes("Correct") ? (
+                        <IconCheck size={20} color="green" />
+                      ) : (
+                        <IconX size={20} color="red" />
+                      )}
+                      <Text fw={500} c={message.includes("Correct") ? "green" : "red"}>
+                        {message}
+                      </Text>
                     </Group>
                   </Paper>
+                )}
 
-                  {message && (
-                    <Paper
-                      my="md"
-                      p="md"
-                      withBorder
-                      bg={message.includes("Correct") ? "rgba(0,128,0,0.1)" : "rgba(255,0,0,0.1)"}
-                    >
-                      <Group>
-                        {message.includes("Correct") ? (
-                          <IconCheck size={20} color="green" />
-                        ) : (
-                          <IconX size={20} color="red" />
-                        )}
-                        <Text fw={500} c={message.includes("Correct") ? "green" : "red"}>
-                          {message}
-                        </Text>
-                      </Group>
-                    </Paper>
-                  )}
-                </>
-              )}
-
-              {selectedExercise && (
-                <Group mt="xs" justify="space-between" align="center">
-                  <Group gap="xs">
-                    <ActionIcon
-                      variant="default"
-                      onClick={() => {
-                        if (!selectedExercise?.gameData.variations) return;
-                        const next = Math.max(0, variationIndex - 1);
-                        setVariationIndex(next);
-                        const v = selectedExercise.gameData.variations[next];
-                        if (v?.fen) setCurrentFen(v.fen);
-                        resetState();
-                      }}
-                      disabled={!selectedExercise?.gameData.variations || variationIndex === 0}
-                    >
-                      <IconChevronLeft size={18} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant="default"
-                      onClick={() => {
-                        if (!selectedExercise?.gameData.variations) return;
-                        const total = selectedExercise.gameData.variations.length;
-                        const next = Math.min(total - 1, variationIndex + 1);
-                        setVariationIndex(next);
-                        const v = selectedExercise.gameData.variations[next];
-                        if (v?.fen) setCurrentFen(v.fen);
-                        resetState();
-                      }}
-                      disabled={
-                        !selectedExercise?.gameData.variations ||
-                        variationIndex >= selectedExercise.gameData.variations.length - 1
-                      }
-                    >
-                      <IconChevronRight size={18} />
-                    </ActionIcon>
+                {selectedExercise && selectedExercise?.gameData.variations?.length > 1 && (
+                  <Group mt="xs" justify="space-between" align="center">
+                    <Group gap="xs">
+                      <ActionIcon
+                        variant="default"
+                        onClick={() => {
+                          if (!selectedExercise?.gameData.variations) return;
+                          const next = Math.max(0, variationIndex - 1);
+                          setVariationIndex(next);
+                          const v = selectedExercise.gameData.variations[next];
+                          if (v?.fen) setCurrentFen(v.fen);
+                          resetState();
+                        }}
+                        disabled={!selectedExercise?.gameData.variations || variationIndex === 0}
+                      >
+                        <IconChevronLeft size={18} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="default"
+                        onClick={() => {
+                          if (!selectedExercise?.gameData.variations) return;
+                          const total = selectedExercise.gameData.variations.length;
+                          const next = Math.min(total - 1, variationIndex + 1);
+                          setVariationIndex(next);
+                          const v = selectedExercise.gameData.variations[next];
+                          if (v?.fen) setCurrentFen(v.fen);
+                          resetState();
+                        }}
+                        disabled={
+                          !selectedExercise?.gameData.variations ||
+                          variationIndex >= selectedExercise.gameData.variations.length - 1
+                        }
+                      >
+                        <IconChevronRight size={18} />
+                      </ActionIcon>
+                    </Group>
+                    <Text size="sm" c="dimmed">
+                      Variation {Math.min(variationIndex + 1, selectedExercise?.gameData.variations?.length || 1)} /{" "}
+                      {selectedExercise?.gameData.variations?.length || 1}
+                    </Text>
                   </Group>
-                  <Text size="sm" c="dimmed">
-                    Variation {Math.min(variationIndex + 1, selectedExercise?.gameData.variations?.length || 1)} /{" "}
-                    {selectedExercise?.gameData.variations?.length || 1}
-                  </Text>
-                </Group>
-              )}
-            </Box>
-          </Flex>
+                )}
+              </Box>
+            </Flex>
+          </>
         )}
       </Stack>
     </>

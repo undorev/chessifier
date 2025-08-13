@@ -5,7 +5,6 @@ import {
   Breadcrumbs,
   Button,
   Center,
-  Divider,
   Flex,
   Group,
   Paper,
@@ -34,10 +33,9 @@ import { useState } from "react";
 import { applyUciMoveToFen } from "@/utils/applyUciMoveToFen";
 import { useUserStatsStore } from "../../state/userStatsStore";
 import { CompletionModal } from "./components/CompletionModal";
-import { LinearProgress } from "./components/ProgressIndicator";
 import PracticeBoardWithProvider from "./components/practice/PracticeBoard";
-import { PracticeCard, type PracticeCardCategory } from "./components/practice/PracticeCard";
-import { PracticeExerciseCard, type PracticeExerciseCardExercise } from "./components/practice/PracticeExerciseCard";
+import { PracticeCard } from "./components/practice/PracticeCard";
+import { PracticeExerciseCard } from "./components/practice/PracticeExerciseCard";
 import { type PracticeCategory, type PracticeExercise, practices, uiConfig } from "./constants/practices";
 import { useExerciseState } from "./hooks/useExerciseState";
 
@@ -243,196 +241,192 @@ export default function PracticePage() {
             )}
           </>
         ) : (
-          <Flex gap="xl" align="flex-start">
-            <Stack gap="md" flex={1}>
-              <Group justify="space-between">
-                <Group>
-                  <ActionIcon
-                    variant="light"
-                    onClick={() => {
-                      if (selectedExercise) {
-                        const currentPracticeIndex = practices.findIndex((c) => c.id === selectedPractice.id);
-                        if (currentPracticeIndex >= 0) {
-                          clearSelection();
-                          handlePracticeSelect(practices[currentPracticeIndex]);
-                        }
-                      } else {
-                        handlePracticeSelect(null);
-                        navigate({ to: "/learn/practice" });
+          <>
+            <Group justify="space-between">
+              <Group>
+                <ActionIcon
+                  variant="light"
+                  onClick={() => {
+                    if (selectedExercise) {
+                      const currentPracticeIndex = practices.findIndex((c) => c.id === selectedPractice.id);
+                      if (currentPracticeIndex >= 0) {
+                        clearSelection();
+                        handlePracticeSelect(practices[currentPracticeIndex]);
                       }
-                    }}
-                    aria-label="Back to Practice"
-                    title="Back to Practice"
-                  >
-                    <IconArrowBackUp size={20} />
-                  </ActionIcon>
-                  <Breadcrumbs separator="→">
-                    <Anchor component="button" onClick={clearSelection}>
-                      Practice
-                    </Anchor>
-                    <Text>{selectedPractice.title}</Text>
-                    {selectedExercise && <Text>{selectedExercise.title}</Text>}
-                  </Breadcrumbs>
-                </Group>
-
-                <LinearProgress
-                  completed={userStats.completedPractice?.[selectedPractice.id]?.length || 0}
-                  total={selectedPractice.exercises.length}
-                  size="md"
-                  width={200}
-                />
+                    } else {
+                      handlePracticeSelect(null);
+                      navigate({ to: "/learn/practice" });
+                    }
+                  }}
+                  aria-label="Back to Practice"
+                  title="Back to Practice"
+                >
+                  <IconArrowBackUp size={20} />
+                </ActionIcon>
+                <Breadcrumbs separator="→">
+                  <Anchor component="button" onClick={clearSelection}>
+                    Practice
+                  </Anchor>
+                  <Text>{selectedPractice.title}</Text>
+                  {selectedExercise && <Text>{selectedExercise.title}</Text>}
+                </Breadcrumbs>
               </Group>
 
-              <Divider />
+              <Group>
+                <ActionIcon variant="light" color="blue" onClick={resetExercise} title="Reset exercise">
+                  <IconRefresh size={20} />
+                </ActionIcon>
 
-              <Paper p="lg" withBorder radius="md">
-                <Group gap="md" mb="md">
-                  <ThemeIcon size={40} variant="gradient" gradient={{ from: selectedPractice.color, to: "cyan" }}>
-                    {uiConfig.icons[selectedPractice.iconName] || uiConfig.icons.crown}
-                  </ThemeIcon>
-                  <Box>
-                    <Title order={3}>{selectedPractice.title}</Title>
-                    <Text c="dimmed">{selectedPractice.description}</Text>
-                  </Box>
-                </Group>
+                <Popover position="bottom-end" shadow="md" opened={opened}>
+                  <Popover.Target>
+                    <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
+                      <IconBulb size={20} />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown style={{ pointerEvents: "none" }}>
+                    <Text>Look for the best move in this position. Consider all tactical motifs!</Text>
+                  </Popover.Dropdown>
+                </Popover>
+              </Group>
+            </Group>
 
-                <Group gap="lg">
-                  <Group gap="xs">
-                    <IconTarget size={16} />
-                    <Text size="sm">{selectedPractice.exercises.length} exercises</Text>
+            <Flex gap="xl" align="flex-start">
+              <Stack gap="md" flex={1}>
+                <Paper p="lg" withBorder radius="md">
+                  <Group gap="md" mb="md">
+                    <ThemeIcon size={40} variant="gradient" gradient={{ from: selectedPractice.color, to: "cyan" }}>
+                      {uiConfig.icons[selectedPractice.iconName] || uiConfig.icons.crown}
+                    </ThemeIcon>
+                    <Box>
+                      <Title order={3}>{selectedPractice.title}</Title>
+                      <Text c="dimmed">{selectedPractice.description}</Text>
+                    </Box>
                   </Group>
-                  <Group gap="xs">
-                    <IconClock size={16} />
-                    <Text size="sm">{selectedPractice.estimatedTime} minutes</Text>
-                  </Group>
-                  <Group gap="xs">
-                    <IconTrophy size={16} />
-                    <Text size="sm">
-                      {selectedPractice.exercises.reduce(
-                        (sum: number, ex: PracticeExercise) => sum + (ex.points || 0),
-                        0,
-                      )}{" "}
-                      points
-                    </Text>
-                  </Group>
-                </Group>
-              </Paper>
 
-              <Title order={4}>Exercises ({selectedPractice.exercises.length})</Title>
-              <Stack gap="md">
-                {selectedPractice.exercises.map((exercise: PracticeExercise, index: number) => {
-                  const isCompleted =
-                    userStats.completedPractice?.[selectedPractice.id]?.includes(exercise.id) || false;
-                  return (
-                    <PracticeExerciseCard
-                      key={exercise.id}
-                      exercise={{
-                        id: exercise.id,
-                        title: exercise.title,
-                        description: exercise.description,
-                        difficulty: exercise.difficulty,
-                        fen: exercise.gameData.fen,
-                        correctMoves: exercise.gameData.correctMoves ? [...exercise.gameData.correctMoves] : undefined,
-                        points: exercise.points,
-                        timeLimit: exercise.timeLimit,
-                        stepsCount: exercise.stepsCount,
-                      }}
-                      index={index}
-                      isCompleted={isCompleted}
-                      onClick={() => {
-                        handleExerciseSelect(exercise);
-                        setCurrentFen(exercise?.gameData?.fen);
-                      }}
-                    />
-                  );
-                })}
-              </Stack>
-            </Stack>
-
-            <Box flex={1}>
-              <PracticeBoardWithProvider
-                fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
-                orientation="white"
-                engineColor="black"
-                onMove={(move) => console.log("Move made:", move)}
-                onPositionChange={(fen) => console.log("Position changed:", fen)}
-                onChessMove={handleMove}
-              />
-
-              {selectedExercise && (
-                <>
-                  <Paper mt="md" p="md" withBorder>
-                    <Group justify="space-between" align="center">
-                      <Text>{selectedExercise.description}</Text>
-                      <Group>
-                        <ActionIcon variant="light" color="blue" onClick={resetExercise} title="Reset exercise">
-                          <IconRefresh size={20} />
-                        </ActionIcon>
-                        <Popover position="top-end" shadow="md" opened={opened}>
-                          <Popover.Target>
-                            <ActionIcon variant="light" color="yellow" onMouseEnter={open} onMouseLeave={close}>
-                              <IconBulb size={20} />
-                            </ActionIcon>
-                          </Popover.Target>
-                          <Popover.Dropdown style={{ pointerEvents: "none" }}>
-                            <Text>Look for the best move in this position. Consider all tactical motifs!</Text>
-                          </Popover.Dropdown>
-                        </Popover>
-                      </Group>
+                  <Group gap="lg">
+                    <Group gap="xs">
+                      <IconTarget size={16} />
+                      <Text size="sm">{selectedPractice.exercises.length} exercises</Text>
                     </Group>
-                  </Paper>
+                    <Group gap="xs">
+                      <IconClock size={16} />
+                      <Text size="sm">{selectedPractice.estimatedTime} minutes</Text>
+                    </Group>
+                    <Group gap="xs">
+                      <IconTrophy size={16} />
+                      <Text size="sm">
+                        {selectedPractice.exercises.reduce(
+                          (sum: number, ex: PracticeExercise) => sum + (ex.points || 0),
+                          0,
+                        )}{" "}
+                        points
+                      </Text>
+                    </Group>
+                  </Group>
+                </Paper>
 
-                  {message && (
-                    <Paper
-                      my="md"
-                      p="md"
-                      withBorder
-                      bg={
-                        message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent")
-                          ? "rgba(0,128,0,0.1)"
-                          : message.includes("Checkmate")
-                            ? "rgba(255,165,0,0.1)"
-                            : "rgba(255,0,0,0.1)"
-                      }
-                    >
-                      <Group>
-                        {message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent") ? (
-                          <IconCheck size={20} color="green" />
-                        ) : message.includes("Checkmate") ? (
-                          <IconTrophy size={20} color="orange" />
-                        ) : (
-                          <IconX size={20} color="red" />
-                        )}
-                        <Text
-                          fw={500}
-                          c={
-                            message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent")
-                              ? "green"
-                              : message.includes("Checkmate")
-                                ? "orange"
-                                : "red"
-                          }
-                        >
-                          {message}
-                        </Text>
-                      </Group>
-                    </Paper>
-                  )}
+                <Title order={4}>Exercises ({selectedPractice.exercises.length})</Title>
+                <Stack gap="md">
+                  {selectedPractice.exercises.map((exercise: PracticeExercise, index: number) => {
+                    const isCompleted =
+                      userStats.completedPractice?.[selectedPractice.id]?.includes(exercise.id) || false;
+                    return (
+                      <PracticeExerciseCard
+                        key={exercise.id}
+                        exercise={{
+                          id: exercise.id,
+                          title: exercise.title,
+                          description: exercise.description,
+                          difficulty: exercise.difficulty,
+                          fen: exercise.gameData.fen,
+                          correctMoves: exercise.gameData.correctMoves
+                            ? [...exercise.gameData.correctMoves]
+                            : undefined,
+                          points: exercise.points,
+                          timeLimit: exercise.timeLimit,
+                          stepsCount: exercise.stepsCount,
+                        }}
+                        index={index}
+                        isCompleted={isCompleted}
+                        onClick={() => {
+                          handleExerciseSelect(exercise);
+                          setCurrentFen(exercise?.gameData?.fen);
+                        }}
+                      />
+                    );
+                  })}
+                </Stack>
+              </Stack>
 
-                  {selectedExercise?.stepsCount && (
-                    <Paper mt="md" p="md" withBorder bg="rgba(59, 130, 246, 0.1)">
-                      <Group>
-                        <IconTarget size={20} color="blue" />
-                        <Text size="sm" c="blue">
-                          Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves: {moveHistory.length}
-                        </Text>
-                      </Group>
-                    </Paper>
-                  )}
-                </>
-              )}
-            </Box>
-          </Flex>
+              <Box flex={1}>
+                <PracticeBoardWithProvider
+                  fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
+                  orientation="white"
+                  engineColor="black"
+                  onMove={(move) => console.log("Move made:", move)}
+                  onPositionChange={(fen) => console.log("Position changed:", fen)}
+                  onChessMove={handleMove}
+                />
+
+                {selectedExercise && (
+                  <>
+                    {message && (
+                      <Paper
+                        my="md"
+                        p="md"
+                        withBorder
+                        bg={
+                          message.includes("Correct") || message.includes("Perfect") || message.includes("Excellent")
+                            ? "rgba(0,128,0,0.1)"
+                            : message.includes("Checkmate")
+                              ? "rgba(255,165,0,0.1)"
+                              : "rgba(255,0,0,0.1)"
+                        }
+                      >
+                        <Group>
+                          {message.includes("Correct") ||
+                          message.includes("Perfect") ||
+                          message.includes("Excellent") ? (
+                            <IconCheck size={20} color="green" />
+                          ) : message.includes("Checkmate") ? (
+                            <IconTrophy size={20} color="orange" />
+                          ) : (
+                            <IconX size={20} color="red" />
+                          )}
+                          <Text
+                            fw={500}
+                            c={
+                              message.includes("Correct") ||
+                              message.includes("Perfect") ||
+                              message.includes("Excellent")
+                                ? "green"
+                                : message.includes("Checkmate")
+                                  ? "orange"
+                                  : "red"
+                            }
+                          >
+                            {message}
+                          </Text>
+                        </Group>
+                      </Paper>
+                    )}
+
+                    {selectedExercise?.stepsCount && (
+                      <Paper mt="md" p="md" withBorder bg="rgba(59, 130, 246, 0.1)">
+                        <Group>
+                          <IconTarget size={20} color="#1c7ed6" />
+                          <Text size="sm" c="blue">
+                            Target: Checkmate in {selectedExercise.stepsCount} moves | Current moves:{" "}
+                            {moveHistory.length}
+                          </Text>
+                        </Group>
+                      </Paper>
+                    )}
+                  </>
+                )}
+              </Box>
+            </Flex>
+          </>
         )}
       </Stack>
     </>
