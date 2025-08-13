@@ -13,6 +13,7 @@ mod oauth;
 mod opening;
 mod pgn;
 mod puzzle;
+mod telemetry;
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -29,7 +30,6 @@ use specta_typescript::{BigIntExportBehavior, Typescript};
 use sysinfo::SystemExt;
 use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager, Window};
-use tauri_plugin_aptabase::EventTracker;
 
 use crate::chess::{
     analyze_game, get_engine_config, get_engine_logs, kill_engine, kill_engines, stop_engine,
@@ -45,6 +45,7 @@ use crate::lexer::lex_pgn;
 use crate::oauth::authenticate;
 use crate::pgn::{count_pgn_games, delete_game, read_games, write_game};
 use crate::puzzle::{get_puzzle, get_puzzle_db_info};
+use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_first_run_telemetry, set_telemetry_enabled};
 use crate::{
     chess::get_best_moves,
     db::{
@@ -96,32 +97,6 @@ const REQUIRED_DIRS: &[(BaseDirectory, &str)] = &[
 
 const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
     &[(BaseDirectory::AppData, "engines/engines.json", "[]")];
-
-fn track_first_run(app: &AppHandle) -> Result<(), String> {
-    let flag_path = app
-        .path()
-        .resolve("first_run_completed", BaseDirectory::AppData)
-        .map_err(|e| format!("Failed to resolve first-run flag path: {}", e))?;
-
-    if !Path::new(&flag_path).exists() {
-        log::info!("First run detected. Tracking 'app_init' and creating flag file.");
-        let _ = app.track_event("app_init", None);
-        std::fs::write(&flag_path, b"1").map_err(|e| {
-            format!(
-                "Failed to write first-run flag file {}: {}",
-                flag_path.to_string_lossy(),
-                e
-            )
-        })?;
-    } else {
-        log::info!(
-            "First-run flag exists at {}. Skipping 'app_init' tracking.",
-            flag_path.to_string_lossy()
-        );
-    }
-
-    Ok(())
-}
 
 /// Ensures that all required directories exist, creating them if necessary
 ///
@@ -253,7 +228,10 @@ async fn main() {
             update_game,
             search_position,
             get_players,
-            get_puzzle_db_info
+            get_puzzle_db_info,
+            get_telemetry_enabled,
+            set_telemetry_enabled,
+            get_telemetry_config
         ))
         .events(tauri_specta::collect_events!(
             BestMovesPayload,
@@ -287,7 +265,7 @@ async fn main() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_aptabase::Builder::new("A-EU-4052319954").build())
+        .plugin(tauri_plugin_aptabase::Builder::new("A-EU-1317838572").build())
         .setup(move |app| {
             log::info!("Setting up application");
 
@@ -310,8 +288,8 @@ async fn main() {
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
 
             let _ = log::info!("Finished rust initialization");
-            // Track 'app_started' once on first run only; ignore errors to avoid blocking startup
-            let _ = track_first_run(&app.handle());
+            // Handle first-run telemetry based on user preferences
+            let _ = handle_first_run_telemetry(&app.handle());
             Ok(())
         })
         .manage(AppState::default())
