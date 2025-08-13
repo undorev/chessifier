@@ -1,6 +1,6 @@
 {
   "productName": "Chessifier",
-  "version": "0.3.0-beta",
+  "version": "0.3.0",
   "mainBinaryName": "Chessifier",
   "identifier": "org.chessifier.app",
   "bundle": {
