@@ -1,93 +1,82 @@
 # Pawn Appétit
 
-## v0.3.0-beta
+## v0.3.0
 
 ### ✨ Features
 
 * **Lessons & Practice**
 
-  * Updated **lessons structure** to support variations and improved exercise handling
-  * Added **checkmate-focused practice exercises** with robust detection and evaluation logic
-  * Enhanced **practice UI** for clearer feedback and hints
-  * Reorganized practice components into a **dedicated directory** for better maintainability
+* **Gameplay Enhancements**
+
+  * Added **time control metadata** for multiple game types
+  * Integrated a **lightweight custom chess engine** for move validation and FEN updates
+
+* **Dashboard**
+
+  * Added **dashboard page** with the ability to **hide on app startup**
 
 * **Theme & UI**
 
-  * Refined **theme switching logic** for smoother and more reliable toggling
+  * Added **theme switching options** to spotlight search
 
-### 🛠 Improvements & Refactors
-
-### 🐛 Fixes
-
-* Fixed **lesson move errors** causing invalid move sets
-* Resolved **navigation bugs** that impacted board access and routing
-
-### 🧹 Chores
-
-* Refactored theme switcher and action handling code for better structure and future extensibility
-
-## v0.3.0-alpha
-
-### ✨ Features
-
-* **User Progress & Stats**
-
-  * Added **lesson completion date tracking** and **achievement recording**
-  * Implemented **user progress tracking** for lessons and practice sessions
-  * Added **puzzle streak counter** to track consecutive days completed
-* **Gameplay Enhancements**
-
-  * Added **time control metadata** support for various game types
-  * Integrated a **lightweight custom chess engine** for move validation and FEN updates
-* **Dashboard**
-
-  * Added **dashboard page** with the ability to **hide on app startup** (WIP)
-  * Updated dashboard with **user ratings** and **main account selection**
 * **UI & Navigation**
 
-  * Added **theme switching options** to spotlight search
-  * Improved Databases, Engines, and Accounts pages with **search and sorting functionality**
+  * Improved search and sorting functionality in **Databases**, **Engines**, and **Accounts** pages
 
 ### 🛠 Improvements & Refactors
 
-* **Lesson & Practice**
+* **Settings**
 
-  * Refined **lesson and practice sections** with better tracking and UI updates
+  * Refactored settings management with improved search and tab organization
+
 * **Accounts**
 
   * Added **alert for Chess.com API limitations**
   * Improved total games count calculation
+
 * **Game Import**
 
-  * Corrected **ply count parsing** by fixing move parsing logic
+  * Corrected **ply count parsing** and move parsing logic
+
 * **UI Interaction**
 
-  * Enabled **window dragging and minimize action**
-  * Improved **navigation paths** for board-related components
+  * Improved navigation paths for board-related components
+
 * **Shortcuts**
 
-  * Revised **spotlight, reload, and exit shortcuts** for better usability
+  * Revised **spotlight, reload, and exit** shortcuts for better usability
+
+* **Codebase**
+
+  * Refactored theme switcher, OAuth authentication logic, and removed unused imports
+  * Streamlined layout handling in LessonsPage and PracticePage
 
 ### 🐛 Fixes
 
-* Fixed **decode\_move** failure handling to prevent crashes
+* Fixed **lesson move errors** causing invalid move sets
+* Resolved **navigation bugs** affecting board access and routing
+* Fixed `decode_move` failure handling to prevent crashes
 * Fixed **external image loading in production** by updating CSP and allowlist
-* Fixed **window behavior** issues on minimize and drag
-* Corrected various **lesson and practice bugs** in the Learn section
+* Fixed **window behavior** on minimize and drag
+* Fixed multiple **lesson and practice bugs** in Learn section
+* Fixed **window dragging and minimize action**
+* Fixed add puzzle modal **size and puzzle count display** - thanks [gm-m](https://github.com/gm-m) 🎉
 
 ### 📚 Documentation
 
-* Added `CONTRIBUTING_TRANSLATIONS.md` with guidelines for translation updates
+* Added `CONTRIBUTING_TRANSLATIONS.md` with translation update guidelines
 * Added **Code of Conduct**, **Security Policy**, and **PR template**
-* Updated `README` with new **screenshots section**
-* Updated **Italian translation** with missing keys and typo fixes — thanks to [gm-m](https://github.com/gm-m) for their first contribution 🎉
+* Updated `README` with a new **screenshots section**
+* Updated **Italian translation** with missing keys and typo fixes - thanks [gm-m](https://github.com/gm-m) 🎉
 
 ### 🧹 Chores
 
-* Added script to **automatically update missing translation keys**
-* Updated workflow files for consistency and clarity 👷
+* Added script to automatically update missing translation keys
+* Updated workflow files for consistency and clarity
 * Updated screenshots
 * Updated dependencies
+* Updated `vampirc-uci` dependency source to Pawn Appétit repository
+
 
 ## v0.2.0
 
