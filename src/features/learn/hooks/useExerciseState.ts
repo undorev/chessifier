@@ -20,6 +20,34 @@ interface UseExerciseStateOptions {
   completeOnCorrectMove?: boolean;
 }
 
+/**
+ * Gets the active player from a FEN string
+ * @param fen The FEN string
+ * @returns "white" or "black" for the active player
+ */
+function getActivePlayerFromFen(fen: string): "white" | "black" {
+  const fenParts = fen.split(" ");
+  const turn = fenParts[1];
+  return turn === "w" ? "white" : "black";
+}
+
+/**
+ * Determines if the current player made the move based on FEN before the move
+ * @param startingFen The FEN before any moves
+ * @param moveIndex The index of the move (0-based)
+ * @returns true if the active player made this move
+ */
+function isActivePlayerMove(startingFen: string, moveIndex: number): boolean {
+  const initialActivePlayer = getActivePlayerFromFen(startingFen);
+  const isEvenIndex = moveIndex % 2 === 0;
+  
+  if (initialActivePlayer === "white") {
+    return isEvenIndex;
+  } else {
+    return isEvenIndex;
+  }
+}
+
 export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>(
   options: UseExerciseStateOptions = {},
 ) {
@@ -34,11 +62,13 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
   const [currentFen, setCurrentFen] = useState<string>(initialFen);
   const [message, setMessage] = useState<string>("");
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [playerMoveHistory, setPlayerMoveHistory] = useState<string[]>([]);
   const [startingFen, setStartingFen] = useState<string>(initialFen);
 
   const resetState = useCallback(() => {
     setMessage("");
     setMoveHistory([]);
+    setPlayerMoveHistory([]);
   }, []);
 
   const handleCategorySelect = useCallback(
@@ -72,6 +102,14 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
       const newMoveHistory = [...moveHistory, move];
       setMoveHistory(newMoveHistory);
 
+      const isPlayerMove = isActivePlayerMove(startingFen, newMoveHistory.length - 1);
+      
+      let newPlayerMoveHistory = playerMoveHistory;
+      if (isPlayerMove) {
+        newPlayerMoveHistory = [...playerMoveHistory, move];
+        setPlayerMoveHistory(newPlayerMoveHistory);
+      }
+
       if (selectedExercise.stepsCount) {
         const evaluation = evaluateCheckmateMoves(startingFen, newMoveHistory, selectedExercise.stepsCount);
         setMessage(evaluation.message);
@@ -82,34 +120,42 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
           }
 
           if (completeOnCorrectMove && onExerciseComplete) {
-            onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
+            const playerMoveCount = newPlayerMoveHistory.length;
+            const adjustedEvaluation: MoveEvaluation = {
+              ...evaluation,
+              moveCount: playerMoveCount,
+              message: evaluation.message.replace(/\d+/g, playerMoveCount.toString()),
+            };
+            onExerciseComplete(selectedCategory.id, selectedExercise.id, adjustedEvaluation);
           }
         }
       } else {
-        const isCorrect = correctMoves.includes(move);
+        if (isPlayerMove) {
+          const isCorrect = correctMoves.includes(move);
 
-        if (isCorrect) {
-          setMessage("Correct!");
+          if (isCorrect) {
+            setMessage("Correct!");
 
-          if (onCorrectMove) {
-            onCorrectMove();
+            if (onCorrectMove) {
+              onCorrectMove();
+            }
+
+            if (completeOnCorrectMove && onExerciseComplete) {
+              const evaluation: MoveEvaluation = {
+                type: "optimal",
+                moveCount: newPlayerMoveHistory.length,
+                isCheckmate: false,
+                message: "Correct!",
+              };
+              onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
+            }
+          } else {
+            setMessage("Incorrect. Try again.");
           }
-
-          if (completeOnCorrectMove && onExerciseComplete) {
-            const evaluation: MoveEvaluation = {
-              type: "optimal",
-              moveCount: newMoveHistory.length,
-              isCheckmate: false,
-              message: "Correct!",
-            };
-            onExerciseComplete(selectedCategory.id, selectedExercise.id, evaluation);
-          }
-        } else {
-          setMessage("Incorrect. Try again.");
         }
       }
     },
-    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove, moveHistory, startingFen],
+    [selectedCategory, selectedExercise, onExerciseComplete, completeOnCorrectMove, moveHistory, playerMoveHistory, startingFen],
   );
 
   const resetExercise = useCallback(() => {
@@ -134,6 +180,8 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
     currentFen,
     message,
     moveHistory,
+    playerMoveHistory,
+    playerMoveCount: playerMoveHistory.length,
 
     setCurrentFen,
     handleCategorySelect,
