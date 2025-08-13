@@ -19,21 +19,20 @@ export interface MoveEvaluation {
 export function evaluateCheckmateMoves(startingFen: string, moves: string[], targetStepsCount: number): MoveEvaluation {
   let currentFen = startingFen;
 
-  // Apply each move to get the final position
-  for (const move of moves) {
+  for (let i = 0; i < moves.length; i++) {
+    const move = moves[i];
     const newFen = applyUciMoveToFen(currentFen, move);
     if (!newFen) {
       return {
         type: "incorrect",
         moveCount: moves.length,
         isCheckmate: false,
-        message: "Invalid move sequence",
+        message: `Invalid move: ${move}. Please make a legal move.`,
       };
     }
     currentFen = newFen;
   }
 
-  // Check if the final position is checkmate
   const isCheckmate = isPositionCheckmate(currentFen);
   const moveCount = moves.length;
 
@@ -46,7 +45,6 @@ export function evaluateCheckmateMoves(startingFen: string, moves: string[], tar
     };
   }
 
-  // Position is checkmate, now evaluate based on move count
   if (moveCount === targetStepsCount) {
     return {
       type: "optimal",
