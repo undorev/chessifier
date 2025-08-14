@@ -52,7 +52,7 @@ export const TelemetrySettings: React.FC<TelemetrySettingsProps> = ({ className 
 
       <Alert icon={<IconInfoCircle size={16} />} color="blue" mt="xs">
         Telemetry data is anonymous and helps us understand how Chessifier is used to improve the experience. We never
-        collect personal information or game content.
+        collect personal information or game content. Data is securely stored using Supabase.
       </Alert>
     </div>
   );
