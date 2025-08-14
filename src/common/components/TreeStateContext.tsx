@@ -1,4 +1,4 @@
-import { createContext, useRef } from "react";
+import { createContext, useMemo } from "react";
 import { createTreeStore, type TreeStore } from "@/state/store/tree";
 import type { TreeState } from "@/utils/treeReducer";
 
@@ -13,7 +13,7 @@ export function TreeStateProvider({
   initial?: TreeState;
   children: React.ReactNode;
 }) {
-  const store = useRef(createTreeStore(id, initial)).current;
+  const store = useMemo(() => createTreeStore(id, initial), [id, initial]);
 
   return <TreeStateContext.Provider value={store}>{children}</TreeStateContext.Provider>;
 }
