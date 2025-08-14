@@ -145,6 +145,16 @@ The binary will be available in your current directory.
 
 📢 Want to help translate? See [CONTRIBUTING_TRANSLATIONS.md](./CONTRIBUTING_TRANSLATIONS.md) and [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## 📊 Telemetry
+
+Pawn Appétit uses Supabase for anonymous telemetry to help improve the application. The telemetry collects:
+
+- Application version and platform information (OS, version, and architecture)
+- Anonymous user country code (from system locale settings)
+- Basic usage events
+
+No personal information or game content are used for data collection. You can disable telemetry in the settings if preferred.
+
 ## 📦 Changelog
 
 For a list of recent changes, see the [Changelog](./CHANGELOG.md).

@@ -45,7 +45,7 @@ use crate::lexer::lex_pgn;
 use crate::oauth::authenticate;
 use crate::pgn::{count_pgn_games, delete_game, read_games, write_game};
 use crate::puzzle::{get_puzzle, get_puzzle_db_info};
-use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_first_run_telemetry, set_telemetry_enabled};
+use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_initial_run_telemetry, set_telemetry_enabled};
 use crate::{
     chess::get_best_moves,
     db::{
@@ -255,7 +255,6 @@ async fn main() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_aptabase::Builder::new("A-EU-1317838572").build())
         .setup(move |app| {
             log::info!("Setting up application");
 
@@ -278,8 +277,8 @@ async fn main() {
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
 
             let _ = log::info!("Finished rust initialization");
-            // Handle first-run telemetry based on user preferences
-            let _ = handle_first_run_telemetry(&app.handle());
+            // Handle initial-run telemetry based on user preferences
+            let _ = handle_initial_run_telemetry(&app.handle());
             Ok(())
         })
         .manage(AppState::default())

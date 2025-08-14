@@ -4,19 +4,20 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager};
 use tauri::path::BaseDirectory;
-use tauri_plugin_aptabase::EventTracker;
+use uuid::Uuid;
+use sysinfo::{System, SystemExt};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
 pub struct TelemetryConfig {
     pub enabled: bool,
-    pub first_run_completed: bool,
+    pub initial_run_completed: bool,
 }
 
 impl Default for TelemetryConfig {
     fn default() -> Self {
         Self {
             enabled: true,
-            first_run_completed: false,
+            initial_run_completed: false,
         }
     }
 }
@@ -29,6 +30,19 @@ pub enum TelemetryError {
     ReadError(#[from] std::io::Error),
     #[error("Failed to parse config: {0}")]
     ParseError(#[from] serde_json::Error),
+    #[error("Failed to send telemetry: {0}")]
+    NetworkError(#[from] reqwest::Error),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TelemetryEvent {
+    id: String,
+    event_type: String,
+    app_version: String,
+    timestamp: String,
+    platform: String,
+    user_id: String,
+    country: Option<String>,
 }
 
 impl TelemetryConfig {
@@ -51,8 +65,8 @@ impl TelemetryConfig {
         let config_content = fs::read_to_string(&config_path)?;
         let config: Self = serde_json::from_str(&config_content)?;
         
-        log::info!("Loaded telemetry config: enabled={}, first_run_completed={}", 
-                  config.enabled, config.first_run_completed);
+        log::info!("Loaded telemetry config: enabled={}, initial_run_completed={}", 
+                  config.enabled, config.initial_run_completed);
         
         Ok(config)
     }
@@ -78,44 +92,160 @@ impl TelemetryConfig {
         Ok(())
     }
 
-    pub fn mark_first_run_completed(&mut self, app: &AppHandle) -> Result<(), TelemetryError> {
-        self.first_run_completed = true;
+    pub fn mark_initial_run_completed(&mut self, app: &AppHandle) -> Result<(), TelemetryError> {
+        self.initial_run_completed = true;
         self.save(app)?;
-        log::info!("First run marked as completed");
+        log::info!("Initial run marked as completed");
         Ok(())
     }
 }
 
-fn track_event_safe(app: &AppHandle, event_name: &str) {
-    match app.track_event(event_name, None) {
-        Ok(_) => {
-            log::info!("Successfully tracked '{}' event", event_name);
+fn get_user_id(app: &AppHandle) -> String {
+    let user_id_path = app.path()
+        .resolve("user_id.txt", BaseDirectory::AppConfig)
+        .unwrap_or_default();
+    
+    if let Ok(existing_id) = fs::read_to_string(&user_id_path) {
+        existing_id.trim().to_string()
+    } else {
+        let new_id = Uuid::new_v4().to_string();
+        if let Some(parent) = user_id_path.parent() {
+            let _ = fs::create_dir_all(parent);
         }
-        Err(e) => {
-            log::warn!("Failed to track '{}' event: {}. This is normal if analytics are disabled or not configured.", event_name, e);
-        }
+        let _ = fs::write(&user_id_path, &new_id);
+        new_id
     }
 }
 
-pub fn handle_first_run_telemetry(app: &AppHandle) -> Result<(), String> {
+fn get_platform_info() -> String {
+    let mut sys = System::new();
+    sys.refresh_system();
+    
+    let os_name = std::env::consts::OS;
+    let os_version = sys.os_version().unwrap_or_else(|| "unknown".to_string());
+    let arch = std::env::consts::ARCH;
+    
+    format!("{} {} ({})", os_name, os_version, arch)
+}
+
+fn get_user_country() -> Option<String> {
+    std::env::var("LC_ALL")
+        .or_else(|_| std::env::var("LC_CTYPE"))
+        .or_else(|_| std::env::var("LANG"))
+        .ok()
+        .and_then(|locale| {
+            if let Some(country_part) = locale.split('.').next() {
+                if let Some(country) = country_part.split('_').nth(1) {
+                    if country.len() == 2 && country.chars().all(|c| c.is_ascii_uppercase()) {
+                        return Some(country.to_string());
+                    }
+                }
+            }
+            None
+        })
+        .or_else(|| {
+            #[cfg(target_os = "windows")]
+            {
+                use std::process::Command;
+                if let Ok(output) = Command::new("powershell")
+                    .args(&["-Command", "(Get-Culture).TwoLetterISOLanguageName"])
+                    .output()
+                {
+                    let country = String::from_utf8_lossy(&output.stdout).trim().to_uppercase();
+                    if country.len() == 2 && country.chars().all(|c| c.is_ascii_uppercase()) {
+                        return Some(country);
+                    }
+                }
+            }
+            
+            #[cfg(target_os = "macos")]
+            {
+                use std::process::Command;
+                if let Ok(output) = Command::new("defaults")
+                    .args(&["read", "-g", "AppleLocale"])
+                    .output()
+                {
+                    let locale = String::from_utf8_lossy(&output.stdout);
+                    let locale = locale.trim();
+                    if let Some(country) = locale.split('_').nth(1) {
+                        let country = country.to_uppercase();
+                        if country.len() == 2 && country.chars().all(|c| c.is_ascii_uppercase()) {
+                            return Some(country);
+                        }
+                    }
+                }
+            }
+            
+            None
+        })
+}
+
+async fn track_event_to_supabase(event_name: &str, app: &AppHandle) -> Result<(), TelemetryError> {
+    let supabase_url = "https://jklxpooswizrhfdghcog.supabase.co";
+    let supabase_key = "sb_publishable_sLNbFdo6jEh5JYYiT9XgmQ_P8jx7z2V";
+
+    let country = get_user_country();
+
+    let event = TelemetryEvent {
+        id: Uuid::new_v4().to_string(),
+        event_type: event_name.to_string(),
+        app_version: app.package_info().version.to_string(),
+        timestamp: chrono::Utc::now().to_rfc3339(),
+        platform: get_platform_info(),
+        user_id: get_user_id(app),
+        country,
+    };
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&format!("{}/rest/v1/telemetry_events", supabase_url))
+        .header("apikey", supabase_key)
+        .header("Authorization", format!("Bearer {}", supabase_key))
+        .header("Content-Type", "application/json")
+        .header("Prefer", "return=minimal")
+        .json(&event)
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        log::info!("Successfully tracked '{}' event to Supabase", event_name);
+    } else {
+        log::warn!("Failed to track '{}' event to Supabase: {}", event_name, response.status());
+    }
+
+    Ok(())
+}
+
+fn track_event_safe(app: &AppHandle, event_name: &str) {
+    let app_handle = app.clone();
+    let event_name = event_name.to_string();
+    
+    tokio::spawn(async move {
+        if let Err(e) = track_event_to_supabase(&event_name, &app_handle).await {
+            log::warn!("Failed to track '{}' event: {}. This is normal if analytics are disabled or not configured.", event_name, e);
+        }
+    });
+}
+
+pub fn handle_initial_run_telemetry(app: &AppHandle) -> Result<(), String> {
     let mut config = TelemetryConfig::load(app)
         .map_err(|e| format!("Failed to load telemetry config: {}", e))?;
 
-    if config.enabled && !config.first_run_completed {
-        log::info!("First run detected and telemetry enabled. Tracking 'first_run' event.");
+    if config.enabled && !config.initial_run_completed {
+        log::info!("Initial run detected and telemetry enabled. Tracking 'initial_run' event.");
 
-        track_event_safe(app, "first_run");
+        track_event_safe(app, "initial_run");
 
-        config.mark_first_run_completed(app)
-            .map_err(|e| format!("Failed to mark first run as completed: {}", e))?;
+        config.mark_initial_run_completed(app)
+            .map_err(|e| format!("Failed to mark initial run as completed: {}", e))?;
     } else if !config.enabled {
-        log::info!("Telemetry disabled, skipping first_run tracking");
-        if !config.first_run_completed {
-            config.mark_first_run_completed(app)
-                .map_err(|e| format!("Failed to mark first run as completed: {}", e))?;
+        log::info!("Telemetry disabled, skipping initial_run tracking");
+        if !config.initial_run_completed {
+            config.mark_initial_run_completed(app)
+                .map_err(|e| format!("Failed to mark initial run as completed: {}", e))?;
         }
     } else {
-        log::info!("First run already completed, skipping tracking");
+        log::info!("Initial run already completed, skipping tracking");
     }
 
     Ok(())

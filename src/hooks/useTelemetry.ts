@@ -3,7 +3,7 @@ import { commands } from "@/bindings";
 
 export interface TelemetryConfig {
   enabled: boolean;
-  first_run_completed: boolean;
+  initial_run_completed: boolean;
 }
 
 export const useTelemetry = () => {
