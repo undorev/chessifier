@@ -137,20 +137,24 @@ impl EngineProcess {
             Ok(p) => p,
             Err(e) => e.ignore_too_much_material()?,
         };
+        
         for m in &options.moves {
             let uci = UciMove::from_ascii(m.as_bytes())?;
             let mv = uci.to_move(&pos)?;
             pos.play_unchecked(&mv);
         }
+        
         let multipv = options
             .extra_options
             .iter()
             .find(|x| x.name == "MultiPV")
-            .map(|x| x.value.parse().unwrap_or(1))
-            .unwrap_or(1);
+            .and_then(|x| x.value.parse().ok())
+            .unwrap_or(1)
+            .min(pos.legal_moves().len() as u16);
 
-        self.real_multipv = multipv.min(pos.legal_moves().len() as u16);
+        self.real_multipv = multipv;
 
+        // Only set options that have changed to avoid unnecessary UCI commands
         for option in &options.extra_options {
             if !self.options.extra_options.contains(option) {
                 self.set_option(&option.name, &option.value).await?;
@@ -160,8 +164,9 @@ impl EngineProcess {
         if options.fen != self.options.fen || options.moves != self.options.moves {
             self.set_position(&options.fen, &options.moves).await?;
         }
+        
         self.last_depth = 0;
-        self.options = options.clone();
+        self.options = options;
         self.best_moves.clear();
         self.last_best_moves.clear();
         Ok(())
@@ -169,9 +174,9 @@ impl EngineProcess {
 
     async fn set_position(&mut self, fen: &str, moves: &[String]) -> Result<(), Error> {
         let msg = if moves.is_empty() {
-            format!("position fen {}\n", fen)
+            format!("position fen {fen}\n")
         } else {
-            format!("position fen {} moves {}\n", fen, moves.join(" "))
+            format!("position fen {fen} moves {}\n", moves.join(" "))
         };
 
         self.stdin.write_all(msg.as_bytes()).await?;
@@ -184,19 +189,16 @@ impl EngineProcess {
     async fn go(&mut self, mode: &GoMode) -> Result<(), Error> {
         self.go_mode = mode.clone();
         let msg = match mode {
-            GoMode::Depth(depth) => format!("go depth {}\n", depth),
-            GoMode::Time(time) => format!("go movetime {}\n", time),
-            GoMode::Nodes(nodes) => format!("go nodes {}\n", nodes),
+            GoMode::Depth(depth) => format!("go depth {depth}\n"),
+            GoMode::Time(time) => format!("go movetime {time}\n"),
+            GoMode::Nodes(nodes) => format!("go nodes {nodes}\n"),
             GoMode::PlayersTime(PlayersTime {
                 white,
                 black,
                 winc,
                 binc,
             }) => {
-                format!(
-                    "go wtime {} btime {} winc {} binc {}\n",
-                    white, black, winc, binc
-                )
+                format!("go wtime {white} btime {black} winc {winc} binc {binc}\n")
             }
             GoMode::Infinite => "go infinite\n".to_string(),
         };
@@ -276,7 +278,7 @@ fn invert_score(score: Score) -> Score {
 fn parse_uci_attrs(
     attrs: Vec<UciInfoAttribute>,
     fen: &Fen,
-    moves: &Vec<String>,
+    moves: &[String],
 ) -> Result<BestMoves, Error> {
     let mut best_moves = BestMoves::default();
 
@@ -284,6 +286,7 @@ fn parse_uci_attrs(
         Ok(p) => p,
         Err(e) => e.ignore_too_much_material()?,
     };
+    
     for m in moves {
         let uci = UciMove::from_ascii(m.as_bytes())?;
         let mv = uci.to_move(&pos)?;
@@ -317,7 +320,7 @@ fn parse_uci_attrs(
             UciInfoAttribute::Score(score) => {
                 best_moves.score = score;
             }
-            _ => (),
+            _ => {}
         }
     }
 
@@ -355,11 +358,12 @@ fn get_handles(child: &mut Child) -> Result<(ChildStdin, Lines<BufReader<ChildSt
     Ok((stdin, stdout))
 }
 
-async fn send_command(stdin: &mut ChildStdin, command: impl AsRef<str>) {
+async fn send_command(stdin: &mut ChildStdin, command: impl AsRef<str>) -> Result<(), Error> {
     stdin
         .write_all(command.as_ref().as_bytes())
         .await
-        .expect("Failed to write command");
+        .map_err(|e| Error::Io(e))?;
+    Ok(())
 }
 
 #[derive(Deserialize, Debug, Clone, Type, Derivative, Eq, PartialEq)]
@@ -939,7 +943,7 @@ pub async fn get_engine_config(path: PathBuf) -> Result<EngineConfig, Error> {
     let mut child = start_engine(path)?;
     let (mut stdin, mut stdout) = get_handles(&mut child)?;
 
-    send_command(&mut stdin, "uci\n").await;
+    let _ = send_command(&mut stdin, "uci\n").await;
 
     let mut config = EngineConfig::default();
 

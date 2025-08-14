@@ -88,15 +88,17 @@ pub fn get_game(conn: &mut SqliteConnection, id: i32) -> Result<NormalizedGame> 
 }
 
 pub fn update_game(conn: &mut SqliteConnection, id: i32, data: &UpdateGame) -> Result<()> {
-    //let mut importer = Importer::new(None);
-
-    let mut reader = BufferedReader::new_cursor(dbg!(&data.moves));
+    let mut reader = BufferedReader::new_cursor(&data.moves);
     let mut importer = Importer::new(None);
 
-    let tree: GameTree = reader.read_game(&mut importer)?.flatten().ok_or(crate::error::Error::NoMovesFound)?.tree;
+    let tree: GameTree = reader
+        .read_game(&mut importer)?
+        .flatten()
+        .ok_or(crate::error::Error::NoMovesFound)?
+        .tree;
+    
     let mut moves: Vec<u8> = Vec::new();
     tree.encode(&mut moves, None);
-
     let ply_count = tree.count_main_line_moves() as i32;
 
     diesel::update(games::dsl::games)

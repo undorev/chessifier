@@ -1,5 +1,4 @@
 use std::str::FromStr;
-use std::string::ToString;
 
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -146,20 +145,21 @@ impl FromStr for Outcome {
             "1-0" => Ok(Outcome::WhiteWin),
             "0-1" => Ok(Outcome::BlackWin),
             "1/2-1/2" => Ok(Outcome::Draw),
-            "*" => Ok(Outcome::Unknown),
+            "*" | "" => Ok(Outcome::Unknown),
             _ => Err(crate::error::Error::NoMatchFound),
         }
     }
 }
 
-impl ToString for Outcome {
-    fn to_string(&self) -> String {
-        match &self {
-            Outcome::WhiteWin => "1-0".to_string(),
-            Outcome::BlackWin => "1-0".to_string(),
-            Outcome::Draw => "1-0".to_string(),
-            Outcome::Unknown => "1-0".to_string(),
-        }
+impl std::fmt::Display for Outcome {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Outcome::WhiteWin => "1-0",
+            Outcome::BlackWin => "0-1", 
+            Outcome::Draw => "1/2-1/2",
+            Outcome::Unknown => "*",
+        };
+        write!(f, "{}", s)
     }
 }
 

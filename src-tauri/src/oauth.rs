@@ -90,20 +90,27 @@ async fn authorize(
     let auth = &app.state::<AppState>().auth;
 
     if query.state.secret() != auth.csrf_token.secret() {
-        println!("Suspected Man in the Middle attack!");
-        return "authorized".to_string(); // never let them know your next move
+        log::warn!("CSRF token mismatch in OAuth callback");
+        return "authorized".to_string(); // Return generic response for security
     }
 
-    let token = auth
+    match auth
         .client
         .exchange_code(query.code.clone())
         .set_pkce_verifier(PkceCodeVerifier::new(auth.pkce.1.clone()))
         .request_async(async_http_client)
         .await
-        .unwrap();
-
-    let access_token = token.access_token().secret();
-    app.emit("access_token", access_token).unwrap();
+    {
+        Ok(token) => {
+            let access_token = token.access_token().secret();
+            if let Err(e) = app.emit("access_token", access_token) {
+                log::error!("Failed to emit access token: {}", e);
+            }
+        }
+        Err(e) => {
+            log::error!("OAuth token exchange failed: {}", e);
+        }
+    }
 
     "authorized".to_string()
 }

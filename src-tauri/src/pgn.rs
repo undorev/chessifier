@@ -31,23 +31,29 @@ impl PgnParser {
         self.reader.stream_position()
     }
 
-    fn offset_by_index(&mut self, n: usize, state: &AppState, file: &String) -> io::Result<()> {
+    fn offset_by_index(&mut self, n: usize, state: &AppState, file: &str) -> io::Result<()> {
         let offset_index = n / GAME_OFFSET_FREQ;
         let n_left = n % GAME_OFFSET_FREQ;
-        let pgn_offsets = state.pgn_offsets.get(file).unwrap();
-
-        if offset_index == 0 || offset_index < pgn_offsets.len() {
-            let offset = match offset_index {
-                0 => self.start,
-                _ => pgn_offsets[offset_index - 1],
+        
+        if let Some(pgn_offsets) = state.pgn_offsets.get(file) {
+            let offset = if offset_index == 0 {
+                self.start
+            } else if offset_index <= pgn_offsets.len() {
+                pgn_offsets[offset_index - 1]
+            } else {
+                // If offset_index is out of bounds, start from beginning
+                self.reader.seek(SeekFrom::Start(self.start))?;
+                self.skip_games(n)?;
+                return Ok(());
             };
 
             self.reader.seek(SeekFrom::Start(offset))?;
-
             self.skip_games(n_left)?;
         } else {
-            self.reader.seek(SeekFrom::Start(self.start))?;
-            self.skip_games(n)?;
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound, 
+                "PGN offsets not found for file"
+            ));
         }
 
         Ok(())
@@ -55,25 +61,24 @@ impl PgnParser {
 
     /// Skip n games, and return the number of bytes read
     fn skip_games(&mut self, n: usize) -> io::Result<usize> {
-        let mut new_game = false;
-        let mut skipped = 0;
-        let mut count = 0;
-
         if n == 0 {
             return Ok(0);
         }
 
+        let mut new_game = false;
+        let mut skipped = 0;
+        let mut count = 0;
         let mut line = String::new();
+
         loop {
-            let res = self.reader.read_line(&mut line);
-            if res.is_err() {
-                continue;
-            }
-            let bytes = res.unwrap();
+            line.clear();
+            let bytes = self.reader.read_line(&mut line)?;
             skipped += bytes;
+            
             if bytes == 0 {
                 break;
             }
+            
             if line.starts_with('[') {
                 if new_game {
                     count += 1;
@@ -86,7 +91,6 @@ impl PgnParser {
             } else {
                 new_game = true;
             }
-            line.clear();
         }
         Ok(skipped)
     }
@@ -94,15 +98,14 @@ impl PgnParser {
     fn read_game(&mut self) -> io::Result<String> {
         let mut new_game = false;
         self.game.clear();
+        self.line.clear();
+        
         loop {
-            let res = self.reader.read_line(&mut self.line);
-            if res.is_err() {
-                continue;
-            }
-            let bytes = res.unwrap();
+            let bytes = self.reader.read_line(&mut self.line)?;
             if bytes == 0 {
                 break;
             }
+            
             if self.line.starts_with('[') {
                 if new_game {
                     break;
@@ -110,6 +113,7 @@ impl PgnParser {
             } else {
                 new_game = true;
             }
+            
             self.game.push_str(&self.line);
             self.line.clear();
         }
@@ -167,12 +171,13 @@ pub async fn read_games(
     state: tauri::State<'_, AppState>,
 ) -> Result<Vec<String>, Error> {
     let file_r = File::open(&file)?;
+    let file_str = file.to_string_lossy();
+    let mut parser = PgnParser::new(file_r);
 
-    let mut parser = PgnParser::new(file_r.try_clone()?);
+    parser.offset_by_index(start as usize, &state, &file_str)?;
 
-    parser.offset_by_index(start as usize, &state, &file.to_string_lossy().to_string())?;
-
-    let mut games: Vec<String> = Vec::with_capacity((end - start) as usize);
+    let capacity = (end - start + 1).max(0) as usize;
+    let mut games: Vec<String> = Vec::with_capacity(capacity);
 
     for _ in start..=end {
         let game = parser.read_game()?;
