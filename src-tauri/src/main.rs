@@ -17,7 +17,7 @@ mod telemetry;
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::{fs::create_dir_all, path::Path};
+use std::{fs::create_dir_all};
 
 use chess::{BestMovesPayload, EngineProcess, ReportProgress};
 use dashmap::DashMap;
@@ -108,23 +108,17 @@ const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
 /// * `Err(String)` if there was an error creating a directory
 fn ensure_required_directories(app: &AppHandle) -> Result<(), String> {
     log::info!("Checking for required directories");
-    for (dir, path) in REQUIRED_DIRS.iter() {
-        if let Ok(resolved_path) = app.path().resolve(path, *dir) {
-            if !Path::new(&resolved_path).exists() {
-                log::info!("Creating directory {}", resolved_path.to_string_lossy());
-                create_dir_all(&resolved_path).map_err(|e| {
-                    format!(
-                        "Failed to create directory {}: {}",
-                        resolved_path.to_string_lossy(),
-                        e
-                    )
-                })?;
-            } else {
-                log::info!(
-                    "Directory already exists: {}",
-                    resolved_path.to_string_lossy()
-                );
-            }
+    for &(dir, path) in REQUIRED_DIRS {
+        let resolved_path = app.path().resolve(path, dir)
+            .map_err(|e| format!("Failed to resolve path {path}: {e}"))?;
+        
+        if !resolved_path.exists() {
+            log::info!("Creating directory {}", resolved_path.display());
+            create_dir_all(&resolved_path).map_err(|e| {
+                format!("Failed to create directory {}: {e}", resolved_path.display())
+            })?;
+        } else {
+            log::info!("Directory already exists: {}", resolved_path.display());
         }
     }
     Ok(())
@@ -140,23 +134,19 @@ fn ensure_required_directories(app: &AppHandle) -> Result<(), String> {
 /// * `Err(String)` if there was an error creating a file
 fn ensure_required_files(app: &AppHandle) -> Result<(), String> {
     log::info!("Checking for required files");
-    for (dir, path, contents) in REQUIRED_FILES.iter() {
+    for &(dir, path, contents) in REQUIRED_FILES {
         let resolved_path = app
             .path()
-            .resolve(path, *dir)
-            .map_err(|e| format!("Failed to resolve path {}: {}", path, e))?;
+            .resolve(path, dir)
+            .map_err(|e| format!("Failed to resolve path {path}: {e}"))?;
 
-        if !Path::new(&resolved_path).exists() {
-            log::info!("Creating file {}", resolved_path.to_string_lossy());
+        if !resolved_path.exists() {
+            log::info!("Creating file {}", resolved_path.display());
             std::fs::write(&resolved_path, contents).map_err(|e| {
-                format!(
-                    "Failed to write file {}: {}",
-                    resolved_path.to_string_lossy(),
-                    e
-                )
+                format!("Failed to write file {}: {e}", resolved_path.display())
             })?;
         } else {
-            log::info!("File already exists: {}", resolved_path.to_string_lossy());
+            log::info!("File already exists: {}", resolved_path.display());
         }
     }
     Ok(())
@@ -310,6 +300,5 @@ fn is_bmi2_compatible() -> bool {
 #[tauri::command]
 #[specta::specta]
 fn memory_size() -> u64 {
-    let total_bytes = sysinfo::System::new_all().total_memory();
-    total_bytes / 1024 / 1024
+    sysinfo::System::new_all().total_memory() / (1024 * 1024)
 }

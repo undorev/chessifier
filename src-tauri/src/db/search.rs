@@ -334,12 +334,18 @@ pub async fn search_position(
             }
 
             if let Some(position_query) = &query.position {
-                let position_query =
-                    convert_position_query(position_query.clone()).expect("Invalid position query");
+                    let position_query = match convert_position_query(position_query.clone()) {
+                        Ok(val) => val,
+                        Err(_) => return,
+                    };
                 if position_query.can_reach(&end_material, *end_pawn_home as u16) {
                     if let Ok(Some(m)) = get_move_after_match(game, fen, &position_query) {
-                        if sample_games.lock().unwrap().len() < 10 {
-                            sample_games.lock().unwrap().push(*id);
+                        let mut guard = match sample_games.lock() {
+                            Ok(guard) => guard,
+                            Err(_) => return,
+                        };
+                        if guard.len() < 10 {
+                            guard.push(*id);
                         }
                         let entry = openings.entry(m);
                         match entry {
@@ -375,7 +381,9 @@ pub async fn search_position(
     );
 
     let openings: Vec<PositionStats> = openings.into_iter().map(|(_, v)| v).collect();
-    let ids: Vec<i32> = sample_games.lock().unwrap().clone();
+    let ids: Vec<i32> = sample_games.lock()
+        .map_err(|_| Error::MutexLockFailed("Failed to lock sample_games".to_string()))?
+        .clone();
 
     info!("finished search in {:?}", start.elapsed());
 

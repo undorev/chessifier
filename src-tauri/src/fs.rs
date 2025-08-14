@@ -36,46 +36,40 @@ pub async fn download_file(
 ) -> Result<(), Error> {
     let finalize = finalize.unwrap_or(true);
     info!("Downloading file from {}", url);
+    
     let client = Client::new();
-
     let mut req = client.get(&url);
-    // add Bearer if token is present
+    
+    // Add Bearer token if present
     if let Some(token) = token {
-        let mut header_map = HeaderMap::new();
         match format!("Bearer {token}").parse() {
             Ok(header_value) => {
+                let mut header_map = HeaderMap::new();
                 header_map.insert("Authorization", header_value);
                 req = req.headers(header_map);
             }
             Err(e) => {
-                // Log the error but continue without the Authorization header
                 info!("Failed to parse Authorization header: {}", e);
             }
         }
     }
+    
     let res = req.send().await?;
-    let total_size = if let Some(total_size) = total_size {
-        Some(total_size as u64)
-    } else {
-        res.content_length()
-    };
+    let total_size = total_size.map(|s| s as u64).or_else(|| res.content_length());
 
-    let mut file: Vec<u8> = Vec::new();
+    let mut file_data: Vec<u8> = Vec::new();
     let mut downloaded: u64 = 0;
     let mut stream = res.bytes_stream();
 
     while let Some(item) = stream.next().await {
         let chunk = item?;
-        file.extend_from_slice(&chunk);
+        file_data.extend_from_slice(&chunk);
         downloaded += chunk.len() as u64;
-        // Emit progress event
-        let progress = if let Some(total_size) = total_size {
-            // Calculate percentage if we know the total size
-            ((downloaded as f32 / total_size as f32) * 100.0).min(100.0)
-        } else {
-            // Use an indeterminate progress indicator (-1) if total size is unknown
-            -1.0
-        };
+        
+        // Calculate progress
+        let progress = total_size
+            .map(|total| ((downloaded as f32 / total as f32) * 100.0).min(100.0))
+            .unwrap_or(-1.0); // Indeterminate progress if total size is unknown
 
         DownloadProgress {
             progress,
@@ -85,17 +79,16 @@ pub async fn download_file(
         .emit(&app)?;
     }
 
-    let path = Path::new(&path);
-
     info!("Downloaded file to {}", path.display());
 
+    // Handle different file types
     if url.ends_with(".zip") {
-        unzip_file(path, file).await?;
+        unzip_file(&path, file_data).await?;
     } else if url.ends_with(".tar") {
-        let mut archive = tar::Archive::new(Cursor::new(file));
-        archive.unpack(path)?;
+        let mut archive = tar::Archive::new(Cursor::new(file_data));
+        archive.unpack(&path)?;
     } else {
-        std::fs::write(path, file)?
+        std::fs::write(&path, file_data)?;
     }
 
     if finalize {
@@ -106,6 +99,7 @@ pub async fn download_file(
         }
         .emit(&app)?;
     }
+    
     Ok(())
 }
 
