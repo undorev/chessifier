@@ -14,7 +14,8 @@ import {
   Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { IconAlertCircle, IconDatabase, IconTrophy } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
+import { IconAlertCircle, IconDatabase, IconTrophy, IconX } from "@tabler/icons-react";
 import { appDataDir, join, resolve } from "@tauri-apps/api/path";
 import { useAtom } from "jotai";
 import { useCallback, useState } from "react";
@@ -80,8 +81,7 @@ function AddEngine({ opened, setOpened }: { opened: boolean; setOpened: (opened:
                   // @ts-ignore
                   engine={engine}
                   engineId={i}
-                  key={i}
-                  initInstalled={engines.some((e) => e.name === engine.name)}
+                  key={engine.name}
                 />
               ))}
               {error && (
@@ -128,7 +128,9 @@ function AddEngine({ opened, setOpened }: { opened: boolean; setOpened: (opened:
 function CloudCard({ engine }: { engine: RemoteEngine }) {
   const { t } = useTranslation();
 
-  const [engines, setEngines] = useAtom(enginesAtom);
+  const [allEngines, setEngines] = useAtom(enginesAtom);
+  const isInstalled = allEngines.find((e) => e.type === engine.type) !== undefined;
+  
   return (
     <Paper withBorder radius="md" p={0} key={engine.name}>
       <Group wrap="nowrap" gap={0} grow>
@@ -141,7 +143,7 @@ function CloudCard({ engine }: { engine: RemoteEngine }) {
             {engine.url}
           </Text>
           <Button
-            disabled={engines.find((e) => e.type === engine.type) !== undefined}
+            disabled={isInstalled}
             fullWidth
             onClick={() => {
               setEngines(async (prev) => [
@@ -171,50 +173,147 @@ function CloudCard({ engine }: { engine: RemoteEngine }) {
 function EngineCard({
   engine,
   engineId,
-  initInstalled,
 }: {
   engine: LocalEngine;
   engineId: number;
-  initInstalled: boolean;
 }) {
   const { t } = useTranslation();
 
   const [inProgress, setInProgress] = useState<boolean>(false);
-  const [, setEngines] = useAtom(enginesAtom);
-  const downloadEngine = useCallback(
-    async (id: number, url: string) => {
+  const [allEngines, setEngines] = useAtom(enginesAtom);
+  const engines = allEngines.filter((e): e is LocalEngine => e.type === "local");
+  const isInstalled = engines.some((e) => e.name === engine.name);
+  
+  const installEngine = useCallback(
+    async (id: number) => {
       setInProgress(true);
-      let path = await resolve(await appDataDir(), "engines", `${url.slice(url.lastIndexOf("/") + 1)}`);
-      if (url.endsWith(".zip") || url.endsWith(".tar")) {
-        path = await resolve(await appDataDir(), "engines");
+      
+      try {
+        let enginePath: string;
+
+        if (engine.installMethod === "download") {
+          const url = engine.downloadLink;
+          if (!url) throw new Error("Download link not found");
+          
+          let path = await resolve(await appDataDir(), "engines", `${url.slice(url.lastIndexOf("/") + 1)}`);
+          if (url.endsWith(".zip") || url.endsWith(".tar")) {
+            path = await resolve(await appDataDir(), "engines");
+          }
+          await commands.downloadFile(`engine_${id}`, url, path, null, null, null);
+          let appDataDirPath = await appDataDir();
+          if (appDataDirPath.endsWith("/") || appDataDirPath.endsWith("\\")) {
+            appDataDirPath = appDataDirPath.slice(0, -1);
+          }
+          enginePath = await join(appDataDirPath, "engines", ...engine.path.split("/"));
+          await commands.setFileAsExecutable(enginePath);
+        } else if (engine.installMethod === "brew") {
+          const brewPackage = engine.brewPackage;
+          if (!brewPackage) throw new Error("Brew package name not found");
+          
+          const result = unwrap(await commands.installPackage("brew", brewPackage));
+          if (!result.success) {
+            throw new Error(`Brew installation failed: ${result.stderr}`);
+          }
+          enginePath = engine.path;
+        } else if (engine.installMethod === "package") {
+          const packageCommand = engine.packageCommand;
+          if (!packageCommand) throw new Error("Package command not found");
+          
+          const [manager, ...args] = packageCommand.split(" ");
+          const packageName = args[args.length - 1];
+          
+          const result = unwrap(await commands.installPackage(manager.replace("sudo", "").trim(), packageName));
+          if (!result.success) {
+            throw new Error(`Package installation failed: ${result.stderr}`);
+          }
+          enginePath = engine.path;
+        } else {
+          throw new Error(`Unsupported installation method: ${engine.installMethod}`);
+        }
+
+        const configResult = await commands.getEngineConfig(enginePath);
+        const config = configResult.status === "ok" 
+          ? configResult.data 
+          : { name: engine.name, options: [] };
+        
+        setEngines(async (prev) => [
+          ...(await prev),
+          {
+            ...engine,
+            type: "local" as const,
+            path: enginePath,
+            loaded: true,
+            settings: config.options
+              .filter((o) => requiredEngineSettings.includes(o.value.name))
+              .map((o) => {
+                let defaultValue: string | number | boolean = "";
+                switch (o.type) {
+                  case "check":
+                    defaultValue = o.value.default ?? false;
+                    break;
+                  case "spin":
+                    defaultValue = Number(o.value.default ?? 0);
+                    break;
+                  case "combo":
+                  case "string":
+                    defaultValue = o.value.default ?? "";
+                    break;
+                  default:
+                    defaultValue = "";
+                }
+                return {
+                  name: o.value.name,
+                  value: defaultValue,
+                };
+              }),
+          },
+        ]);
+      } catch (error) {
+        console.error("Engine installation failed:", error);
+        notifications.show({
+          title: t("Common.Error"),
+          message: error instanceof Error ? error.message : String(error),
+          color: "red",
+          icon: <IconX />,
+        });
+      } finally {
+        setInProgress(false);
       }
-      await commands.downloadFile(`engine_${id}`, url, path, null, null, null);
-      let appDataDirPath = await appDataDir();
-      if (appDataDirPath.endsWith("/") || appDataDirPath.endsWith("\\")) {
-        appDataDirPath = appDataDirPath.slice(0, -1);
-      }
-      const enginePath = await join(appDataDirPath, "engines", ...engine.path.split("/"));
-      await commands.setFileAsExecutable(enginePath);
-      const config = unwrap(await commands.getEngineConfig(enginePath));
-      setEngines(async (prev) => [
-        ...(await prev),
-        {
-          ...engine,
-          type: "local",
-          path: enginePath,
-          loaded: true,
-          settings: config.options
-            .filter((o) => requiredEngineSettings.includes(o.value.name))
-            .map((o) => ({
-              name: o.value.name,
-              // @ts-expect-error
-              value: o.value.default,
-            })),
-        },
-      ]);
     },
-    [engine, setEngines],
+    [engine, setEngines, t],
   );
+
+  const getInstallText = () => {
+    switch (engine.installMethod) {
+      case "brew":
+        return `brew install ${engine.brewPackage}`;
+      case "package":
+        return engine.packageCommand || "Install via package manager";
+      default:
+        return formatBytes(engine.downloadSize ?? 0);
+    }
+  };
+
+  const getInstallActionLabel = () => {
+    switch (engine.installMethod) {
+      case "brew":
+        return t("Common.Install") + " (Brew)";
+      case "package":
+        return t("Common.Install") + " (Package)";
+      default:
+        return t("Common.Install");
+    }
+  };
+
+  const getProgressLabel = () => {
+    switch (engine.installMethod) {
+      case "brew":
+      case "package":
+        return "Installing...";
+      default:
+        return t("Common.Downloading");
+    }
+  };
 
   return (
     <Paper withBorder radius="md" p={0} key={engine.name}>
@@ -237,19 +336,19 @@ function EngineCard({
           </Group>
           <Group wrap="nowrap" gap="xs" mb="xs">
             <IconDatabase size="1rem" />
-            <Text size="xs">{formatBytes(engine.downloadSize ?? 0)}</Text>
+            <Text size="xs">{getInstallText()}</Text>
           </Group>
           <ProgressButton
             id={`engine_${engineId}`}
             progressEvent={events.downloadProgress}
-            initInstalled={initInstalled}
+            initInstalled={isInstalled}
             labels={{
               completed: t("Common.Installed"),
-              action: t("Common.Install"),
-              inProgress: t("Common.Downloading"),
+              action: getInstallActionLabel(),
+              inProgress: getProgressLabel(),
               finalizing: t("Common.Extracting"),
             }}
-            onClick={() => downloadEngine(engineId, engine.downloadLink!)}
+            onClick={() => installEngine(engineId)}
             inProgress={inProgress}
             setInProgress={setInProgress}
           />

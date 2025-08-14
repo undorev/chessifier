@@ -2,6 +2,7 @@ import type { Platform } from "@tauri-apps/plugin-os";
 import useSWR from "swr";
 import { z } from "zod";
 import { type BestMoves, commands, type EngineOptions, type GoMode } from "@/bindings";
+import { isInstallMethodSupported } from "./packageManager";
 import { unwrap } from "./unwrap";
 
 export const requiredEngineSettings = ["MultiPV", "Threads", "Hash"];
@@ -13,6 +14,7 @@ const ENGINES = [
     os: "windows",
     bmi2: true,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
+    installMethod: "download" as const,
     downloadLink:
       "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-windows-x86-64-avx2.zip",
     path: "stockfish/stockfish-windows-x86-64-avx2.exe",
@@ -25,6 +27,7 @@ const ENGINES = [
     os: "windows",
     bmi2: false,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
+    installMethod: "download" as const,
     downloadLink:
       "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-windows-x86-64-sse41-popcnt.zip",
     path: "stockfish/stockfish-windows-x86-64-sse41-popcnt.exe",
@@ -37,11 +40,10 @@ const ENGINES = [
     os: "macos",
     bmi2: true,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
-    downloadLink:
-      "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-macos-x86-64-sse41-popcnt.tar",
-    path: "stockfish/stockfish-macos-x86-64-sse41-popcnt",
+    installMethod: "brew" as const,
+    brewPackage: "stockfish",
+    path: "/opt/homebrew/bin/stockfish",
     elo: 3635,
-    downloadSize: 80081408,
   },
   {
     name: "Stockfish",
@@ -49,11 +51,10 @@ const ENGINES = [
     os: "macos",
     bmi2: false,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
-    downloadLink:
-      "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-macos-x86-64-sse41-popcnt.tar",
-    path: "stockfish/stockfish-macos-x86-64-sse41-popcnt",
+    installMethod: "brew" as const,
+    brewPackage: "stockfish",
+    path: "/opt/homebrew/bin/stockfish",
     elo: 3635,
-    downloadSize: 80081408,
   },
   {
     name: "Stockfish",
@@ -61,6 +62,7 @@ const ENGINES = [
     os: "linux",
     bmi2: true,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
+    installMethod: "download" as const,
     downloadLink:
       "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-ubuntu-x86-64-avx2.tar",
     path: "stockfish/stockfish-ubuntu-x86-64-avx2",
@@ -73,6 +75,7 @@ const ENGINES = [
     os: "linux",
     bmi2: false,
     image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/NewLogoSF.png",
+    installMethod: "download" as const,
     downloadLink:
       "https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-ubuntu-x86-64-sse41-popcnt.tar",
     path: "stockfish/stockfish-ubuntu-x86-64-sse41-popcnt",
@@ -85,6 +88,7 @@ const ENGINES = [
     os: "windows",
     bmi2: true,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_rubi.png",
+    installMethod: "download" as const,
     downloadLink: "https://github.com/Matthies/RubiChess/releases/download/20240817/RubiChess-20240817.zip",
     path: "RubiChess-20240817/windows/RubiChess-20240817_x86-64-avx2.exe",
     elo: 3600,
@@ -96,6 +100,7 @@ const ENGINES = [
     os: "windows",
     bmi2: false,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_rubi.png",
+    installMethod: "download" as const,
     downloadLink: "https://github.com/Matthies/RubiChess/releases/download/20240817/RubiChess-20240817.zip",
     path: "RubiChess-20240817/windows/RubiChess-20240817_x86-64-modern.exe",
     elo: 3600,
@@ -107,6 +112,7 @@ const ENGINES = [
     os: "linux",
     bmi2: true,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_rubi.png",
+    installMethod: "download" as const,
     downloadLink: "https://github.com/Matthies/RubiChess/releases/download/20240817/RubiChess-20240817.zip",
     path: "RubiChess-20240817/linux/RubiChess-20240817_x86-64-avx2",
     elo: 3600,
@@ -118,6 +124,7 @@ const ENGINES = [
     os: "linux",
     bmi2: false,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_rubi.png",
+    installMethod: "download" as const,
     downloadLink: "https://github.com/Matthies/RubiChess/releases/download/20240817/RubiChess-20240817.zip",
     path: "RubiChess-20240817/linux/RubiChess-20240817_x86-64-modern",
     elo: 3600,
@@ -129,6 +136,7 @@ const ENGINES = [
     os: "windows",
     bmi2: true,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/Windows/dragon-64bit-avx2.exe",
     elo: 3533,
@@ -140,6 +148,7 @@ const ENGINES = [
     os: "windows",
     bmi2: false,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/Windows/dragon-64bit.exe",
     elo: 3533,
@@ -151,6 +160,7 @@ const ENGINES = [
     os: "linux",
     bmi2: true,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/Linux/dragon-linux-avx2",
     elo: 3533,
@@ -162,6 +172,7 @@ const ENGINES = [
     os: "linux",
     bmi2: false,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/Linux/dragon-linux",
     elo: 3533,
@@ -173,6 +184,7 @@ const ENGINES = [
     os: "macos",
     bmi2: true,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/OSX/dragon-avx2-osx",
     elo: 3533,
@@ -184,6 +196,7 @@ const ENGINES = [
     os: "macos",
     bmi2: false,
     image: "https://images.chesscomfiles.com/chess-themes/computer_chess_championship/avatars/lrg_dragon.png",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/dragon.zip",
     path: "dragon_05e2a7/OSX/dragon-osx",
     elo: 3533,
@@ -195,6 +208,7 @@ const ENGINES = [
     os: "windows",
     bmi2: true,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/Windows/komodo-14.1-64bit-bmi2.exe",
     elo: 3479,
@@ -206,6 +220,7 @@ const ENGINES = [
     os: "windows",
     bmi2: false,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/Windows/komodo-14.1-64bit.exe",
     elo: 3479,
@@ -217,6 +232,7 @@ const ENGINES = [
     os: "linux",
     bmi2: true,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/Linux/komodo-14.1-linux-bmi2",
     elo: 3479,
@@ -228,6 +244,7 @@ const ENGINES = [
     os: "linux",
     bmi2: false,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/Linux/komodo-14.1-linux",
     elo: 3479,
@@ -239,6 +256,7 @@ const ENGINES = [
     os: "macos",
     bmi2: true,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/OSX/komodo-14.1-64-bmi2-osx",
     elo: 3479,
@@ -250,6 +268,7 @@ const ENGINES = [
     os: "macos",
     bmi2: false,
     image: "https://images.chesscomfiles.com/uploads/v1/images_users/tiny_mce/ColinStapczynski/php2OzLMj.jpeg",
+    installMethod: "download" as const,
     downloadLink: "https://komodochess.com/pub/komodo-14.zip",
     path: "komodo-14_224afb/OSX/komodo-14.1-64-osx",
     elo: 3479,
@@ -261,10 +280,55 @@ const ENGINES = [
     os: "windows",
     bmi2: true,
     image: "https://lczero.org/images/logo.svg",
+    installMethod: "download" as const,
     downloadLink: "https://pub-561e4f3376ea4e4eb2ffd01a876ba46e.r2.dev/lc0-v0.30.0-windows-gpu-nvidia-cuda.zip",
     path: "lc0-v0.30.0-windows-gpu-nvidia-cuda/lc0.exe",
     elo: 3440,
     downloadSize: 251872888,
+  },
+  {
+    name: "Leela Chess Zero",
+    version: "0.30.0",
+    os: "macos",
+    bmi2: true,
+    image: "https://lczero.org/images/logo.svg",
+    installMethod: "brew" as const,
+    brewPackage: "lc0",
+    path: "/opt/homebrew/bin/lc0",
+    elo: 3440,
+  },
+  {
+    name: "Leela Chess Zero",
+    version: "0.30.0",
+    os: "macos",
+    bmi2: false,
+    image: "https://lczero.org/images/logo.svg",
+    installMethod: "brew" as const,
+    brewPackage: "lc0",
+    path: "/opt/homebrew/bin/lc0",
+    elo: 3440,
+  },
+  {
+    name: "Leela Chess Zero",
+    version: "0.30.0",
+    os: "linux",
+    bmi2: true,
+    image: "https://lczero.org/images/logo.svg",
+    installMethod: "package" as const,
+    packageCommand: "sudo apt-get install lc0",
+    path: "/usr/bin/lc0",
+    elo: 3440,
+  },
+  {
+    name: "Leela Chess Zero",
+    version: "0.30.0",
+    os: "linux",
+    bmi2: false,
+    image: "https://lczero.org/images/logo.svg",
+    installMethod: "package" as const,
+    packageCommand: "sudo apt-get install lc0",
+    path: "/usr/bin/lc0",
+    elo: 3440,
   },
 ];
 
@@ -302,8 +366,11 @@ const localEngineSchema = z.object({
   path: z.string(),
   image: z.string().nullish(),
   elo: z.number().nullish(),
+  installMethod: z.enum(["download", "brew", "package"]).nullish(),
   downloadSize: z.number().nullish(),
   downloadLink: z.string().nullish(),
+  brewPackage: z.string().nullish(),
+  packageCommand: z.string().nullish(),
   loaded: z.boolean().nullish(),
   go: goModeSchema.nullish(),
   enabled: z.boolean().nullish(),
@@ -352,8 +419,16 @@ export function getBestMoves(
 export function useDefaultEngines(os: Platform | undefined, opened: boolean) {
   const { data, error, isLoading } = useSWR(opened ? os : null, async (os: Platform) => {
     const bmi2: boolean = await commands.isBmi2Compatible();
+    const availableEngines = ENGINES.filter((e) => e.os === os && e.bmi2 === bmi2);
 
-    return ENGINES.filter((e) => e.os === os && e.bmi2 === bmi2);
+    const supportedEngines = await Promise.all(
+      availableEngines.map(async (engine) => {
+        const isSupported = await isInstallMethodSupported(engine.installMethod || "download");
+        return isSupported ? engine : null;
+      }),
+    );
+
+    return supportedEngines.filter((engine): engine is NonNullable<typeof engine> => engine !== null);
   });
   return {
     defaultEngines: data,
