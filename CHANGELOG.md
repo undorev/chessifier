@@ -1,5 +1,17 @@
 # Chessifier
 
+## v0.3.2
+
+### ✨ Features
+
+* **Enhanced telemetry settings** and improved database setup
+
+### 🐛 Fixes
+
+* **Improved error handling** across various modules
+* **Exercise reset**: pieces now correctly return to initial positions
+* **Board orientation** now respects player roles – thanks [gm-m](https://github.com/gm-m) 🎉
+
 ## v0.3.1
 
 ### ✨ Features
