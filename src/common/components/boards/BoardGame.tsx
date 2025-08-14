@@ -57,7 +57,6 @@ function EnginesSelect({
   return (
     <Suspense>
       <Select
-        label="Engine"
         allowDeselect={false}
         data={engines?.map((engine) => ({
           label: engine.name,
@@ -536,7 +535,6 @@ function BoardGame() {
       ...headers,
       ...newHeaders,
       fen: root.fen,
-
     });
 
     setTabs((prev) =>

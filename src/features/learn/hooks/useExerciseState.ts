@@ -64,6 +64,7 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [playerMoveHistory, setPlayerMoveHistory] = useState<string[]>([]);
   const [startingFen, setStartingFen] = useState<string>(initialFen);
+  const [resetCounter, setResetCounter] = useState<number>(0);
 
   const resetState = useCallback(() => {
     setMessage("");
@@ -167,12 +168,19 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
   );
 
   const resetExercise = useCallback(() => {
-    if (selectedExercise?.fen) {
-      setCurrentFen(selectedExercise.fen);
-      setStartingFen(selectedExercise.fen);
+    if (startingFen) {
+      setCurrentFen(startingFen);
     }
+    setResetCounter(prev => prev + 1);
     resetState();
-  }, [selectedExercise, resetState]);
+  }, [startingFen, resetState]);
+
+  const updateExerciseFen = useCallback((fen: string | undefined) => {
+    if (fen) {
+      setCurrentFen(fen);
+      setStartingFen(fen);
+    }
+  }, []);
 
   const clearSelection = useCallback(() => {
     setSelectedCategory(null);
@@ -190,8 +198,10 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
     moveHistory,
     playerMoveHistory,
     playerMoveCount: playerMoveHistory.length,
+    resetCounter,
 
     setCurrentFen,
+    updateExerciseFen,
     handleCategorySelect,
     handleExerciseSelect,
     handleMove,

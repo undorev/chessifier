@@ -55,8 +55,10 @@ export default function PracticePage() {
     selectedExercise,
     currentFen,
     setCurrentFen,
+    updateExerciseFen,
     message,
     playerMoveCount,
+    resetCounter,
     handleCategorySelect: handlePracticeSelect,
     handleExerciseSelect,
     handleMove: handleMoveBase,
@@ -108,7 +110,7 @@ export default function PracticePage() {
           setTimeout(() => {
             const nextExercise = selectedPractice.exercises[currentIndex + 1];
             handleExerciseSelect(nextExercise);
-            setCurrentFen(nextExercise?.gameData?.fen);
+            updateExerciseFen(nextExercise?.gameData?.fen);
           }, 1500);
         }
       }
@@ -350,7 +352,7 @@ export default function PracticePage() {
                         isCompleted={isCompleted}
                         onClick={() => {
                           handleExerciseSelect(exercise);
-                          setCurrentFen(exercise?.gameData?.fen);
+                          updateExerciseFen(exercise?.gameData?.fen);
                         }}
                       />
                     );
@@ -360,6 +362,7 @@ export default function PracticePage() {
 
               <Box flex={1}>
                 <PracticeBoardWithProvider
+                  key={`${selectedExercise?.id}-${resetCounter}`}
                   fen={selectedExercise ? currentFen : "8/8/8/8/8/8/8/8 w - - 0 1"}
                   orientation="white"
                   engineColor="black"
