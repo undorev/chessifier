@@ -337,11 +337,22 @@ fn parse_uci_attrs(
 
 fn start_engine(path: PathBuf) -> Result<Child, Error> {
     let mut command = Command::new(&path);
-    command.current_dir(path.parent().unwrap());
+    
+    // For Homebrew-installed engines, try to set a better working directory
+    if let Some(parent) = path.parent() {
+        command.current_dir(parent);
+    } else {
+        // Fallback to user's home directory for Homebrew engines
+        if let Some(home_dir) = std::env::var_os("HOME") {
+            command.current_dir(home_dir);
+        }
+    }
+    
     command
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stderr(Stdio::piped())
+        .env("TERM", "dumb"); // Prevent engines from trying to use terminal features
 
     #[cfg(target_os = "windows")]
     command.creation_flags(CREATE_NO_WINDOW);
@@ -940,30 +951,71 @@ pub struct EngineConfig {
 #[tauri::command]
 #[specta::specta]
 pub async fn get_engine_config(path: PathBuf) -> Result<EngineConfig, Error> {
-    let mut child = start_engine(path)?;
+    let mut child = start_engine(path.clone())?;
     let (mut stdin, mut stdout) = get_handles(&mut child)?;
 
     let _ = send_command(&mut stdin, "uci\n").await;
 
     let mut config = EngineConfig::default();
+    
+    // Add timeout to prevent hanging
+    let timeout_duration = Duration::from_secs(10);
+    let start_time = Instant::now();
 
     loop {
-        if let Some(line) = stdout.next_line().await? {
-            if let UciMessage::Id {
-                name: Some(name),
-                author: _,
-            } = parse_one(&line)
-            {
-                config.name = name;
+        if start_time.elapsed() > timeout_duration {
+            // Kill the process and return a minimal config
+            let _ = child.kill().await;
+            info!("Engine config timeout for path: {:?}", path);
+            config.name = path.file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("Unknown Engine")
+                .to_string();
+            break;
+        }
+
+        match tokio::time::timeout(Duration::from_millis(100), stdout.next_line()).await {
+            Ok(Ok(Some(line))) => {
+                if let UciMessage::Id {
+                    name: Some(name),
+                    author: _,
+                } = parse_one(&line)
+                {
+                    config.name = name;
+                }
+                if let UciMessage::Option(opt) = parse_one(&line) {
+                    config.options.push(opt);
+                }
+                if let UciMessage::UciOk = parse_one(&line) {
+                    break;
+                }
             }
-            if let UciMessage::Option(opt) = parse_one(&line) {
-                config.options.push(opt);
-            }
-            if let UciMessage::UciOk = parse_one(&line) {
+            Ok(Ok(None)) => {
+                // Engine closed stdout
                 break;
+            }
+            Ok(Err(_)) => {
+                // Error reading from stdout
+                break;
+            }
+            Err(_) => {
+                // Timeout waiting for line, continue loop to check overall timeout
+                continue;
             }
         }
     }
-    println!("{:?}", config);
+    
+    // Ensure child process is terminated
+    let _ = child.kill().await;
+    
+    // If we got no name, use the filename
+    if config.name.is_empty() {
+        config.name = path.file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("Unknown Engine")
+            .to_string();
+    }
+    
+    info!("Engine config retrieved: name={}, options_count={}", config.name, config.options.len());
     Ok(config)
 }

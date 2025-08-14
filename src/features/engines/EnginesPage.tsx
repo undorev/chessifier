@@ -29,7 +29,7 @@ import { IconArrowsSort, IconCloud, IconCpu, IconPhotoPlus, IconPlus, IconSearch
 import { useNavigate } from "@tanstack/react-router";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
 import { commands, type UciOptionConfig } from "@/bindings";
@@ -42,7 +42,6 @@ import LinesSlider from "@/common/components/panels/analysis/LinesSlider";
 import { Route } from "@/routes/engines";
 import { enginesAtom } from "@/state/atoms";
 import { type Engine, engineSchema, type LocalEngine, requiredEngineSettings } from "@/utils/engines";
-import { unwrap } from "@/utils/unwrap";
 import AddEngine from "./components/AddEngine";
 
 export default function EnginesPage() {
@@ -244,9 +243,56 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
 
   const [engines, setEngines] = useAtom(enginesAtom);
   const engine = engines[selected] as LocalEngine;
-  const { data: options } = useSWRImmutable(["engine-config", engine.path], async ([, path]) => {
-    return unwrap(await commands.getEngineConfig(path));
-  });
+  const [options, setOptions] = useState<{ name: string; options: UciOptionConfig[] } | null>(null);
+  const processedEngineRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    
+    async function fetchEngineConfig() {
+      try {
+        const fileExistsResult = await commands.fileExists(engine.path);
+        if (cancelled) return;
+        
+        if (fileExistsResult.status !== "ok") {
+          console.warn(`Engine file does not exist: ${engine.path}`);
+          setOptions({
+            name: engine.name || "Unknown Engine",
+            options: []
+          });
+          return;
+        }
+
+        const result = await commands.getEngineConfig(engine.path);
+        if (cancelled) return;
+        
+        if (result.status === "ok") {
+          setOptions(result.data);
+        } else {
+          console.warn(`Failed to get engine config for ${engine.path}: ${result.error}`);
+          setOptions({
+            name: engine.name || "Unknown Engine",
+            options: []
+          });
+        }
+      } catch (error) {
+        if (cancelled) return;
+        console.warn(`Error getting engine config for ${engine.path}:`, error);
+        setOptions({
+          name: engine.name || "Unknown Engine", 
+          options: []
+        });
+      }
+    }
+
+    setOptions(null);
+    processedEngineRef.current = null;
+    fetchEngineConfig();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [engine.path, engine.name]);
 
   function setEngine(newEngine: LocalEngine) {
     setEngines(async (prev) => {
@@ -258,25 +304,35 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
 
   useEffect(() => {
     if (!options) return;
+    
+    const engineKey = `${engine.path}-${JSON.stringify(engine.settings)}`;
+    
+    if (processedEngineRef.current === engineKey) return;
+    
     const settings = [...(engine.settings || [])];
     const missing = requiredEngineSettings.filter((field) => !settings.find((setting) => setting.name === field));
-    for (const field of requiredEngineSettings) {
-      if (!settings.find((setting) => setting.name === field)) {
-        const opt = options.options.find((o) => o.value.name === field);
-        if (opt) {
-          // @ts-ignore
-          settings.push({ name: field, value: opt.value.default });
-        }
+    
+    if (missing.length === 0) {
+      processedEngineRef.current = engineKey;
+      return;
+    }
+    
+    for (const field of missing) {
+      const opt = options.options.find((o) => o.value.name === field);
+      if (opt) {
+        // @ts-ignore
+        settings.push({ name: field, value: opt.value.default });
       }
     }
-    if (missing.length > 0) {
-      setEngines(async (prev) => {
-        const copy = [...(await prev)];
-        copy[selected] = { ...(copy[selected] as LocalEngine), settings };
-        return copy;
-      });
-    }
-  }, [options, engine.settings, selected, setEngines]);
+    
+    processedEngineRef.current = engineKey;
+    
+    setEngines(async (prev) => {
+      const copy = [...(await prev)];
+      copy[selected] = { ...(copy[selected] as LocalEngine), settings };
+      return copy;
+    });
+  }, [options, selected, engine.path, engine.settings]);
   type UciOptionWithCurrent =
     | {
         type: "spin";
@@ -594,7 +650,7 @@ function JSONModal({
             setError(null);
             toggleOpened();
           } else {
-            setError("Invalid Configuration"); // TODO: show better error message
+            setError("Invalid Configuration");
           }
         }}
       >

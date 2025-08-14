@@ -101,6 +101,9 @@ pub enum Error {
 
     #[error("Failed to acquire mutex lock: {0}")]
     MutexLockFailed(String),
+
+    #[error("Package manager error: {0}")]
+    PackageManager(String),
 }
 
 impl serde::Serialize for Error {

@@ -43,6 +43,10 @@ function ProgressButton<T extends Payload>({
   const [completed, setCompleted] = useState(initInstalled);
 
   useEffect(() => {
+    setCompleted(initInstalled);
+  }, [initInstalled]);
+
+  useEffect(() => {
     const unlisten = progressEvent.listen(async ({ payload }) => {
       if (payload.id !== id) return;
       if (payload.finished) {
@@ -56,7 +60,7 @@ function ProgressButton<T extends Payload>({
     return () => {
       unlisten.then((f) => f());
     };
-  }, [id]);
+  }, [id, progressEvent, setInProgress]);
 
   return (
     <ProgressButtonWithOutState

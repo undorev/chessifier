@@ -11,6 +11,7 @@ mod fs;
 mod lexer;
 mod oauth;
 mod opening;
+mod package_manager;
 mod pgn;
 mod puzzle;
 mod telemetry;
@@ -43,6 +44,9 @@ use crate::fide::{download_fide_db, find_fide_player};
 use crate::fs::{set_file_as_executable, DownloadProgress};
 use crate::lexer::lex_pgn;
 use crate::oauth::authenticate;
+use crate::package_manager::{
+    check_package_installed, check_package_manager_available, find_executable_path, install_package,
+};
 use crate::pgn::{count_pgn_games, delete_game, read_games, write_game};
 use crate::puzzle::{get_puzzle, get_puzzle_db_info};
 use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_initial_run_telemetry, set_telemetry_enabled};
@@ -221,7 +225,11 @@ async fn main() {
             get_puzzle_db_info,
             get_telemetry_enabled,
             set_telemetry_enabled,
-            get_telemetry_config
+            get_telemetry_config,
+            check_package_manager_available,
+            install_package,
+            check_package_installed,
+            find_executable_path
         ))
         .events(tauri_specta::collect_events!(
             BestMovesPayload,

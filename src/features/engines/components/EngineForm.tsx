@@ -8,7 +8,6 @@ import { commands, type UciOptionConfig } from "@/bindings";
 import FileInput from "@/common/components/FileInput";
 import { type LocalEngine, requiredEngineSettings } from "@/utils/engines";
 import { usePlatform } from "@/utils/files";
-import { unwrap } from "@/utils/unwrap";
 
 export default function EngineForm({
   onSubmit,
@@ -48,9 +47,12 @@ export default function EngineForm({
             filters,
           });
           if (!selected) return;
-          config.current = unwrap(await commands.getEngineConfig(selected as string));
+          const configResult = await commands.getEngineConfig(selected as string);
+          config.current = configResult.status === "ok" 
+            ? configResult.data 
+            : { name: "", options: [] };
           form.setFieldValue("path", selected as string);
-          form.setFieldValue("name", config.current.name);
+          form.setFieldValue("name", config.current.name || "Unknown Engine");
         }}
       />
 
