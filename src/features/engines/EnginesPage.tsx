@@ -54,7 +54,7 @@ export default function EnginesPage() {
   const { selected } = Route.useSearch();
   const navigate = useNavigate();
   const setSelected = (v: number | null) => {
-    // @ts-ignore
+    // @ts-expect-error
     navigate({ search: { selected: v ?? undefined } });
   };
 
@@ -248,39 +248,39 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
 
   useEffect(() => {
     let cancelled = false;
-    
+
     async function fetchEngineConfig() {
       try {
         const fileExistsResult = await commands.fileExists(engine.path);
         if (cancelled) return;
-        
+
         if (fileExistsResult.status !== "ok") {
           console.warn(`Engine file does not exist: ${engine.path}`);
           setOptions({
             name: engine.name || "Unknown Engine",
-            options: []
+            options: [],
           });
           return;
         }
 
         const result = await commands.getEngineConfig(engine.path);
         if (cancelled) return;
-        
+
         if (result.status === "ok") {
           setOptions(result.data);
         } else {
           console.warn(`Failed to get engine config for ${engine.path}: ${result.error}`);
           setOptions({
             name: engine.name || "Unknown Engine",
-            options: []
+            options: [],
           });
         }
       } catch (error) {
         if (cancelled) return;
         console.warn(`Error getting engine config for ${engine.path}:`, error);
         setOptions({
-          name: engine.name || "Unknown Engine", 
-          options: []
+          name: engine.name || "Unknown Engine",
+          options: [],
         });
       }
     }
@@ -304,29 +304,29 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
 
   useEffect(() => {
     if (!options) return;
-    
+
     const engineKey = `${engine.path}-${JSON.stringify(engine.settings)}`;
-    
+
     if (processedEngineRef.current === engineKey) return;
-    
+
     const settings = [...(engine.settings || [])];
     const missing = requiredEngineSettings.filter((field) => !settings.find((setting) => setting.name === field));
-    
+
     if (missing.length === 0) {
       processedEngineRef.current = engineKey;
       return;
     }
-    
+
     for (const field of missing) {
       const opt = options.options.find((o) => o.value.name === field);
       if (opt) {
-        // @ts-ignore
+        // @ts-expect-error
         settings.push({ name: field, value: opt.value.default });
       }
     }
-    
+
     processedEngineRef.current = engineKey;
-    
+
     setEngines(async (prev) => {
       const copy = [...(await prev)];
       copy[selected] = { ...(copy[selected] as LocalEngine), settings };
@@ -565,7 +565,7 @@ function EngineSettings({ selected, setSelected }: { selected: number; setSelect
                   .filter((option) => requiredEngineSettings.includes(option.value.name))
                   .map((option) => ({
                     name: option.value.name,
-                    // @ts-ignore
+                    // @ts-expect-error
                     value: option.value.default,
                   })),
               })

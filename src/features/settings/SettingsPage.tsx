@@ -28,6 +28,7 @@ import {
   spellCheckAtom,
   storedDocumentDirAtom,
 } from "@/state/atoms";
+import { ThemeSettings } from "@/themes";
 import BoardSelect from "./components/BoardSelect";
 import ColorControl from "./components/ColorControl";
 import FontSizeSlider from "./components/FontSizeSlider";
@@ -36,7 +37,6 @@ import SettingsNumberInput from "./components/SettingsNumberInput";
 import SettingsSwitch from "./components/SettingsSwitch";
 import SoundSelect from "./components/SoundSelect";
 import TelemetrySettings from "./components/TelemetrySettings";
-import ThemeButton from "./components/ThemeButton";
 import VolumeSlider from "./components/VolumeSlider";
 import * as classes from "./SettingsPage.css";
 
@@ -375,17 +375,7 @@ export default function Page() {
         title: t("Settings.Appearance.Theme"),
         description: t("Settings.Appearance.Theme.Desc"),
         tab: "appearance",
-        component: (
-          <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
-            <div>
-              <Text>{t("Settings.Appearance.Theme")}</Text>
-              <Text size="xs" c="dimmed">
-                {t("Settings.Appearance.Theme.Desc")}
-              </Text>
-            </div>
-            <ThemeButton />
-          </Group>
-        ),
+        component: <ThemeSettings />,
       },
       {
         id: "language",

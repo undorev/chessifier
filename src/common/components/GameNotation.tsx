@@ -161,7 +161,7 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
                   start={headers.start}
                   first={true}
                   showComments={showComments}
-                  // @ts-ignore
+                  // @ts-expect-error
                   targetRef={variationRefs.mainline}
                   toggleVariationState={toggleVariationState}
                 />
@@ -180,7 +180,7 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
                   showComments={showComments}
                   renderMoves={false}
                   nextLevelExpanded={true}
-                  // @ts-ignore
+                  // @ts-expect-error
                   targetRef={variationRefs.variations}
                   variationState={variationState}
                   childInPath={false}
@@ -198,7 +198,7 @@ function GameNotation({ topBar }: { topBar?: boolean }) {
                   start={headers.start}
                   showComments={showComments}
                   nextLevelExpanded={true}
-                  // @ts-ignore
+                  // @ts-expect-error
                   targetRef={variationRefs.repertoire}
                   variationState={variationState}
                 />

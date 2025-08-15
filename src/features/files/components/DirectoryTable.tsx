@@ -47,13 +47,13 @@ function recursiveSort(
         if (sort.columnAccessor === "name") {
           return b.name.localeCompare(a.name);
         }
-        // @ts-ignore
+        // @ts-expect-error
         return b[sort.columnAccessor] > a[sort.columnAccessor] ? 1 : -1;
       }
       if (sort.columnAccessor === "name") {
         return a.name.localeCompare(b.name);
       }
-      // @ts-ignore
+      // @ts-expect-error
       return a[sort.columnAccessor] > b[sort.columnAccessor] ? 1 : -1;
     })
     .sort((a, b) => {
