@@ -78,7 +78,7 @@ function AddEngine({ opened, setOpened }: { opened: boolean; setOpened: (opened:
             <Stack>
               {defaultEngines?.map((engine, i) => (
                 <EngineCard
-                  // @ts-ignore
+                  // @ts-expect-error
                   engine={engine}
                   engineId={i}
                   key={engine.name}
@@ -130,7 +130,7 @@ function CloudCard({ engine }: { engine: RemoteEngine }) {
 
   const [allEngines, setEngines] = useAtom(enginesAtom);
   const isInstalled = allEngines.find((e) => e.type === engine.type) !== undefined;
-  
+
   return (
     <Paper withBorder radius="md" p={0} key={engine.name}>
       <Group wrap="nowrap" gap={0} grow>
@@ -170,31 +170,25 @@ function CloudCard({ engine }: { engine: RemoteEngine }) {
   );
 }
 
-function EngineCard({
-  engine,
-  engineId,
-}: {
-  engine: LocalEngine;
-  engineId: number;
-}) {
+function EngineCard({ engine, engineId }: { engine: LocalEngine; engineId: number }) {
   const { t } = useTranslation();
 
   const [inProgress, setInProgress] = useState<boolean>(false);
   const [allEngines, setEngines] = useAtom(enginesAtom);
   const engines = allEngines.filter((e): e is LocalEngine => e.type === "local");
   const isInstalled = engines.some((e) => e.name === engine.name);
-  
+
   const installEngine = useCallback(
     async (id: number) => {
       setInProgress(true);
-      
+
       try {
         let enginePath: string;
 
         if (engine.installMethod === "download") {
           const url = engine.downloadLink;
           if (!url) throw new Error("Download link not found");
-          
+
           let path = await resolve(await appDataDir(), "engines", `${url.slice(url.lastIndexOf("/") + 1)}`);
           if (url.endsWith(".zip") || url.endsWith(".tar")) {
             path = await resolve(await appDataDir(), "engines");
@@ -209,7 +203,7 @@ function EngineCard({
         } else if (engine.installMethod === "brew") {
           const brewPackage = engine.brewPackage;
           if (!brewPackage) throw new Error("Brew package name not found");
-          
+
           const result = unwrap(await commands.installPackage("brew", brewPackage));
           if (!result.success) {
             throw new Error(`Brew installation failed: ${result.stderr}`);
@@ -218,10 +212,10 @@ function EngineCard({
         } else if (engine.installMethod === "package") {
           const packageCommand = engine.packageCommand;
           if (!packageCommand) throw new Error("Package command not found");
-          
+
           const [manager, ...args] = packageCommand.split(" ");
           const packageName = args[args.length - 1];
-          
+
           const result = unwrap(await commands.installPackage(manager.replace("sudo", "").trim(), packageName));
           if (!result.success) {
             throw new Error(`Package installation failed: ${result.stderr}`);
@@ -232,10 +226,8 @@ function EngineCard({
         }
 
         const configResult = await commands.getEngineConfig(enginePath);
-        const config = configResult.status === "ok" 
-          ? configResult.data 
-          : { name: engine.name, options: [] };
-        
+        const config = configResult.status === "ok" ? configResult.data : { name: engine.name, options: [] };
+
         setEngines(async (prev) => [
           ...(await prev),
           {

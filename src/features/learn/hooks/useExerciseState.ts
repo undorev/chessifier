@@ -171,7 +171,7 @@ export function useExerciseState<T extends ExerciseBase, C extends CategoryBase>
     if (startingFen) {
       setCurrentFen(startingFen);
     }
-    setResetCounter(prev => prev + 1);
+    setResetCounter((prev) => prev + 1);
     resetState();
   }, [startingFen, resetState]);
 

@@ -18,10 +18,22 @@ export async function getPackageManagerStatus(): Promise<PackageManagerStatus> {
   }
 
   const [brew, apt, dnf, pacman] = await Promise.all([
-    commands.checkPackageManagerAvailable("brew").then(unwrap).catch(() => false),
-    commands.checkPackageManagerAvailable("apt").then(unwrap).catch(() => false),
-    commands.checkPackageManagerAvailable("dnf").then(unwrap).catch(() => false),
-    commands.checkPackageManagerAvailable("pacman").then(unwrap).catch(() => false),
+    commands
+      .checkPackageManagerAvailable("brew")
+      .then(unwrap)
+      .catch(() => false),
+    commands
+      .checkPackageManagerAvailable("apt")
+      .then(unwrap)
+      .catch(() => false),
+    commands
+      .checkPackageManagerAvailable("dnf")
+      .then(unwrap)
+      .catch(() => false),
+    commands
+      .checkPackageManagerAvailable("pacman")
+      .then(unwrap)
+      .catch(() => false),
   ]);
 
   packageManagerStatusCache = { brew, apt, dnf, pacman };

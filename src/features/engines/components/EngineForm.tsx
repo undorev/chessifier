@@ -48,9 +48,7 @@ export default function EngineForm({
           });
           if (!selected) return;
           const configResult = await commands.getEngineConfig(selected as string);
-          config.current = configResult.status === "ok" 
-            ? configResult.data 
-            : { name: "", options: [] };
+          config.current = configResult.status === "ok" ? configResult.data : { name: "", options: [] };
           form.setFieldValue("path", selected as string);
           form.setFieldValue("name", config.current.name || "Unknown Engine");
         }}
