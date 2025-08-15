@@ -226,6 +226,8 @@ export const en_US = {
     "Board.Action.FlipBoard": "Flip Board ({{key}})",
 
     "Board.Tabs.Practice": "Practice",
+    "Board.Tabs.Graph": "Graph",
+    "Board.Tabs.Graph.CenterGraph": "Center on current move",
     "Board.Tabs.Analysis": "Analysis",
     "Board.Tabs.Database": "Database",
     "Board.Tabs.Annotate": "Annotate",

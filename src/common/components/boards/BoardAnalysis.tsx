@@ -1,6 +1,6 @@
 import { Paper, Portal, Stack, Tabs } from "@mantine/core";
 import { useHotkeys, useToggle } from "@mantine/hooks";
-import { IconDatabase, IconInfoCircle, IconNotes, IconTargetArrow, IconZoomCheck } from "@tabler/icons-react";
+import { IconDatabase, IconGraphFilled, IconInfoCircle, IconNotes, IconTargetArrow, IconZoomCheck } from "@tabler/icons-react";
 import { useLoaderData } from "@tanstack/react-router";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { useAtom, useAtomValue } from "jotai";
@@ -29,6 +29,7 @@ import PracticePanel from "../panels/practice/PracticePanel";
 import Board from "./Board";
 import EditingCard from "./EditingCard";
 import EvalListener from "./EvalListener";
+import GraphPanel from "../panels/practice/GraphPanel";
 
 function BoardAnalysis() {
   const { t } = useTranslation();
@@ -179,6 +180,11 @@ function BoardAnalysis() {
                   {t("Board.Tabs.Practice")}
                 </Tabs.Tab>
               )}
+              {isRepertoire && (
+                <Tabs.Tab value="graph" leftSection={<IconGraphFilled size="1rem" />}>
+                  {t("Board.Tabs.Graph")}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="analysis" leftSection={<IconZoomCheck size="1rem" />}>
                 {t("Board.Tabs.Analysis")}
               </Tabs.Tab>
@@ -196,6 +202,13 @@ function BoardAnalysis() {
               <Tabs.Panel value="practice" flex={1} style={{ overflowY: "hidden" }}>
                 <Suspense>
                   <PracticePanel />
+                </Suspense>
+              </Tabs.Panel>
+            )}
+            {isRepertoire && (
+              <Tabs.Panel value="graph" flex={1} style={{ overflowY: "hidden" }}>
+                <Suspense>
+                  <GraphPanel />
                 </Suspense>
               </Tabs.Panel>
             )}
