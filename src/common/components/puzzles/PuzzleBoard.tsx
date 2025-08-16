@@ -50,6 +50,9 @@ function PuzzleBoard({
   const [ended, setEnded] = useState(false);
 
   const [pos] = positionFromFen(currentNode.fen);
+  const initialFen = puzzle?.fen || currentNode.fen;
+  const [initialPos] = positionFromFen(initialFen);
+  
 
   const treeIter = treeIteratorMainLine(root);
   treeIter.next();
@@ -64,7 +67,10 @@ function PuzzleBoard({
     }
   }
   const turn = pos?.turn || "white";
-  let orientation = turn;
+  let orientation = initialPos?.turn || "white";
+  if ((puzzle?.moves.length || 0) % 2 === 0) {
+    orientation = orientation === "white" ? "black" : "white";
+  }
   
   const [pendingMove, setPendingMove] = useState<NormalMove | null>(null);
 
