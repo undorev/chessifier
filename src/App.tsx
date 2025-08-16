@@ -1,12 +1,4 @@
-import {
-  ActionIcon,
-  Autocomplete,
-  Input,
-  localStorageColorSchemeManager,
-  MantineProvider,
-  Textarea,
-  TextInput,
-} from "@mantine/core";
+import { ActionIcon, Autocomplete, Input, Textarea, TextInput } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { getMatches } from "@tauri-apps/plugin-cli";
@@ -40,16 +32,12 @@ import "mantine-datatable/styles.css";
 
 import "@/styles/global.css";
 
-import { commands } from "./bindings";
-import { openFile } from "./utils/files";
-
-const colorSchemeManager = localStorageColorSchemeManager({
-  key: "mantine-color-scheme",
-});
-
 import { documentDir, homeDir, resolve } from "@tauri-apps/api/path";
 import ErrorComponent from "@/common/components/ErrorComponent";
+import { commands } from "./bindings";
 import { routeTree } from "./routeTree.gen";
+import { ThemeProvider } from "./themes";
+import { openFile } from "./utils/files";
 
 export type Dirs = {
   documentDir: string;
@@ -65,7 +53,7 @@ const router = createRouter({
       if (!doc) {
         try {
           doc = await resolve(await documentDir(), "Chessifier");
-        } catch (e) {
+        } catch {
           doc = await resolve(await homeDir(), "Chessifier");
         }
       }
@@ -106,7 +94,7 @@ export default function App() {
         detach();
       };
     })();
-  }, []);
+  }, [setTabs, setActiveTab]);
 
   const fontSize = useAtomValue(fontSizeAtom);
   const spellCheck = useAtomValue(spellCheckAtom);
@@ -120,61 +108,34 @@ export default function App() {
       <Helmet>
         <link rel="stylesheet" href={`/pieces/${pieceSet}.css`} />
       </Helmet>
-      <MantineProvider
-        colorSchemeManager={colorSchemeManager}
-        defaultColorScheme="auto"
-        theme={{
-          primaryColor,
-          components: {
-            ActionIcon: ActionIcon.extend({
-              defaultProps: {
-                variant: "transparent",
-                color: "gray",
-              },
-            }),
-            TextInput: TextInput.extend({
-              defaultProps: {
-                spellCheck: spellCheck,
-              },
-            }),
-            Autocomplete: Autocomplete.extend({
-              defaultProps: {
-                spellCheck: spellCheck,
-              },
-            }),
-            Textarea: Textarea.extend({
-              defaultProps: {
-                spellCheck: spellCheck,
-              },
-            }),
-            Input: Input.extend({
-              defaultProps: {
-                // @ts-ignore
-                spellCheck: spellCheck,
-              },
-            }),
-          },
-          colors: {
-            dark: [
-              "#C1C2C5",
-              "#A6A7AB",
-              "#909296",
-              "#5c5f66",
-              "#373A40",
-              "#2C2E33",
-              "#25262b",
-              "#1A1B1E",
-              "#141517",
-              "#101113",
-            ],
-          },
-        }}
+      <ThemeProvider
+        // Pass the component extensions and other Mantine config
+        mantineConfig={
+          {
+            //   primaryColor,
+            //   colors: {
+            //     dark: [
+            //       "#C1C2C5",
+            //       "#A6A7AB",
+            //       "#909296",
+            //       "#5c5f66",
+            //       "#373A40",
+            //       "#2C2E33",
+            //       "#25262b",
+            //       "#1A1B1E",
+            //       "#141517",
+            //       "#101113",
+            //     ],
+            //   },
+          }
+        }
+        spellCheck={spellCheck}
       >
         <ContextMenuProvider>
           <Notifications />
           <RouterProvider router={router} />
         </ContextMenuProvider>
-      </MantineProvider>
+      </ThemeProvider>
     </>
   );
 }

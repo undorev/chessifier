@@ -506,7 +506,7 @@ function BoardGame() {
           ? "white"
           : players.white.type === "engine" && players.black.type === "human"
             ? "black"
-            : headers.orientation
+            : headers.orientation,
     };
 
     if (players.white.timeControl || players.black.timeControl) {

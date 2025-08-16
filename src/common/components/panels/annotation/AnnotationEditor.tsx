@@ -39,7 +39,7 @@ function AnnotationEditor() {
       ],
       content: currentNode.comment,
       onUpdate: ({ editor }) => {
-        // @ts-ignore
+        // @ts-expect-error
         const comment = editor.storage.markdown.getMarkdown();
         setComment(comment);
       },

@@ -27,7 +27,7 @@ function PiecesGrid({
               setup.board.set(to, piece);
               onPut(makeFen(setup));
             }}
-            // @ts-ignore
+            // @ts-expect-error
             boardRef={boardRef}
             piece={{
               role,
