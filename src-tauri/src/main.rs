@@ -49,7 +49,7 @@ use crate::package_manager::{
 };
 use crate::pgn::{count_pgn_games, delete_game, read_games, write_game};
 use crate::puzzle::{get_puzzle, get_puzzle_db_info};
-use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_initial_run_telemetry, set_telemetry_enabled};
+use crate::telemetry::{get_telemetry_config, get_telemetry_enabled, handle_initial_run_telemetry, set_telemetry_enabled, get_user_country_api, get_user_country_locale, get_user_id_command, get_platform_info_command};
 use crate::{
     chess::get_best_moves,
     db::{
@@ -96,7 +96,7 @@ const REQUIRED_DIRS: &[(BaseDirectory, &str)] = &[
     (BaseDirectory::AppData, "presets"),
     (BaseDirectory::AppData, "puzzles"),
     (BaseDirectory::AppData, "documents"),
-    (BaseDirectory::Document, "Chessifier"),
+    (BaseDirectory::Document, "Pawn Appetit"),
 ];
 
 const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
@@ -226,6 +226,10 @@ async fn main() {
             get_telemetry_enabled,
             set_telemetry_enabled,
             get_telemetry_config,
+            get_user_country_api,
+            get_user_country_locale,
+            get_user_id_command,
+            get_platform_info_command,
             check_package_manager_available,
             install_package,
             check_package_installed,
@@ -253,7 +257,7 @@ async fn main() {
         .plugin(tauri_plugin_log::Builder::new()
                 .target(tauri_plugin_log::Target::new(
                     tauri_plugin_log::TargetKind::LogDir {
-                        file_name: Some("chessifier".to_string()),
+                        file_name: Some("pawn-appetit".to_string()),
                     },
                 ))
                 .level(LevelFilter::Info).build())

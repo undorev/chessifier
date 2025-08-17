@@ -209,7 +209,7 @@ export const uk_UA = {
     "Engines.Add.ImageFile": "Файл зображення",
     "Engines.Add.ImageFile.Desc": "Натисніть для вибору файлу зображення (рекомендовано: 60x60)",
     "Engines.Remove.Title": "Видалити движок",
-    "Engines.Remove.Message": "Ви впевнені, що хочете видалити цей движок із Chessifier?",
+    "Engines.Remove.Message": "Ви впевнені, що хочете видалити цей движок із Pawn Appétit?",
 
     "Databases.Title": "Бази даних",
     "Databases.Card.Games": "Ігри",

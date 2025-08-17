@@ -111,7 +111,7 @@ export const nb_NO = {
     "Menu.Help.ClearSavedData": "Fjern lagrede data",
     "Menu.Help.OpenLogs": "Åpne logger",
     "Menu.Help.CheckUpdate": "Se etter oppdateringer",
-    "Menu.Help.About": "Om Chessifier",
+    "Menu.Help.About": "Om Pawn Appétit",
 
     "SideBar.Board": "Brett",
     "SideBar.Accounts": "Bruker",
@@ -212,7 +212,7 @@ export const nb_NO = {
     "Engines.Add.ImageFile": "Bildefil",
     "Engines.Add.ImageFile.Desc": "Klikk for å velge bildefilen (anbefalt størrelse: 60x60)",
     "Engines.Remove.Title": "Fjern computer",
-    "Engines.Remove.Message": "Er du sikker på at du vil fjerne denne computeren fra Chessifier?",
+    "Engines.Remove.Message": "Er du sikker på at du vil fjerne denne computeren fra Pawn Appétit?",
 
     "Databases.Title": "Dine databaser",
     "Databases.Card.Games": "Partier",

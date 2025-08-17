@@ -210,7 +210,7 @@ export const be_BY = {
     "Engines.Add.ImageFile": "Файл выявы",
     "Engines.Add.ImageFile.Desc": "Націсніце для выбару файла выявы (рэкамендуецца: 60x60)",
     "Engines.Remove.Title": "Выдаліць рухавік",
-    "Engines.Remove.Message": "Вы ўпэўнены, што хочаце выдаліць гэты рухавік з Chessifier?",
+    "Engines.Remove.Message": "Вы ўпэўнены, што хочаце выдаліць гэты рухавік з Pawn Appétit?",
 
     "Databases.Title": "Базы дадзеных",
     "Databases.Card.Games": "Гульні",

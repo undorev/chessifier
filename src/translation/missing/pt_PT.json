@@ -79,6 +79,8 @@
   "Board.Action.SavePGN": "Save PGN ({{key}})",
   "Board.Action.AddGame": "Add Game",
   "Board.Action.FlipBoard": "Flip Board ({{key}})",
+  "Board.Tabs.Graph": "Graph",
+  "Board.Tabs.Graph.CenterGraph": "Center on current move",
   "Board.Practice.ResetOpeningData.Title": "Reset opening data",
   "Board.Practice.ResetOpeningData.Desc": "Are you sure you want to reset the opening data for \"{{fileName}}\"? All the learning progress will be lost.",
   "Board.Analysis.EnableWDL": "You have to enable UCI_ShowWDL in the engine settings to use this feature.",

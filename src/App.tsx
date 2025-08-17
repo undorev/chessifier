@@ -52,9 +52,9 @@ const router = createRouter({
       let doc = store.get(storedDocumentDirAtom);
       if (!doc) {
         try {
-          doc = await resolve(await documentDir(), "Chessifier");
+          doc = await resolve(await documentDir(), "Pawn Appetit");
         } catch {
-          doc = await resolve(await homeDir(), "Chessifier");
+          doc = await resolve(await homeDir(), "Pawn Appetit");
         }
       }
       const dirs: Dirs = { documentDir: doc };

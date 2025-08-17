@@ -1,6 +1,6 @@
 type SolvesMap = Record<string, number>;
 
-const STORAGE_KEY = "chessifier.puzzle.solves";
+const STORAGE_KEY = "PawnAppetit.puzzle.solves";
 
 function pad2(n: number) {
   return n < 10 ? `0${n}` : String(n);

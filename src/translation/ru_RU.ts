@@ -221,7 +221,7 @@ export const ru_RU = {
     "Engines.Add.ImageFile": "Файл изображения",
     "Engines.Add.ImageFile.Desc": "Нажмите для выбора файла изображения (рекомендуется: 60x60)",
     "Engines.Remove.Title": "Удалить движок",
-    "Engines.Remove.Message": "Вы уверены, что хотите удалить этот движок из Chessifier?",
+    "Engines.Remove.Message": "Вы уверены, что хотите удалить этот движок из Pawn Appétit?",
 
     "Databases.Title": "Базы данных",
     "Databases.Card.Games": "Игры",

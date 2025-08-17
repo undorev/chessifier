@@ -305,7 +305,7 @@ export const it_IT = {
     "Engines.Add.ImageFile": "File immagine",
     "Engines.Add.ImageFile.Desc": "Clicca per selezionare il file immagine (dimensione consigliata: 60x60)",
     "Engines.Remove.Title": "Rimuovi Motore",
-    "Engines.Remove.Message": "Sei sicuro di voler rimuovere questo motore da Chessifier?",
+    "Engines.Remove.Message": "Sei sicuro di voler rimuovere questo motore da Pawn Appétit?",
 
     "Databases.Title": "Database",
     "Databases.Card.Games": "Partite",

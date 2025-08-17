@@ -35,7 +35,7 @@ export function generateThemeCSS(theme: ThemeDefinition): string {
 }
 
 export function applyTheme(theme: ThemeDefinition): void {
-  const styleId = "chessifier-theme-variables";
+  const styleId = "pawn-appetit-theme-variables";
 
   const existingStyle = document.getElementById(styleId);
   if (existingStyle) {

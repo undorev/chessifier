@@ -630,7 +630,7 @@ export default function Page() {
       {
         id: "telemetry",
         title: "Telemetry",
-        description: "Help improve Chessifier by sharing anonymous usage data",
+          description: "Help improve Pawn Appétit by sharing anonymous usage data",
         tab: "directories",
         component: <TelemetrySettings className={classes.item} />,
       },

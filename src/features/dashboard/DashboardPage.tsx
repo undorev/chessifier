@@ -67,7 +67,7 @@ function getChessTitle(rating: number): string {
 export default function DashboardPage() {
   const [isFirstOpen, setIsFirstOpen] = useState(false);
   useEffect(() => {
-    const key = "chessifier.firstOpen";
+    const key = "pawn-appetit.firstOpen";
     if (!localStorage.getItem(key)) {
       localStorage.setItem(key, "true");
       setIsFirstOpen(true);
@@ -425,7 +425,7 @@ export default function DashboardPage() {
         <Group align="center" justify="space-between" wrap="nowrap">
           <Stack gap={6} flex={6}>
             <Title order={1} fw={800}>
-              {isFirstOpen ? "Welcome to Chessifier!" : " Welcome back"}
+                          {isFirstOpen ? "Welcome to Pawn Appétit!" : " Welcome back"}
             </Title>
             <Text size="sm" c="dimmed">
               Ready to make your next best move?

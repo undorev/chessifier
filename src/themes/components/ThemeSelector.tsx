@@ -206,7 +206,7 @@ export function ThemeSelector({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "chessifier-themes.json";
+    a.download = "pawn-appetit-themes.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

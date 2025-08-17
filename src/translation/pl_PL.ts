@@ -210,7 +210,7 @@ export const pl_PL = {
     "Engines.Add.ImageFile": "Plik graficzny",
     "Engines.Add.ImageFile.Desc": "Kliknij, aby wybrać plik graficzny (zalecany rozmiar: 60x60)",
     "Engines.Remove.Title": "Usuń silnik",
-    "Engines.Remove.Message": "Czy na pewno chcesz usunąć ten silnik z Chessifier?",
+    "Engines.Remove.Message": "Czy na pewno chcesz usunąć ten silnik z Pawn Appétit?",
 
     "Databases.Title": "Twoje bazy danych",
     "Databases.Card.Games": "Gry",

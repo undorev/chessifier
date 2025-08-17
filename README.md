@@ -1,24 +1,24 @@
 <br />
 <div align="center">
-<a href="https://github.com/Chessifier/chessifier">
-    <img width="115" height="115" src="https://github.com/Chessifier/chessifier/raw/main/src-tauri/icons/icon.png" alt="Logo">
+<a href="https://github.com/ChessKitchen/pawn-appetit">
+    <img width="115" height="115" src="https://github.com/ChessKitchen/pawn-appetit/raw/main/src-tauri/icons/icon.png" alt="Logo">
 </a>
 
-<h3 align="center">Chessifier</h3>
+<h3 align="center">Pawn Appétit</h3>
 
 <p align="center">
     The Ultimate Chess Toolkit
     <br />
     <br />
-    <a href="https://chessifier.github.io/">Website</a>
+    <a href="https://pawnappetit.com/">Website</a>
     ·
     <a href="https://discord.gg/8hk49G8ZbX">Discord Server</a>
     ·
-    <a href="https://github.com/Chessifier/chessifier/releases">Releases</a>
+    <a href="https://github.com/ChessKitchen/pawn-appetit/releases">Releases</a>
 </p>
 </div>
 
-Chessifier is a modern, open-source, cross-platform chess GUI built for power users and enthusiasts. Designed to be intuitive, customizable, and feature-rich, it provides a seamless experience for analyzing games, training repertoires, and managing engines and databases.
+Pawn Appétit is a modern, open-source, cross-platform chess GUI built for power users and enthusiasts. Designed to be intuitive, customizable, and feature-rich, it provides a seamless experience for analyzing games, training repertoires, and managing engines and databases.
 
 ## ✨ Features
 
@@ -31,7 +31,7 @@ Chessifier is a modern, open-source, cross-platform chess GUI built for power us
 ## 📸 Screenshots
 
 
-Here are some screenshots of Chessifier in action:
+Here are some screenshots of Pawn Appétit in action:
 
 <div align="center">
   <img src="./screenshots/dashboard-page.png" alt="Dashboard Page" width="600" />
@@ -66,8 +66,8 @@ Ensure you have the required tools installed for your platform:
 1. **Clone the repository**:
 
    ```bash
-   git clone git@github.com:Chessifier/chessifier.git
-   cd chessifier
+   git clone git@github.com:ChessKitchen/pawn-appetit.git
+   cd pawn-appetit
    ```
 
 2. **Install dependencies using pnpm**:
@@ -100,31 +100,31 @@ Ensure you have the required tools installed for your platform:
 
 ### 🐳 Using Docker
 
-You can also build Chessifier using Docker (make sure [Docker](https://www.docker.com/) is installed and running):
+You can also build Pawn Appétit using Docker (make sure [Docker](https://www.docker.com/) is installed and running):
 
 1. **🏗️ Build the Docker image**:
 
    ```bash
-   docker build -t chessifier .
+   docker build -t pawn-appetit .
    ```
 
 2. **🚀 Run the container**:
 
    ```bash
-   docker run -d --name chessifier-app chessifier
+   docker run -d --name pawn-appetit-app pawn-appetit
    ```
 
 3. **📦 Copy the built binary from the container**:
 
    ```bash
-   docker cp chessifier-app:/output/chessifier ./chessifier
+   docker cp pawn-appetit-app:/output/pawn-appetit ./pawn-appetit
    ```
 
 The binary will be available in your current directory.
 
 ## 💻 Supported Platforms
 
-Chessifier currently supports the following desktop platforms:
+Pawn Appétit currently supports the following desktop platforms:
 
 | Platform | Supported Versions |
 |----------|-------------------|
@@ -134,7 +134,7 @@ Chessifier currently supports the following desktop platforms:
 
 ## 📱 Planned Platform Support
 
-We’re planning to bring Chessifier to additional platforms in future releases:
+We’re planning to bring Pawn Appétit to additional platforms in future releases:
 - Android
 - iOS
 - Web Browser
@@ -145,17 +145,17 @@ We’re planning to bring Chessifier to additional platforms in future releases:
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | 🟡 82% | [AM](./src/translation/am_AM.ts) |
+| 🇦🇲 AM | 🟡 81% | [AM](./src/translation/am_AM.ts) |
 | 🇧🇾 BY | 🟡 73% | [BY](./src/translation/be_BY.ts) |
-| 🇩🇪 DE | 🟡 74% | [DE](./src/translation/de_DE.ts) |
-| 🇪🇸 ES | 🟡 74% | [ES](./src/translation/es_ES.ts) |
+| 🇩🇪 DE | 🟡 73% | [DE](./src/translation/de_DE.ts) |
+| 🇪🇸 ES | 🟡 73% | [ES](./src/translation/es_ES.ts) |
 | 🇫🇷 FR | 🟡 81% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 99% | [IT](./src/translation/it_IT.ts) |
-| 🇳🇴 NO | 🟡 74% | [NO](./src/translation/nb_NO.ts) |
+| 🇮🇹 IT | 🟡 98% | [IT](./src/translation/it_IT.ts) |
+| 🇳🇴 NO | 🟡 73% | [NO](./src/translation/nb_NO.ts) |
 | 🇵🇱 PL | 🟡 73% | [PL](./src/translation/pl_PL.ts) |
 | 🇵🇹 PT | 🟡 73% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 82% | [RU](./src/translation/ru_RU.ts) |
-| 🇹🇷 TR | 🟡 74% | [TR](./src/translation/tr_TR.ts) |
+| 🇷🇺 RU | 🟡 81% | [RU](./src/translation/ru_RU.ts) |
+| 🇹🇷 TR | 🟡 73% | [TR](./src/translation/tr_TR.ts) |
 | 🇺🇦 UA | 🟡 73% | [UA](./src/translation/uk_UA.ts) |
 | 🇨🇳 CN | 🟡 73% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
@@ -164,13 +164,13 @@ We’re planning to bring Chessifier to additional platforms in future releases:
 
 ## 📊 Telemetry
 
-Chessifier uses Supabase for anonymous telemetry to help improve the application. The telemetry collects:
+Pawn Appétit uses Supabase for anonymous telemetry to help improve the application. The telemetry collects:
 
 - Application version and platform information (OS, version, and architecture)
-- Anonymous user country code (from system locale settings)
+- Anonymous user country code, detected locally or via a public IP geolocation API (`ip-api.com`)
 - Basic usage events
 
-No personal information or game content are used for data collection. You can disable telemetry in the settings if preferred.
+No personal information, IP addresses, or game content are used for data collection. You can disable telemetry in the settings if preferred.
 
 ## 📦 Changelog
 
@@ -186,5 +186,5 @@ Join our [Discord server](https://discord.gg/8hk49G8ZbX) to connect with other u
 
 ## 🧱 About This Project
 
-Chessifier is a fork of [En Croissant](https://github.com/franciscoBSalgueiro/en-croissant), extended with additional features, refinements, and a focus on user experience.
+Pawn Appétit is a fork of [En Croissant](https://github.com/franciscoBSalgueiro/en-croissant), extended with additional features, refinements, and a focus on user experience.
 

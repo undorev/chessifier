@@ -246,7 +246,7 @@ function RootLayout() {
             label: t("Menu.Help.OpenLogs"),
             id: "logs",
             action: async () => {
-              const path = await resolve(await appLogDir(), "chessifier.log");
+              const path = await resolve(await appLogDir(), "pawn-appetit.log");
               notifications.show({
                 title: "Logs",
                 message: `Opened logs in ${path}`,
@@ -266,7 +266,7 @@ function RootLayout() {
             action: () => {
               modals.openContextModal({
                 modal: "aboutModal",
-                title: "Chessifier",
+                title: "Pawn Appétit",
                 innerProps: {},
               });
             },

@@ -6,7 +6,7 @@ const keys = {
   OPEN_FILE: { name: "Open File", keys: "mod+o" },
   SAVE_FILE: { name: "Save File", keys: "mod+s" },
   APP_RELOAD: { name: "Reload", keys: "mod+r" },
-  EXIT_APP: { name: "Exit Chessifier", keys: "mod+q" },
+  EXIT_APP: { name: "Exit Pawn Appétit", keys: "mod+q" },
   SPOTLIGHT_SEARCH: { name: "Spotlight Search", keys: "mod+k" },
 
   // === Board Tabs ===

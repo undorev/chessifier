@@ -209,7 +209,7 @@ export const zh_CN = {
     "Engines.Add.ImageFile": "图片文件",
     "Engines.Add.ImageFile.Desc": "点击选择图片文件 (推荐尺寸: 60x60)",
     "Engines.Remove.Title": "移除引擎",
-    "Engines.Remove.Message": "你确定要从 Chessifier 中移除这个引擎吗？",
+    "Engines.Remove.Message": "你确定要从 Pawn Appétit 中移除这个引擎吗？",
 
     "Databases.Title": "数据库管理",
     "Databases.Card.Games": "对局数量",

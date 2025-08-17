@@ -1,6 +1,6 @@
 ## 🌎 Contributing Translations
 
-Help us make Chessifier accessible to everyone by contributing a new translation or improving an existing one\! Your contributions are valuable and easy to make.
+Help us make Pawn Appétit accessible to everyone by contributing a new translation or improving an existing one\! Your contributions are valuable and easy to make.
 
 ### How to Contribute
 

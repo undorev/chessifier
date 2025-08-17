@@ -34,7 +34,7 @@ export const TelemetrySettings: React.FC<TelemetrySettingsProps> = ({ className 
         <div>
           <Text>Telemetry</Text>
           <Text size="xs" c="dimmed">
-            Help improve Chessifier by sharing anonymous usage data
+            Help improve Pawn Appétit by sharing anonymous usage data
           </Text>
         </div>
         <Switch
@@ -51,7 +51,7 @@ export const TelemetrySettings: React.FC<TelemetrySettingsProps> = ({ className 
       )}
 
       <Alert icon={<IconInfoCircle size={16} />} color="blue" mt="xs">
-        Telemetry data is anonymous and helps us understand how Chessifier is used to improve the experience. We never
+        Telemetry data is anonymous and helps us understand how Pawn Appétit is used to improve the experience. We never
         collect personal information or game content. Data is securely stored using Supabase.
       </Alert>
     </div>

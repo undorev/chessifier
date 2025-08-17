@@ -306,7 +306,7 @@ export const en_US = {
     "Engines.Add.ImageFile": "Image file",
     "Engines.Add.ImageFile.Desc": "Click to select the image file (recommended size: 60x60)",
     "Engines.Remove.Title": "Remove Engine",
-    "Engines.Remove.Message": "Are you sure you want to remove this engine from Chessifier?",
+    "Engines.Remove.Message": "Are you sure you want to remove this engine from Pawn Appétit?",
 
     "Databases.Title": "Your Databases",
     "Databases.Card.Games": "Games",

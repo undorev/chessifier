@@ -1,4 +1,4 @@
-# Chessifier
+# Pawn Appétit
 
 ## v0.3.2
 
@@ -50,7 +50,7 @@
 * **Settings**
 
   * Refactored settings management with improved search and tab organization
-  * Corrected **Settings.Anarchy.ForcedChessifier** label to **EnPassant** — thanks [dotneB](https://github.com/dotneB) 🎉
+  * Corrected label to **EnPassant** — thanks [dotneB](https://github.com/dotneB) 🎉
 
 * **Accounts**
 
@@ -98,7 +98,7 @@
 * Updated workflow files for consistency and clarity
 * Updated screenshots
 * Updated dependencies
-* Updated `vampirc-uci` dependency source to Chessifier repository
+* Updated `vampirc-uci` dependency source to Pawn Appétit repository
 
 
 ## v0.2.0

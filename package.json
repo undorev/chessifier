@@ -1,6 +1,6 @@
 {
-  "name": "chessifier",
-  "version": "0.3.2",
+  "name": "pawn-appetit",
+  "version": "1.0.0-alpha",
   "type": "module",
   "scripts": {
     "start-vite": "vite",

@@ -5,7 +5,7 @@ export const classicLightTheme: ThemeDefinition = {
   displayName: "Classic Light",
   type: "light",
   description: "A clean, bright theme perfect for daytime coding",
-  author: "Chessifier Team",
+  author: "ChessKitchen Team",
   version: "1.0.0",
   colors: {
     "editor.background": "#ffffff",

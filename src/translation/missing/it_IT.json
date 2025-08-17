@@ -1,4 +1,6 @@
 {
+  "Board.Tabs.Graph": "Graph",
+  "Board.Tabs.Graph.CenterGraph": "Center on current move",
   "Errors.InvalidFullmoves": "Invalid fullmove number",
   "Errors.InvalidHaldmoves": "Invalid halfmove number",
   "Errors.InvalidPockets": "Invalid pockets",

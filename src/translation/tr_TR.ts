@@ -209,7 +209,7 @@ export const tr_TR = {
     "Engines.Add.ImageFile": "Görsel dosyası",
     "Engines.Add.ImageFile.Desc": "Görsel dosyası seçmek için tıklayın (önerilen boyut: 60x60)",
     "Engines.Remove.Title": "Motor Kaldır",
-    "Engines.Remove.Message": "Bu motoru Chessifier'tan kaldırmak istediğinize emin misiniz?",
+    "Engines.Remove.Message": "Bu motoru Pawn Appétit'tan kaldırmak istediğinize emin misiniz?",
 
     "Databases.Title": "Veritabanlarınız",
     "Databases.Card.Games": "Oyunlar",

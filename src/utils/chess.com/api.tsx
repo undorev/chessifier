@@ -13,7 +13,7 @@ import { decodeTCN } from "./tcn";
 
 const baseURL = "https://api.chess.com";
 const headers = {
-  "User-Agent": "Chessifier",
+  "User-Agent": "Pawn Appetit",
 };
 
 const ChessComPerf = z.object({

@@ -5,7 +5,7 @@ export const classicDarkTheme: ThemeDefinition = {
   displayName: "Classic Dark",
   type: "dark",
   description: "A comfortable dark theme perfect for nighttime coding",
-  author: "Chessifier Team",
+  author: "ChessKitchen Team",
   version: "1.0.0",
   colors: {
     "editor.background": "#1e1e1e",

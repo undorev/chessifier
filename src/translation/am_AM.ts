@@ -222,7 +222,7 @@ export const am_AM = {
     "Engines.Add.ImageFile": "Պատկերային ֆայլ",
     "Engines.Add.ImageFile.Desc": "Սեղմեք պատկերային ֆայլն ընտրելու համար (առաջարկվող չափս՝ 60x60)",
     "Engines.Remove.Title": "Հեռացնել շարժիչը",
-    "Engines.Remove.Message": "Համոզվա՞ծ եք, որ ցանկանում եք հեռացնել այս շարժիչը Chessifier-ից։",
+    "Engines.Remove.Message": "Համոզվա՞ծ եք, որ ցանկանում եք հեռացնել այս շարժիչը Pawn Appétit-ից։",
 
     "Databases.Title": "Ձեր տվյալների բազաները",
     "Databases.Card.Games": "Խաղեր",
