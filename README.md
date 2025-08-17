@@ -128,17 +128,17 @@ The binary will be available in your current directory.
 | Language  | Status   | File                        |
 |-----------|----------|-----------------------------|
 | 🇺🇸 US | ✅ 100% | [US](./src/translation/en_US.ts) |
-| 🇦🇲 AM | 🟡 82% | [AM](./src/translation/am_AM.ts) |
+| 🇦🇲 AM | 🟡 81% | [AM](./src/translation/am_AM.ts) |
 | 🇧🇾 BY | 🟡 73% | [BY](./src/translation/be_BY.ts) |
-| 🇩🇪 DE | 🟡 74% | [DE](./src/translation/de_DE.ts) |
-| 🇪🇸 ES | 🟡 74% | [ES](./src/translation/es_ES.ts) |
+| 🇩🇪 DE | 🟡 73% | [DE](./src/translation/de_DE.ts) |
+| 🇪🇸 ES | 🟡 73% | [ES](./src/translation/es_ES.ts) |
 | 🇫🇷 FR | 🟡 81% | [FR](./src/translation/fr_FR.ts) |
-| 🇮🇹 IT | 🟡 99% | [IT](./src/translation/it_IT.ts) |
-| 🇳🇴 NO | 🟡 74% | [NO](./src/translation/nb_NO.ts) |
+| 🇮🇹 IT | 🟡 98% | [IT](./src/translation/it_IT.ts) |
+| 🇳🇴 NO | 🟡 73% | [NO](./src/translation/nb_NO.ts) |
 | 🇵🇱 PL | 🟡 73% | [PL](./src/translation/pl_PL.ts) |
 | 🇵🇹 PT | 🟡 73% | [PT](./src/translation/pt_PT.ts) |
-| 🇷🇺 RU | 🟡 82% | [RU](./src/translation/ru_RU.ts) |
-| 🇹🇷 TR | 🟡 74% | [TR](./src/translation/tr_TR.ts) |
+| 🇷🇺 RU | 🟡 81% | [RU](./src/translation/ru_RU.ts) |
+| 🇹🇷 TR | 🟡 73% | [TR](./src/translation/tr_TR.ts) |
 | 🇺🇦 UA | 🟡 73% | [UA](./src/translation/uk_UA.ts) |
 | 🇨🇳 CN | 🟡 73% | [CN](./src/translation/zh_CN.ts) |
 <!-- TRANSLATIONS_END -->
@@ -150,10 +150,10 @@ The binary will be available in your current directory.
 Pawn Appétit uses Supabase for anonymous telemetry to help improve the application. The telemetry collects:
 
 - Application version and platform information (OS, version, and architecture)
-- Anonymous user country code (from system locale settings)
+- Anonymous user country code, detected locally or via a public IP geolocation API (`ip-api.com`)
 - Basic usage events
 
-No personal information or game content are used for data collection. You can disable telemetry in the settings if preferred.
+No personal information, IP addresses, or game content are used for data collection. You can disable telemetry in the settings if preferred.
 
 ## 📦 Changelog
 
