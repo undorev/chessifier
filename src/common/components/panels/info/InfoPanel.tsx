@@ -30,7 +30,8 @@ function InfoPanel() {
   const currentNode = getNodeAtPath(root, position);
   const [games, setGames] = useState<Map<number, string>>(new Map());
   const currentTab = useAtomValue(currentTabAtom);
-  const isReportoire = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "repertoire";
+  const isRepertoire = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "repertoire";
+  const isPuzzle = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "puzzle";
 
   const { t } = useTranslation();
 
@@ -44,7 +45,7 @@ function InfoPanel() {
         <Stack>
           <GameInfo
             headers={headers}
-            simplified={isReportoire}
+            simplified={isRepertoire ? "repertoire" : isPuzzle ? "puzzle" : undefined}
             changeTitle={(title: string) => {
               setGames((prev) => {
                 const newGames = new Map(prev);

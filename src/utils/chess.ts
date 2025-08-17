@@ -467,7 +467,7 @@ export async function parsePGN(pgn: string, initialFen?: string): Promise<TreeSt
   return tree;
 }
 
-function getPgnHeaders(tokens: Token[]): GameHeaders {
+export function getPgnHeaders(tokens: Token[]): GameHeaders {
   const headersN = new Map<string, string>();
 
   for (const token of tokens) {

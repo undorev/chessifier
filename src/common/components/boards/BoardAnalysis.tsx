@@ -1,6 +1,13 @@
 import { Paper, Portal, Stack, Tabs } from "@mantine/core";
 import { useHotkeys, useToggle } from "@mantine/hooks";
-import { IconDatabase, IconGraphFilled, IconInfoCircle, IconNotes, IconTargetArrow, IconZoomCheck } from "@tabler/icons-react";
+import {
+  IconDatabase,
+  IconGraphFilled,
+  IconInfoCircle,
+  IconNotes,
+  IconTargetArrow,
+  IconZoomCheck,
+} from "@tabler/icons-react";
 import { useLoaderData } from "@tanstack/react-router";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { useAtom, useAtomValue } from "jotai";
@@ -25,11 +32,11 @@ import AnalysisPanel from "../panels/analysis/AnalysisPanel";
 import AnnotationPanel from "../panels/annotation/AnnotationPanel";
 import DatabasePanel from "../panels/database/DatabasePanel";
 import InfoPanel from "../panels/info/InfoPanel";
+import GraphPanel from "../panels/practice/GraphPanel";
 import PracticePanel from "../panels/practice/PracticePanel";
 import Board from "./Board";
 import EditingCard from "./EditingCard";
 import EvalListener from "./EvalListener";
-import GraphPanel from "../panels/practice/GraphPanel";
 
 function BoardAnalysis() {
   const { t } = useTranslation();
@@ -136,6 +143,7 @@ function BoardAnalysis() {
   const [currentTabSelected, setCurrentTabSelected] = useAtom(currentTabSelectedAtom);
   const practiceTabSelected = useAtomValue(currentPracticeTabAtom);
   const isRepertoire = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "repertoire";
+  const isPuzzle = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "puzzle";
   const practicing = currentTabSelected === "practice" && practiceTabSelected === "train";
 
   return (
@@ -185,15 +193,21 @@ function BoardAnalysis() {
                   {t("Board.Tabs.Graph")}
                 </Tabs.Tab>
               )}
-              <Tabs.Tab value="analysis" leftSection={<IconZoomCheck size="1rem" />}>
-                {t("Board.Tabs.Analysis")}
-              </Tabs.Tab>
-              <Tabs.Tab value="database" leftSection={<IconDatabase size="1rem" />}>
-                {t("Board.Tabs.Database")}
-              </Tabs.Tab>
-              <Tabs.Tab value="annotate" leftSection={<IconNotes size="1rem" />}>
-                {t("Board.Tabs.Annotate")}
-              </Tabs.Tab>
+              {!isPuzzle && (
+                <Tabs.Tab value="analysis" leftSection={<IconZoomCheck size="1rem" />}>
+                  {t("Board.Tabs.Analysis")}
+                </Tabs.Tab>
+              )}
+              {!isPuzzle && (
+                <Tabs.Tab value="database" leftSection={<IconDatabase size="1rem" />}>
+                  {t("Board.Tabs.Database")}
+                </Tabs.Tab>
+              )}
+              {!isPuzzle && (
+                <Tabs.Tab value="annotate" leftSection={<IconNotes size="1rem" />}>
+                  {t("Board.Tabs.Annotate")}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="info" leftSection={<IconInfoCircle size="1rem" />}>
                 {t("Board.Tabs.Info")}
               </Tabs.Tab>
