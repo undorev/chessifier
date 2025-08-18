@@ -3,24 +3,21 @@ import {
   Badge,
   Button,
   Card,
-  Center,
   Code,
-  Collapse,
   Group,
   Menu,
   Modal,
+  Popover,
   rem,
-  SegmentedControl,
   Stack,
   Text,
   Textarea,
   Tooltip,
 } from "@mantine/core";
-import { useDisclosure, useId } from "@mantine/hooks";
+import { useId } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
-  IconChevronDown,
   IconCopy,
   IconDots,
   IconDownload,
@@ -29,9 +26,7 @@ import {
   IconFileImport,
   IconMoon,
   IconPalette,
-  IconSettings,
   IconSun,
-  IconSunMoon,
   IconTrash,
   IconUpload,
   IconX,
@@ -174,8 +169,6 @@ export function ThemeSettings() {
   const { createCustomTheme, duplicateTheme, deleteCustomTheme, exportTheme, saveCustomTheme } =
     useThemeCustomization();
   const { toggleAutoDetection } = useThemeDetection();
-
-  const [advancedOpen, { toggle: toggleAdvanced }] = useDisclosure(false);
   const [editorOpened, setEditorOpened] = useState(false);
   const [editingTheme, setEditingTheme] = useState<ThemeDefinition | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -183,29 +176,6 @@ export function ThemeSettings() {
   const [importJson, setImportJson] = useState("");
   const [exportJson, setExportJson] = useState("");
   const fileInputId = useId();
-
-  const handleQuickThemeChange = (value: string) => {
-    if (value === "auto") {
-      if (!autoDetectEnabled) {
-        toggleAutoDetection();
-      }
-    } else {
-      if (autoDetectEnabled) {
-        toggleAutoDetection();
-      }
-      
-      const targetTheme = availableThemes.find((theme) => theme.type === value && !theme.isCustom);
-
-      if (targetTheme) {
-        setTheme(targetTheme.name);
-      }
-    }
-  };
-
-  const getCurrentQuickValue = () => {
-    if (autoDetectEnabled) return "auto";
-    return currentTheme?.type || "light";
-  };
 
   const handleManualThemeChange = (themeName: string) => {
     if (autoDetectEnabled) {
@@ -348,118 +318,36 @@ export function ThemeSettings() {
           </Text>
         </div>
 
-        <SegmentedControl
-          value={getCurrentQuickValue()}
-          onChange={handleQuickThemeChange}
-          data={[
-            {
-              value: "light",
-              label: (
-                <Center>
-                  <IconSun size={rem(16)} />
-                  <Text size="sm" ml={10}>
-                    {t("Settings.Appearance.Theme.Light", "Light")}
-                  </Text>
-                </Center>
-              ),
-            },
-            {
-              value: "dark",
-              label: (
-                <Center>
-                  <IconMoon size={rem(16)} />
-                  <Text size="sm" ml={10}>
-                    {t("Settings.Appearance.Theme.Dark", "Dark")}
-                  </Text>
-                </Center>
-              ),
-            },
-            {
-              value: "auto",
-              label: (
-                <Center>
-                  <IconSunMoon size={rem(16)} />
-                  <Text size="sm" ml={10}>
-                    {t("Settings.Appearance.Theme.Auto", "Auto")}
-                  </Text>
-                </Center>
-              ),
-            },
-          ]}
-          fullWidth
-        />
-      </Group>
+        <Group gap="xs">
+          <Tooltip label="Import from file">
+            <ActionIcon variant="subtle" component="label" htmlFor={fileInputId}>
+              <IconUpload size={rem(16)} />
+            </ActionIcon>
+          </Tooltip>
 
-      <Button
-        variant="subtle"
-        leftSection={<IconSettings size={rem(16)} />}
-        rightSection={
-          <IconChevronDown
-            size={rem(16)}
-            style={{
-              transform: advancedOpen ? "rotate(180deg)" : undefined,
-              transition: "transform 0.2s ease",
-            }}
-          />
-        }
-        onClick={toggleAdvanced}
-        fullWidth
-        justify="space-between"
-      >
-        Advanced Theme Options
-      </Button>
+          <Tooltip label="Import from JSON">
+            <ActionIcon variant="subtle" onClick={() => setImportModalOpen(true)}>
+              <IconFileImport size={rem(16)} />
+            </ActionIcon>
+          </Tooltip>
 
-      <Collapse in={advancedOpen}>
-        <Stack gap="md">
-          <Card withBorder p="md">
-            <Stack gap="md">
-              <Group justify="space-between">
-                <Text fw={500} size="sm">
-                  Theme Management
-                </Text>
-                <Group gap="xs">
-                  <Tooltip label="Import from file">
-                    <ActionIcon variant="subtle" component="label" htmlFor={fileInputId}>
-                      <IconUpload size={rem(16)} />
-                    </ActionIcon>
-                  </Tooltip>
+          <Tooltip label="Export current theme">
+            <ActionIcon variant="subtle" onClick={handleExportCurrentTheme} disabled={!currentTheme}>
+              <IconFileExport size={rem(16)} />
+            </ActionIcon>
+          </Tooltip>
 
-                  <Tooltip label="Import from JSON">
-                    <ActionIcon variant="subtle" onClick={() => setImportModalOpen(true)}>
-                      <IconFileImport size={rem(16)} />
-                    </ActionIcon>
-                  </Tooltip>
+          <Tooltip label="Create custom theme">
+            <ActionIcon variant="subtle" onClick={handleCreateCustomTheme} disabled={!currentTheme}>
+              <IconPalette size={rem(16)} />
+            </ActionIcon>
+          </Tooltip>
 
-                  <Tooltip label="Export current theme">
-                    <ActionIcon variant="subtle" onClick={handleExportCurrentTheme} disabled={!currentTheme}>
-                      <IconFileExport size={rem(16)} />
-                    </ActionIcon>
-                  </Tooltip>
-
-                  <Tooltip label="Create custom theme">
-                    <ActionIcon variant="subtle" onClick={handleCreateCustomTheme} disabled={!currentTheme}>
-                      <IconPalette size={rem(16)} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-              </Group>
-
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleFileImport}
-                style={{ display: "none" }}
-                id={fileInputId}
-              />
-            </Stack>
-          </Card>
-
-          <Card withBorder p="md">
-            <Stack gap="md">
-              <Text fw={500} size="sm">
-                All Available Themes
-              </Text>
-
+          <Popover trapFocus position="top-end" shadow="md">
+            <Popover.Target>
+              <Button variant="default">{currentTheme?.displayName}</Button>
+            </Popover.Target>
+            <Popover.Dropdown>
               <Stack gap="xs">
                 {availableThemes.map((theme) => (
                   <ThemeCard
@@ -474,10 +362,10 @@ export function ThemeSettings() {
                   />
                 ))}
               </Stack>
-            </Stack>
-          </Card>
-        </Stack>
-      </Collapse>
+            </Popover.Dropdown>
+          </Popover>
+        </Group>
+      </Group>
 
       <ThemeEditor
         theme={editingTheme}
