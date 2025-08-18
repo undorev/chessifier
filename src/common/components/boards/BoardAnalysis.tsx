@@ -1,6 +1,13 @@
 import { Paper, Portal, Stack, Tabs } from "@mantine/core";
 import { useHotkeys, useToggle } from "@mantine/hooks";
-import { IconDatabase, IconGraphFilled, IconInfoCircle, IconNotes, IconTargetArrow, IconZoomCheck } from "@tabler/icons-react";
+import {
+  IconDatabase,
+  IconGraphFilled,
+  IconInfoCircle,
+  IconNotes,
+  IconTargetArrow,
+  IconZoomCheck,
+} from "@tabler/icons-react";
 import { useLoaderData } from "@tanstack/react-router";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { useAtom, useAtomValue } from "jotai";
@@ -25,11 +32,11 @@ import AnalysisPanel from "../panels/analysis/AnalysisPanel";
 import AnnotationPanel from "../panels/annotation/AnnotationPanel";
 import DatabasePanel from "../panels/database/DatabasePanel";
 import InfoPanel from "../panels/info/InfoPanel";
+import GraphPanel from "../panels/practice/GraphPanel";
 import PracticePanel from "../panels/practice/PracticePanel";
 import Board from "./Board";
 import EditingCard from "./EditingCard";
 import EvalListener from "./EvalListener";
-import GraphPanel from "../panels/practice/GraphPanel";
 
 function BoardAnalysis() {
   const { t } = useTranslation();

@@ -425,7 +425,7 @@ export default function DashboardPage() {
         <Group align="center" justify="space-between" wrap="nowrap">
           <Stack gap={6} flex={6}>
             <Title order={1} fw={800}>
-                          {isFirstOpen ? "Welcome to Pawn Appétit!" : " Welcome back"}
+              {isFirstOpen ? "Welcome to Pawn Appétit!" : " Welcome back"}
             </Title>
             <Text size="sm" c="dimmed">
               Ready to make your next best move?
