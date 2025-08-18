@@ -47,21 +47,23 @@ const ChessComPlayer = z.object({
   username: z.string(),
 });
 
+const ChessComGameSchema = z.object({
+  url: z.string(),
+  pgn: z.string().nullish(),
+  time_control: z.string(),
+  end_time: z.number(),
+  rated: z.boolean(),
+  initial_setup: z.string(),
+  fen: z.string(),
+  rules: z.string(),
+  white: ChessComPlayer,
+  black: ChessComPlayer,
+});
+
+export type ChessComGame = z.infer<typeof ChessComGameSchema>;
+
 const ChessComGames = z.object({
-  games: z.array(
-    z.object({
-      url: z.string(),
-      pgn: z.string().nullish(),
-      time_control: z.string(),
-      end_time: z.number(),
-      rated: z.boolean(),
-      initial_setup: z.string(),
-      fen: z.string(),
-      rules: z.string(),
-      white: ChessComPlayer,
-      black: ChessComPlayer,
-    }),
-  ),
+  games: z.array(ChessComGameSchema),
 });
 
 export async function getChessComAccount(player: string): Promise<ChessComStats | null> {
@@ -96,6 +98,40 @@ async function getGameArchives(player: string) {
   const url = `${baseURL}/pub/player/${player}/games/archives`;
   const response = await fetch(url, { headers, method: "GET" });
   return (await response.json()) as Archive;
+}
+
+export async function fetchLastChessComGames(player: string): Promise<ChessComGame[]> {
+  try {
+    const archives = await getGameArchives(player);
+    if (archives.archives.length === 0) {
+      return [];
+    }
+    const lastArchiveUrl = archives.archives[archives.archives.length - 1];
+    const response = await fetch(lastArchiveUrl, { headers, method: "GET" });
+
+    if (!response.ok) {
+      error(`Failed to fetch games from ${lastArchiveUrl}: ${response.status}`);
+      return [];
+    }
+
+    const gamesData = ChessComGames.safeParse(await response.json());
+
+    if (!gamesData.success) {
+      error(`Invalid game data from ${lastArchiveUrl}: ${gamesData.error}`);
+      return [];
+    }
+
+    return gamesData.data.games.sort((a, b) => b.end_time - a.end_time);
+  } catch (e) {
+    error(`Error fetching last chess.com games for ${player}: ${e}`);
+    notifications.show({
+      title: "Fetch Error",
+      message: `Could not fetch recent games for ${player}.`,
+      color: "red",
+      icon: <IconX />,
+    });
+    return [];
+  }
 }
 
 export async function downloadChessCom(player: string, timestamp: number | null) {
@@ -154,6 +190,14 @@ const chessComGameSchema = z.object({
   pgnHeaders: z.record(z.string(), z.string()),
 });
 
+// This new schema matches the nested structure of the API response
+const chessComGameCallbackSchema = z.object({
+  game: z.object({
+    moveList: z.string(),
+    pgnHeaders: z.record(z.string(), z.string()),
+  }),
+});
+
 export async function getChesscomGame(gameURL: string) {
   const regex = /.*\/game\/(live|daily)\/(\d+)/;
   const match = gameURL.match(regex);
@@ -182,9 +226,11 @@ export async function getChesscomGame(gameURL: string) {
   }
 
   const apiData = await response.json();
-  const gameData = chessComGameSchema.safeParse(apiData);
-  if (!gameData.success) {
-    error(`Invalid response for Chess.com game: ${response.status} ${response.url}\n${gameData.error}`);
+  // We now parse the entire response with the new schema
+  const parsedResponse = chessComGameCallbackSchema.safeParse(apiData);
+
+  if (!parsedResponse.success) {
+    error(`Invalid response for Chess.com game: ${response.status} ${response.url}\n${parsedResponse.error}`);
     notifications.show({
       title: "Failed to fetch Chess.com game",
       message: `Invalid response for "${gameURL}" on chess.com`,
@@ -194,8 +240,10 @@ export async function getChesscomGame(gameURL: string) {
     return null;
   }
 
-  const moveList = gameData.data.moveList;
-  const pgnHeaders = gameData.data.pgnHeaders;
+  // Extract the game data from the parsed response
+  const gameData = parsedResponse.data.game;
+  const moveList = gameData.moveList;
+  const pgnHeaders = gameData.pgnHeaders;
   const moves = moveList.match(/.{1,2}/g);
   if (!moves) {
     return "";
