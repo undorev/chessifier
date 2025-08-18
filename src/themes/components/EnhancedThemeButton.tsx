@@ -36,7 +36,7 @@ export default function EnhancedThemeButton() {
       if (autoDetectEnabled) {
         toggleAutoDetection();
       }
-
+      
       if (newScheme === "dark") {
         if (currentTheme?.type !== "dark") {
           setTheme("classic-dark");

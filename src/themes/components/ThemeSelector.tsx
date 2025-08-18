@@ -159,6 +159,13 @@ export function ThemeSelector({
   const [editorOpened, setEditorOpened] = useState(false);
   const [editingTheme, setEditingTheme] = useState<ThemeDefinition | null>(null);
 
+  const handleManualThemeChange = (themeName: string) => {
+    if (autoDetectEnabled) {
+      toggleAutoDetection();
+    }
+    setTheme(themeName);
+  };
+
   const handleEditTheme = (themeName: string) => {
     const theme = getTheme(themeName);
     if (theme) {
@@ -237,7 +244,7 @@ export function ThemeSelector({
             label: theme.displayName,
           }))}
           value={currentTheme?.name || ""}
-          onChange={(value) => value && setTheme(value)}
+          onChange={(value) => value && handleManualThemeChange(value)}
           leftSection={<IconPalette size={rem(16)} />}
           placeholder="Select theme"
           style={{ minWidth: 200 }}
@@ -305,7 +312,7 @@ export function ThemeSelector({
               key={theme.name}
               theme={theme}
               isActive={currentTheme?.name === theme.name}
-              onSelect={() => setTheme(theme.name)}
+              onSelect={() => handleManualThemeChange(theme.name)}
               onEdit={theme.isCustom && showCustomization ? () => handleEditTheme(theme.name) : undefined}
               onDelete={theme.isCustom ? () => deleteCustomTheme(theme.name) : undefined}
               onDuplicate={showCustomization ? () => duplicateTheme(theme.name) : undefined}
