@@ -1,4 +1,4 @@
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import {
   Accordion,
   ActionIcon,
@@ -16,7 +16,7 @@ import {
 import { IconChevronsRight, IconPlayerPause, IconSelector, IconSettings } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAtom, useAtomValue } from "jotai";
-import { memo, useContext, useDeferredValue, useMemo } from "react";
+import { memo, useContext, useDeferredValue, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -62,6 +62,30 @@ function AnalysisPanel() {
 
   const [engines, setEngines] = useAtom(enginesAtom);
   const loadedEngines = useMemo(() => engines.filter((e) => e.loaded), [engines]);
+
+  useEffect(() => {
+    const handleEngineReorder = (event: CustomEvent) => {
+      const { source, destination } = event.detail;
+      setEngines(async (prev) => {
+        const result = Array.from(await prev);
+        const prevLoaded = result.filter((e) => e.loaded);
+        const [removed] = prevLoaded.splice(source.index, 1);
+        prevLoaded.splice(destination.index, 0, removed);
+
+        result.forEach((e, i) => {
+          if (e.loaded) {
+            result[i] = prevLoaded.shift()!;
+          }
+        });
+        return result;
+      });
+    };
+
+    window.addEventListener('engineReorder', handleEngineReorder as EventListener);
+    return () => {
+      window.removeEventListener('engineReorder', handleEngineReorder as EventListener);
+    };
+  }, [setEngines]);
 
   const [, enable] = useAtom(enableAllAtom);
   const allEnabledLoader = useAtomValue(allEnabledAtom);
@@ -154,54 +178,35 @@ function AnalysisPanel() {
                   },
                 }}
               >
-                <DragDropContext
-                  onDragEnd={({ destination, source }) =>
-                    destination?.index !== undefined &&
-                    setEngines(async (prev) => {
-                      const result = Array.from(await prev);
-                      const prevLoaded = result.filter((e) => e.loaded);
-                      const [removed] = prevLoaded.splice(source.index, 1);
-                      prevLoaded.splice(destination.index, 0, removed);
+                <Droppable droppableId="engines-droppable" direction="vertical">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      <Stack w="100%">
+                        {loadedEngines.map((engine, i) => (
+                          <Draggable key={engine.name + i.toString()} draggableId={`engine-${engine.name}`} index={i}>
+                            {(provided) => (
+                              <div ref={provided.innerRef} {...provided.draggableProps}>
+                                <Accordion.Item value={engine.name}>
+                                  <BestMoves
+                                    id={i}
+                                    engine={engine}
+                                    fen={rootFen}
+                                    moves={moves}
+                                    halfMoves={currentNodeHalfMoves}
+                                    dragHandleProps={provided.dragHandleProps}
+                                    orientation={headers.orientation || "white"}
+                                  />
+                                </Accordion.Item>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      </Stack>
 
-                      result.forEach((e, i) => {
-                        if (e.loaded) {
-                          result[i] = prevLoaded.shift()!;
-                        }
-                      });
-                      return result;
-                    })
-                  }
-                >
-                  <Droppable droppableId="droppable" direction="vertical">
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps}>
-                        <Stack w="100%">
-                          {loadedEngines.map((engine, i) => (
-                            <Draggable key={engine.name + i.toString()} draggableId={engine.name} index={i}>
-                              {(provided) => (
-                                <div ref={provided.innerRef} {...provided.draggableProps}>
-                                  <Accordion.Item value={engine.name}>
-                                    <BestMoves
-                                      id={i}
-                                      engine={engine}
-                                      fen={rootFen}
-                                      moves={moves}
-                                      halfMoves={currentNodeHalfMoves}
-                                      dragHandleProps={provided.dragHandleProps}
-                                      orientation={headers.orientation || "white"}
-                                    />
-                                  </Accordion.Item>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                        </Stack>
-
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </Accordion>
               <Group gap="xs">
                 <Button

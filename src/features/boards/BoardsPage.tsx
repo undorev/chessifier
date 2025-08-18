@@ -166,29 +166,39 @@ export default function BoardsPage() {
   ]);
 
   return (
-    <Tabs
-      value={activeTab}
-      onChange={(v) => setActiveTab(v)}
-      keepMounted={false}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        width: "100%",
+    <DragDropContext
+      onDragEnd={({ destination, source }) => {
+        if (!destination) return;
+        
+        if (source.droppableId === "droppable" && destination.droppableId === "droppable") {
+          setTabs((prev) => {
+            const result = Array.from(prev);
+            const [removed] = result.splice(source.index, 1);
+            result.splice(destination.index, 0, removed);
+            return result;
+          });
+        }
+        
+        if (source.droppableId === "engines-droppable" && destination.droppableId === "engines-droppable") {
+          const event = new CustomEvent('engineReorder', {
+            detail: { source, destination }
+          });
+          window.dispatchEvent(event);
+        }
       }}
     >
-      <ScrollArea h="3.75rem" px="md" pt="sm" scrollbarSize={8}>
-        <DragDropContext
-          onDragEnd={({ destination, source }) =>
-            destination?.index !== undefined &&
-            setTabs((prev) => {
-              const result = Array.from(prev);
-              const [removed] = result.splice(source.index, 1);
-              result.splice(destination.index, 0, removed);
-              return result;
-            })
-          }
-        >
+      <Tabs
+        value={activeTab}
+        onChange={(v) => setActiveTab(v)}
+        keepMounted={false}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        <ScrollArea h="3.75rem" px="md" pt="sm" scrollbarSize={8}>
           <Droppable droppableId="droppable" direction="horizontal">
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} style={{ display: "flex" }}>
@@ -231,14 +241,14 @@ export default function BoardsPage() {
               </div>
             )}
           </Droppable>
-        </DragDropContext>
-      </ScrollArea>
-      {tabs.map((tab) => (
-        <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
-          <TabSwitch tab={tab} />
-        </Tabs.Panel>
-      ))}
-    </Tabs>
+        </ScrollArea>
+        {tabs.map((tab) => (
+          <Tabs.Panel key={tab.value} value={tab.value} h="100%" w="100%" pb="sm" px="sm">
+            <TabSwitch tab={tab} />
+          </Tabs.Panel>
+        ))}
+      </Tabs>
+    </DragDropContext>
   );
 }
 
