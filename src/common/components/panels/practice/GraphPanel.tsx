@@ -1,11 +1,11 @@
-import { TreeStateContext } from "@/common/components/TreeStateContext";
-import { type TreeNode } from "@/utils/treeReducer";
 import { ActionIcon, Paper, Tooltip } from "@mantine/core";
 import { IconFocus } from "@tabler/icons-react";
 import * as d3 from "d3";
 import { t } from "i18next";
 import { useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
+import { TreeStateContext } from "@/common/components/TreeStateContext";
+import type { TreeNode } from "@/utils/treeReducer";
 
 const COLORS = {
   link: "#555",
