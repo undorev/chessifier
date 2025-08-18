@@ -61,6 +61,7 @@ export default function ImportModal({ context, id }: ContextModalProps<{ modalBo
       if (file || pgn) {
         let fileInfo: FileMetadata | undefined;
         let input = pgn;
+
         if (file) {
           const count = unwrap(await commands.countPgnGames(file));
           if (save) {
@@ -96,13 +97,26 @@ export default function ImportModal({ context, id }: ContextModalProps<{ modalBo
               },
             };
           }
+        } else if (save) {
+          // Handle pgn without file case
+          const newFile = await createFile({
+            filename,
+            filetype,
+            pgn,
+            dir: documentDir,
+          });
+          if (newFile.isErr) {
+            setError(newFile.error.message);
+            setLoading(false);
+            return;
+          }
+          fileInfo = newFile.value;
         }
 
         try {
           const tree = await parsePGN(input);
           setCurrentTab((prev) => {
             sessionStorage.setItem(prev?.value, JSON.stringify({ version: 0, state: tree }));
-
             return {
               ...prev,
               name: getGameName(tree.headers),
@@ -134,7 +148,6 @@ export default function ImportModal({ context, id }: ContextModalProps<{ modalBo
         const gameId = link.split("/")[3];
         pgn = await getLichessGame(gameId);
       }
-
       const tree = await parsePGN(pgn);
       setCurrentTab((prev) => {
         sessionStorage.setItem(prev.value, JSON.stringify({ version: 0, state: tree }));
