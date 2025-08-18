@@ -193,7 +193,7 @@ export function ThemeSettings() {
       if (autoDetectEnabled) {
         toggleAutoDetection();
       }
-
+      
       const targetTheme = availableThemes.find((theme) => theme.type === value && !theme.isCustom);
 
       if (targetTheme) {
@@ -205,6 +205,13 @@ export function ThemeSettings() {
   const getCurrentQuickValue = () => {
     if (autoDetectEnabled) return "auto";
     return currentTheme?.type || "light";
+  };
+
+  const handleManualThemeChange = (themeName: string) => {
+    if (autoDetectEnabled) {
+      toggleAutoDetection();
+    }
+    setTheme(themeName);
   };
 
   const handleCreateCustomTheme = () => {
@@ -333,7 +340,6 @@ export function ThemeSettings() {
 
   return (
     <Stack gap="xl">
-      {/* Header */}
       <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
         <div>
           <Text>{t("Settings.Appearance.Theme", "Theme")}</Text>
@@ -384,7 +390,6 @@ export function ThemeSettings() {
         />
       </Group>
 
-      {/* Advanced Settings Toggle */}
       <Button
         variant="subtle"
         leftSection={<IconSettings size={rem(16)} />}
@@ -404,10 +409,8 @@ export function ThemeSettings() {
         Advanced Theme Options
       </Button>
 
-      {/* Advanced Settings */}
       <Collapse in={advancedOpen}>
         <Stack gap="md">
-          {/* Theme Management */}
           <Card withBorder p="md">
             <Stack gap="md">
               <Group justify="space-between">
@@ -451,7 +454,6 @@ export function ThemeSettings() {
             </Stack>
           </Card>
 
-          {/* Available Themes */}
           <Card withBorder p="md">
             <Stack gap="md">
               <Text fw={500} size="sm">
@@ -464,7 +466,7 @@ export function ThemeSettings() {
                     key={theme.name}
                     theme={theme}
                     isActive={currentTheme?.name === theme.name}
-                    onSelect={() => setTheme(theme.name)}
+                    onSelect={() => handleManualThemeChange(theme.name)}
                     onEdit={theme.isCustom ? () => handleEditTheme(theme.name) : undefined}
                     onDelete={theme.isCustom ? () => deleteCustomTheme(theme.name) : undefined}
                     onDuplicate={() => duplicateTheme(theme.name)}
@@ -477,7 +479,6 @@ export function ThemeSettings() {
         </Stack>
       </Collapse>
 
-      {/* Theme Editor Modal */}
       <ThemeEditor
         theme={editingTheme}
         opened={editorOpened}
@@ -487,7 +488,6 @@ export function ThemeSettings() {
         }}
       />
 
-      {/* Import Modal */}
       <Modal opened={importModalOpen} onClose={() => setImportModalOpen(false)} title="Import Theme" size="lg">
         <Stack gap="md">
           <Text size="sm" c="dimmed">
@@ -514,7 +514,6 @@ export function ThemeSettings() {
         </Stack>
       </Modal>
 
-      {/* Export Modal */}
       <Modal opened={exportModalOpen} onClose={() => setExportModalOpen(false)} title="Export Theme" size="lg">
         <Stack gap="md">
           <Text size="sm" c="dimmed">

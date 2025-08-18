@@ -36,11 +36,13 @@ export const activeThemeAtom = atom(
           [newTheme.name]: newTheme,
         },
         activeTheme: themeName,
+        autoDetectSystemTheme: false,
       });
     } else {
       set(themePreferencesAtom, {
         ...preferences,
         activeTheme: themeName,
+        autoDetectSystemTheme: false,
       });
     }
   },
@@ -92,6 +94,7 @@ export const addCustomThemeAtom = atom(null, (get, set, theme: ThemeDefinition) 
       ...preferences.customThemes,
       [theme.name]: theme,
     },
+    autoDetectSystemTheme: false,
   });
 });
 
@@ -132,6 +135,7 @@ export const importThemeFromJSONAtom = atom(null, (get, set, jsonString: string)
       ...preferences.customThemes,
       [theme.name]: theme,
     },
+    autoDetectSystemTheme: false,
   });
 
   return theme;
