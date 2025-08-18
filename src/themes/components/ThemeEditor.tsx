@@ -202,6 +202,7 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                   { value: "dark", label: "Dark" },
                 ]}
                 {...form.getInputProps("type")}
+                name="type"
               />
 
               <Textarea
@@ -235,22 +236,42 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     <ColorInput
                       label="Background"
                       value={form.values.colors?.["editor.background"] || "#ffffff"}
-                      onChange={(value) => form.setFieldValue("colors.editor.background", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "editor.background": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Foreground"
                       value={form.values.colors?.["editor.foreground"] || "#000000"}
-                      onChange={(value) => form.setFieldValue("colors.editor.foreground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "editor.foreground": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Selection"
                       value={form.values.colors?.["editor.selectionBackground"] || "#007acc20"}
-                      onChange={(value) => form.setFieldValue("colors.editor.selectionBackground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "editor.selectionBackground": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Line Highlight"
                       value={form.values.colors?.["editor.lineHighlightBackground"] || "#f5f5f5"}
-                      onChange={(value) => form.setFieldValue("colors.editor.lineHighlightBackground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "editor.lineHighlightBackground": value,
+                        });
+                      }}
                     />
                   </Stack>
                 </div>
@@ -264,22 +285,42 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     <ColorInput
                       label="Background"
                       value={form.values.colors?.["button.background"] || "#007acc"}
-                      onChange={(value) => form.setFieldValue("colors.button.background", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "button.background": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Foreground"
                       value={form.values.colors?.["button.foreground"] || "#ffffff"}
-                      onChange={(value) => form.setFieldValue("colors.button.foreground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "button.foreground": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Hover Background"
                       value={form.values.colors?.["button.hoverBackground"] || "#005a9e"}
-                      onChange={(value) => form.setFieldValue("colors.button.hoverBackground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "button.hoverBackground": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Border"
                       value={form.values.colors?.["button.border"] || "#007acc"}
-                      onChange={(value) => form.setFieldValue("colors.button.border", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "button.border": value,
+                        });
+                      }}
                     />
                   </Stack>
                 </div>
@@ -293,22 +334,42 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     <ColorInput
                       label="Background"
                       value={form.values.colors?.["input.background"] || "#ffffff"}
-                      onChange={(value) => form.setFieldValue("colors.input.background", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "input.background": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Foreground"
                       value={form.values.colors?.["input.foreground"] || "#000000"}
-                      onChange={(value) => form.setFieldValue("colors.input.foreground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "input.foreground": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Border"
                       value={form.values.colors?.["input.border"] || "#cccccc"}
-                      onChange={(value) => form.setFieldValue("colors.input.border", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "input.border": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Focus Border"
                       value={form.values.colors?.["input.focusBorder"] || "#007acc"}
-                      onChange={(value) => form.setFieldValue("colors.input.focusBorder", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "input.focusBorder": value,
+                        });
+                      }}
                     />
                   </Stack>
                 </div>
@@ -322,22 +383,42 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     <ColorInput
                       label="Background"
                       value={form.values.colors?.["panel.background"] || "#f8f8f8"}
-                      onChange={(value) => form.setFieldValue("colors.panel.background", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "panel.background": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Border"
                       value={form.values.colors?.["panel.border"] || "#cccccc"}
-                      onChange={(value) => form.setFieldValue("colors.panel.border", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "panel.border": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Sidebar Background"
                       value={form.values.colors?.["sidebar.background"] || "#f8f8f8"}
-                      onChange={(value) => form.setFieldValue("colors.sidebar.background", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "sidebar.background": value,
+                        });
+                      }}
                     />
                     <ColorInput
                       label="Sidebar Foreground"
                       value={form.values.colors?.["sidebar.foreground"] || "#000000"}
-                      onChange={(value) => form.setFieldValue("colors.sidebar.foreground", value)}
+                      onChange={(value) => {
+                        form.setFieldValue("colors", {
+                          ...form.values.colors,
+                          "sidebar.foreground": value,
+                        });
+                      }}
                     />
                   </Stack>
                 </div>
@@ -351,7 +432,12 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                 label="Font Family"
                 placeholder="-apple-system, BlinkMacSystemFont, sans-serif"
                 value={form.values.typography?.fontFamily || ""}
-                onChange={(event) => form.setFieldValue("typography.fontFamily", event.currentTarget.value)}
+                onChange={(event) => {
+                  form.setFieldValue("typography", {
+                    ...form.values.typography,
+                    fontFamily: event.currentTarget.value,
+                  });
+                }}
               />
 
               <Group grow>
@@ -359,13 +445,23 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                   label="Font Size"
                   placeholder="14px"
                   value={form.values.typography?.fontSize || ""}
-                  onChange={(event) => form.setFieldValue("typography.fontSize", event.currentTarget.value)}
+                  onChange={(event) => {
+                    form.setFieldValue("typography", {
+                      ...form.values.typography,
+                      fontSize: event.currentTarget.value,
+                    });
+                  }}
                 />
                 <TextInput
                   label="Font Weight"
                   placeholder="400"
                   value={form.values.typography?.fontWeight || ""}
-                  onChange={(event) => form.setFieldValue("typography.fontWeight", event.currentTarget.value)}
+                  onChange={(event) => {
+                    form.setFieldValue("typography", {
+                      ...form.values.typography,
+                      fontWeight: event.currentTarget.value,
+                    });
+                  }}
                 />
               </Group>
 
@@ -374,13 +470,23 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                   label="Line Height"
                   placeholder="1.5"
                   value={form.values.typography?.lineHeight || ""}
-                  onChange={(event) => form.setFieldValue("typography.lineHeight", event.currentTarget.value)}
+                  onChange={(event) => {
+                    form.setFieldValue("typography", {
+                      ...form.values.typography,
+                      lineHeight: event.currentTarget.value,
+                    });
+                  }}
                 />
                 <TextInput
                   label="Letter Spacing"
                   placeholder="0"
                   value={form.values.typography?.letterSpacing || ""}
-                  onChange={(event) => form.setFieldValue("typography.letterSpacing", event.currentTarget.value)}
+                  onChange={(event) => {
+                    form.setFieldValue("typography", {
+                      ...form.values.typography,
+                      letterSpacing: event.currentTarget.value,
+                    });
+                  }}
                 />
               </Group>
             </Stack>
@@ -397,31 +503,56 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     label="XS"
                     placeholder="4px"
                     value={form.values.spacing?.xs || ""}
-                    onChange={(event) => form.setFieldValue("spacing.xs", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("spacing", {
+                        ...form.values.spacing,
+                        xs: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="SM"
                     placeholder="8px"
                     value={form.values.spacing?.sm || ""}
-                    onChange={(event) => form.setFieldValue("spacing.sm", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("spacing", {
+                        ...form.values.spacing,
+                        sm: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="MD"
                     placeholder="16px"
                     value={form.values.spacing?.md || ""}
-                    onChange={(event) => form.setFieldValue("spacing.md", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("spacing", {
+                        ...form.values.spacing,
+                        md: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="LG"
                     placeholder="24px"
                     value={form.values.spacing?.lg || ""}
-                    onChange={(event) => form.setFieldValue("spacing.lg", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("spacing", {
+                        ...form.values.spacing,
+                        lg: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="XL"
                     placeholder="32px"
                     value={form.values.spacing?.xl || ""}
-                    onChange={(event) => form.setFieldValue("spacing.xl", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("spacing", {
+                        ...form.values.spacing,
+                        xl: event.currentTarget.value,
+                      });
+                    }}
                   />
                 </SimpleGrid>
               </div>
@@ -435,31 +566,56 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
                     label="XS"
                     placeholder="2px"
                     value={form.values.borderRadius?.xs || ""}
-                    onChange={(event) => form.setFieldValue("borderRadius.xs", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("borderRadius", {
+                        ...form.values.borderRadius,
+                        xs: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="SM"
                     placeholder="4px"
                     value={form.values.borderRadius?.sm || ""}
-                    onChange={(event) => form.setFieldValue("borderRadius.sm", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("borderRadius", {
+                        ...form.values.borderRadius,
+                        sm: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="MD"
                     placeholder="6px"
                     value={form.values.borderRadius?.md || ""}
-                    onChange={(event) => form.setFieldValue("borderRadius.md", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("borderRadius", {
+                        ...form.values.borderRadius,
+                        md: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="LG"
                     placeholder="8px"
                     value={form.values.borderRadius?.lg || ""}
-                    onChange={(event) => form.setFieldValue("borderRadius.lg", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("borderRadius", {
+                        ...form.values.borderRadius,
+                        lg: event.currentTarget.value,
+                      });
+                    }}
                   />
                   <TextInput
                     label="XL"
                     placeholder="12px"
                     value={form.values.borderRadius?.xl || ""}
-                    onChange={(event) => form.setFieldValue("borderRadius.xl", event.currentTarget.value)}
+                    onChange={(event) => {
+                      form.setFieldValue("borderRadius", {
+                        ...form.values.borderRadius,
+                        xl: event.currentTarget.value,
+                      });
+                    }}
                   />
                 </SimpleGrid>
               </div>

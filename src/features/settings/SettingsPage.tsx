@@ -20,7 +20,6 @@ import {
   nativeBarAtom,
   percentageCoverageAtom,
   previewBoardOnHoverAtom,
-  showArrowsAtom,
   showConsecutiveArrowsAtom,
   showCoordinatesAtom,
   showDestsAtom,
@@ -29,6 +28,8 @@ import {
   storedDocumentDirAtom,
 } from "@/state/atoms";
 import { ThemeSettings } from "@/themes";
+import { computedThemeAtom } from "@/themes/state";
+import type { ThemeDefinition } from "@/themes/types";
 import BoardSelect from "./components/BoardSelect";
 import ColorControl from "./components/ColorControl";
 import FontSizeSlider from "./components/FontSizeSlider";
@@ -61,9 +62,10 @@ export default function Page() {
 
   const [moveMethod, setMoveMethod] = useAtom(moveMethodAtom);
   const [moveNotationType, setMoveNotationType] = useAtom(moveNotationTypeAtom);
+  const [computedTheme] = useAtom<ThemeDefinition | null>(computedThemeAtom);
 
-  const allSettings = useMemo(
-    (): SettingItem[] => [
+  const allSettings = useMemo((): SettingItem[] => {
+    const items: SettingItem[] = [
       {
         id: "piece-dest",
         title: t("Settings.PieceDest"),
@@ -78,23 +80,6 @@ export default function Page() {
               </Text>
             </div>
             <SettingsSwitch atom={showDestsAtom} />
-          </Group>
-        ),
-      },
-      {
-        id: "arrows",
-        title: t("Settings.Arrows"),
-        description: t("Settings.Arrows.Desc"),
-        tab: "board",
-        component: (
-          <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
-            <div>
-              <Text>{t("Settings.Arrows")}</Text>
-              <Text size="xs" c="dimmed">
-                {t("Settings.Arrows.Desc")}
-              </Text>
-            </div>
-            <SettingsSwitch atom={showArrowsAtom} />
           </Group>
         ),
       },
@@ -371,13 +356,6 @@ export default function Page() {
         ),
       },
       {
-        id: "theme",
-        title: t("Settings.Appearance.Theme"),
-        description: t("Settings.Appearance.Theme.Desc"),
-        tab: "appearance",
-        component: <ThemeSettings />,
-      },
-      {
         id: "language",
         title: t("Settings.Appearance.Language"),
         description: t("Settings.Appearance.Language.Desc"),
@@ -548,23 +526,11 @@ export default function Page() {
         ),
       },
       {
-        id: "accent-color",
-        title: t("Settings.Appearance.AccentColor"),
-        description: t("Settings.Appearance.AccentColor.Desc"),
+        id: "theme",
+        title: t("Settings.Appearance.Theme"),
+        description: t("Settings.Appearance.Theme.Desc"),
         tab: "appearance",
-        component: (
-          <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
-            <div>
-              <Text>{t("Settings.Appearance.AccentColor")}</Text>
-              <Text size="xs" c="dimmed">
-                {t("Settings.Appearance.AccentColor.Desc")}
-              </Text>
-            </div>
-            <div style={{ width: 200 }}>
-              <ColorControl />
-            </div>
-          </Group>
-        ),
+        component: <ThemeSettings />,
       },
       {
         id: "volume",
@@ -634,21 +600,57 @@ export default function Page() {
         tab: "directories",
         component: <TelemetrySettings className={classes.item} />,
       },
-    ],
-    [
-      t,
-      i18n.language,
-      i18n.changeLanguage,
-      isNative,
-      setIsNative,
-      moveMethod,
-      setMoveMethod,
-      moveNotationType,
-      setMoveNotationType,
-      filesDirectory,
-      setFilesDirectory,
-    ],
-  );
+      // Insert accent-color setting conditionally so it appears near other appearance controls
+    ];
+
+    if (computedTheme) {
+      const themeName = computedTheme.name;
+      const isClassic = themeName === "classic-light" || themeName === "classic-dark";
+      if (isClassic) {
+        const accentItem: SettingItem = {
+          id: "accent-color",
+          title: t("Settings.Appearance.AccentColor"),
+          description: t("Settings.Appearance.AccentColor.Desc"),
+          tab: "appearance",
+          component: (
+            <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
+              <div>
+                <Text>{t("Settings.Appearance.AccentColor")}</Text>
+                <Text size="xs" c="dimmed">
+                  {t("Settings.Appearance.AccentColor.Desc")}
+                </Text>
+              </div>
+              <div style={{ width: 200 }}>
+                <ColorControl />
+              </div>
+            </Group>
+          ),
+        };
+
+        const themeIdx = items.findIndex((s) => s.id === "theme");
+        if (themeIdx >= 0) {
+          items.splice(themeIdx + 1, 0, accentItem);
+        } else {
+          items.push(accentItem);
+        }
+      }
+    }
+
+    return items;
+  }, [
+    t,
+    i18n.language,
+    i18n.changeLanguage,
+    isNative,
+    setIsNative,
+    moveMethod,
+    setMoveMethod,
+    moveNotationType,
+    setMoveNotationType,
+    filesDirectory,
+    setFilesDirectory,
+    computedTheme,
+  ]);
 
   const filteredSettings = useMemo(() => {
     if (!search.trim()) return null;
