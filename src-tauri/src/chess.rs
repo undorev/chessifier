@@ -154,11 +154,19 @@ impl EngineProcess {
 
         self.real_multipv = multipv;
 
-        // Only set options that have changed to avoid unnecessary UCI commands
-        for option in &options.extra_options {
-            if !self.options.extra_options.contains(option) {
-                self.set_option(&option.name, &option.value).await?;
+        let mut options_to_set = Vec::new();
+        
+        for new_option in &options.extra_options {
+            let current_option = self.options.extra_options.iter()
+                .find(|opt| opt.name == new_option.name);
+            
+            if current_option.map_or(true, |opt| opt.value != new_option.value) {
+                options_to_set.push(new_option);
             }
+        }
+        
+        for option in options_to_set {
+            self.set_option(&option.name, &option.value).await?;
         }
 
         if options.fen != self.options.fen || options.moves != self.options.moves {
@@ -591,20 +599,9 @@ pub async fn get_best_moves(
                             }
                         }
                     }
-                    UciMessage::BestMove { best_move, .. } => {
-                        let final_move = best_move.to_string();
-                        let final_best_moves = BestMoves {
-                            multipv: 1,
-                            depth: proc.last_depth,
-                            nodes: 0,
-                            score: proc.last_best_moves.first().map_or(Score::default(), |m| m.score.clone()),
-                            uci_moves: vec![final_move],
-                            san_moves: vec![],
-                            nps: 0,
-                        };
-
+                    UciMessage::BestMove { .. } => {
                         BestMovesPayload {
-                            best_lines: vec![final_best_moves],
+                            best_lines: proc.last_best_moves.clone(),
                             engine: id.clone(),
                             tab: tab.clone(),
                             fen: proc.options.fen.clone(),
@@ -614,8 +611,6 @@ pub async fn get_best_moves(
                         .emit(&app)?;
 
                         proc.last_progress = 100.0;
-
-                        break;
                     }
                     _ => {}
                 }
