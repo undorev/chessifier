@@ -190,6 +190,14 @@ const chessComGameSchema = z.object({
   pgnHeaders: z.record(z.string(), z.string()),
 });
 
+// This new schema matches the nested structure of the API response
+const chessComGameCallbackSchema = z.object({
+  game: z.object({
+    moveList: z.string(),
+    pgnHeaders: z.record(z.string(), z.string()),
+  }),
+});
+
 export async function getChesscomGame(gameURL: string) {
   const regex = /.*\/game\/(live|daily)\/(\d+)/;
   const match = gameURL.match(regex);
@@ -218,9 +226,11 @@ export async function getChesscomGame(gameURL: string) {
   }
 
   const apiData = await response.json();
-  const gameData = chessComGameSchema.safeParse(apiData);
-  if (!gameData.success) {
-    error(`Invalid response for Chess.com game: ${response.status} ${response.url}\n${gameData.error}`);
+  // We now parse the entire response with the new schema
+  const parsedResponse = chessComGameCallbackSchema.safeParse(apiData);
+
+  if (!parsedResponse.success) {
+    error(`Invalid response for Chess.com game: ${response.status} ${response.url}\n${parsedResponse.error}`);
     notifications.show({
       title: "Failed to fetch Chess.com game",
       message: `Invalid response for "${gameURL}" on chess.com`,
@@ -230,8 +240,10 @@ export async function getChesscomGame(gameURL: string) {
     return null;
   }
 
-  const moveList = gameData.data.moveList;
-  const pgnHeaders = gameData.data.pgnHeaders;
+  // Extract the game data from the parsed response
+  const gameData = parsedResponse.data.game;
+  const moveList = gameData.moveList;
+  const pgnHeaders = gameData.pgnHeaders;
   const moves = moveList.match(/.{1,2}/g);
   if (!moves) {
     return "";
