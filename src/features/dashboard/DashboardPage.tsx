@@ -50,9 +50,10 @@ import { type DailyGoal, getDailyGoals } from "@/utils/dailyGoals";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
 import { getPuzzleStats, getTodayPuzzleCount } from "@/utils/puzzleStreak";
 import { genID, type Tab } from "@/utils/tabs";
-import { type ChessComGame, fetchLastChessComGames } from "@/utils/chess.com/api";
+import { type ChessComGame, fetchLastChessComGames, getChesscomGame } from "@/utils/chess.com/api";
 import { fetchLastLichessGames } from "@/utils/lichess/api";
 import { info } from "@tauri-apps/plugin-log";
+import { createTab } from "@/utils/tabs";
 
 function getChessTitle(rating: number): string {
   if (rating >= 2500) return "Grandmaster";
@@ -184,9 +185,6 @@ export default function DashboardPage() {
         );
         const gamesArrays = await Promise.all(allGamesPromises);
 
-        // Log the number of games returned for each user
-        info(`Chess.com game counts returned: ${JSON.stringify(gamesArrays.map(arr => arr.length))}`);
-
         const combinedGames = gamesArrays.flat();
         combinedGames.sort((a, b) => b.end_time - a.end_time);
         setChessComGames(combinedGames.slice(0, 50));
@@ -196,22 +194,6 @@ export default function DashboardPage() {
     };
     fetchGames();
   }, [sessions, lastChessComUpdate, selectedChessComUser]);
-
-  const handleAnalyseGame = (pgn: string) => {
-    const uuid = genID();
-    // Create a simple analysis tab object, without the 'meta' property
-    setTabs((prev) => [
-      ...prev,
-      {
-        value: uuid,
-        name: "Analysis",
-        type: "analysis",
-      },
-    ]);
-    setActiveTab(uuid);
-    // Pass the PGN to the '/boards' route via navigation state
-    navigate({ to: "/boards", state: {  } });
-  };
 
   const [puzzleStats, setPuzzleStats] = useState(() => getPuzzleStats());
   useEffect(() => {
@@ -819,8 +801,31 @@ export default function DashboardPage() {
                                 <Button
                                   size="xs"
                                   variant="light"
-                                  onClick={() => g.pgn && handleAnalyseGame(g.pgn)}
-                                  disabled={!g.pgn}
+                                  onClick={() => {
+                                    if (g.pgn) {
+                                      const headersForAnalysis = {
+                                        id: 0,
+                                        event: "Online Game",
+                                        site: "Chess.com",
+                                        date: new Date(g.end_time * 1000).toLocaleDateString(),
+                                        white: g.white.username,
+                                        black: g.black.username,
+                                        result: g.white.result === 'win' ? '1-0' : g.black.result === 'win' ? '0-1' : '1/2-1/2',
+                                        fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                                      };
+                                      createTab({
+                                        tab: {
+                                          name: `${g.white.username} - ${g.black.username}`,
+                                          type: "analysis",
+                                        },
+                                        setTabs,
+                                        setActiveTab,
+                                        pgn: g.pgn,
+                                        headers: headersForAnalysis, //complains that headersForAnalysis.result isnt of type Outcome (not a real issue but should be fixed)
+                                      });
+                                      navigate({ to: "/boards" });
+                                    }
+                                  }}
                                 >
                                   Analyse
                                 </Button>
@@ -925,7 +930,32 @@ export default function DashboardPage() {
                                 <Button
                                   size="xs"
                                   variant="light"
-                                  onClick={() => g.pgn && handleAnalyseGame(g.pgn)}
+                                  onClick={() => {
+                                    if (g.pgn) {
+                                      const headersForAnalysis = {
+                                        id: 0,
+                                        event: `Rated ${g.speed} game`,
+                                        site: "Lichess.org",
+                                        date: new Date(g.createdAt).toLocaleDateString(),
+                                        white: g.players.white.user?.name || "Unknown",
+                                        black: g.players.black.user?.name || "Unknown",
+                                        result: g.winner === 'white' ? '1-0' : g.winner === 'black' ? '0-1' : '1/2-1/2',
+                                        fen: g.lastFen,
+                                      };
+
+                                      createTab({
+                                        tab: {
+                                          name: `${headersForAnalysis.white} - ${headersForAnalysis.black}`,
+                                          type: "analysis",
+                                        },
+                                        setTabs,
+                                        setActiveTab,
+                                        pgn: g.pgn,
+                                        headers: headersForAnalysis, //complains that headersForAnalysis.result isnt of type Outcome (not a real issue but should be fixed)
+                                      });
+                                      navigate({ to: "/boards" });
+                                    }
+                                  }}
                                   disabled={!g.pgn}
                                 >
                                   Analyse
