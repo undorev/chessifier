@@ -18,17 +18,26 @@ import {
 } from "@mantine/core";
 import { useSessionStorage } from "@mantine/hooks";
 import { IconPlus, IconX, IconZoomCheck } from "@tabler/icons-react";
-import { Chess, parseUci } from "chessops";
-import { parseFen } from "chessops/fen";
+import { useLoaderData } from "@tanstack/react-router";
+import { readDir } from "@tauri-apps/plugin-fs";
+import { Chess, makeUci, parseUci } from "chessops";
+import { INITIAL_BOARD_FEN, parseFen } from "chessops/fen";
+import { parseSan } from "chessops/san";
 import { useAtom, useSetAtom } from "jotai";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 import { useStore } from "zustand";
-import { commands, type PuzzleDatabaseInfo } from "@/bindings";
+import { commands, type PuzzleDatabaseInfo, type Token } from "@/bindings";
 import ChallengeHistory from "@/common/components/ChallengeHistory";
 import GameNotation from "@/common/components/GameNotation";
 import MoveControls from "@/common/components/MoveControls";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
+import {
+  type Directory,
+  type FileMetadata,
+  processEntriesRecursively,
+} from "@/features/files/components/file";
 import {
   activeTabAtom,
   currentPuzzleAtom,
@@ -39,6 +48,7 @@ import {
   selectedPuzzleDbAtom,
   tabsAtom,
 } from "@/state/atoms";
+import { getPgnHeaders } from "@/utils/chess";
 import { positionFromFen } from "@/utils/chessops";
 import { type Completion, getPuzzleDatabases, type Puzzle } from "@/utils/puzzles";
 import { createTab } from "@/utils/tabs";
@@ -46,6 +56,23 @@ import { defaultTree } from "@/utils/treeReducer";
 import { unwrap } from "@/utils/unwrap";
 import AddPuzzle from "./AddPuzzle";
 import PuzzleBoard from "./PuzzleBoard";
+
+const PuzzleDbFromPgnCache = new Map<string, { puzzle?: Puzzle; tokens: Token[]; rating: number; index: number }[]>();
+
+const useFileDirectory = (dir: string) => {
+  const { data, error, isLoading, mutate } = useSWR("file-directory", async () => {
+    const entries = await readDir(dir);
+    const allEntries = processEntriesRecursively(dir, entries);
+
+    return allEntries;
+  });
+  return {
+    files: data,
+    isLoading,
+    error,
+    mutate,
+  };
+};
 
 function Puzzles({ id }: { id: string }) {
   const { t } = useTranslation();
@@ -63,12 +90,16 @@ function Puzzles({ id }: { id: string }) {
   const [puzzleDbs, setPuzzleDbs] = useState<PuzzleDatabaseInfo[]>([]);
   const [selectedDb, setSelectedDb] = useAtom(selectedPuzzleDbAtom);
 
-  useEffect(() => {
-    getPuzzleDatabases().then((databases) => {
-      setPuzzleDbs(databases);
-    });
-  }, []);
+  const { documentDir } = useLoaderData({ from: "/boards" });
+  const { files, isLoading } = useFileDirectory(documentDir);
 
+  useEffect(() => {
+    if (files) {
+      getPuzzleDatabases(files as (FileMetadata | Directory)[]).then((databases) => {
+        setPuzzleDbs(databases);
+      });
+    }
+  }, [files]);
   const [ratingRange, setRatingRange] = useAtom(puzzleRatingRangeAtom);
 
   const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
@@ -80,10 +111,74 @@ function Puzzles({ id }: { id: string }) {
 
   function setPuzzle(puzzle: { fen: string; moves: string[] }) {
     setFen(puzzle.fen);
-    makeMove({ payload: parseUci(puzzle.moves[0])! });
+    if (puzzle.moves.length % 2 === 0) {
+      console.log("Setting puzzle. Puzzle has even moves. Player must play second");
+      makeMove({ payload: parseUci(puzzle.moves[0])! });
+    }
   }
 
-  function generatePuzzle(db: string) {
+  async function generatePuzzleFromPgn(db: string, minRating: number, maxRating: number) {
+    let localPuzzleDb = PuzzleDbFromPgnCache.get(db);
+    if (!localPuzzleDb) {
+      const count = unwrap(await commands.countPgnGames(db));
+      const games = unwrap(await commands.readGames(db, 0, count - 1));
+      const puzzles = await Promise.all(
+        games.map(async (game, i) => {
+          const tokens = unwrap(await commands.lexPgn(game));
+          const headers = getPgnHeaders(tokens);
+          const rating = headers.white_elo || 1500;
+          return { rating, index: i, tokens };
+        }),
+      );
+      PuzzleDbFromPgnCache.set(db, puzzles);
+      localPuzzleDb = puzzles;
+    }
+    const possiblePuzzles = localPuzzleDb.filter((p) => p.rating >= minRating && p.rating <= maxRating);
+    if (possiblePuzzles.length === 0) return null;
+    const selectedGame = possiblePuzzles[Math.floor(Math.random() * possiblePuzzles.length)];
+    if (!selectedGame.puzzle) {
+      const headers = getPgnHeaders(selectedGame.tokens);
+      const puzzleFen = headers.fen.trim() || INITIAL_BOARD_FEN;
+      const [pos, error] = positionFromFen(puzzleFen);
+      if (error) {
+        console.error("generatePuzzleFromPgn: error parsing positionFromFen", error);
+        return null;
+      }
+
+      const parsedMoves = selectedGame.tokens
+        .filter((t) => t.type === "San")
+        .map((t) => t.value)
+        .map((san) => {
+          if (pos) {
+            const move = parseSan(pos, san);
+            const uciMove = move ? makeUci(move) : null;
+            if (move) {
+              pos.play(move);
+            }
+            return uciMove;
+          }
+          return null;
+        });
+
+      const moves = parsedMoves.filter((move) => move !== null);
+      parsedMoves.length !== moves.length &&
+        console.warn("Some moves could not be parsed from SAN to UCI. This needs to be fixed.");
+
+      selectedGame.puzzle = {
+        fen: puzzleFen,
+        moves,
+        rating: selectedGame.rating,
+        rating_deviation: 0,
+        popularity: 0,
+        nb_plays: 0,
+        completion: "incomplete",
+      };
+    }
+
+    return selectedGame.puzzle;
+  }
+
+  async function generatePuzzle(db: string) {
     let range = ratingRange;
     if (progressive) {
       const rating = puzzles?.[currentPuzzle]?.rating;
@@ -92,19 +187,35 @@ function Puzzles({ id }: { id: string }) {
         setRatingRange([rating + 50, rating + 100]);
       }
     }
-    commands.getPuzzle(db, range[0], range[1]).then((res) => {
-      const puzzle = unwrap(res);
-      const newPuzzle: Puzzle = {
-        ...puzzle,
-        moves: puzzle.moves.split(" "),
+
+    // Find the database info to check its type
+    const dbInfo = puzzleDbs.find((p) => p.path === db);
+    if (!dbInfo) return;
+
+    let puzzle: Puzzle;
+    if (dbInfo.path.endsWith(".db3")) {
+      // Handle .db3 database puzzles
+      const res = await commands.getPuzzle(db, range[0], range[1]);
+      const dbPuzzle = unwrap(res);
+      puzzle = {
+        ...dbPuzzle,
+        moves: dbPuzzle.moves.split(" "),
         completion: "incomplete",
       };
-      setPuzzles((puzzles) => {
-        return [...puzzles, newPuzzle];
-      });
-      setCurrentPuzzle(puzzles.length);
-      setPuzzle(newPuzzle);
+    } else {
+      const dbPuzzle = await generatePuzzleFromPgn(db, range[0], range[1]);
+      if (!dbPuzzle) {
+        throw new Error("Unable to generate a puzzle from local file within the requested range");
+      }
+
+      puzzle = dbPuzzle;
+    }
+
+    setPuzzles((puzzles) => {
+      return [...puzzles, puzzle];
     });
+    setCurrentPuzzle(puzzles.length);
+    setPuzzle(puzzle);
   }
 
   function changeCompletion(completion: Completion) {
@@ -140,7 +251,13 @@ function Puzzles({ id }: { id: string }) {
       </Portal>
       <Portal target="#topRight" style={{ height: "100%" }}>
         <Paper h="100%" withBorder p="md">
-          <AddPuzzle puzzleDbs={puzzleDbs} opened={addOpened} setOpened={setAddOpened} setPuzzleDbs={setPuzzleDbs} />
+          <AddPuzzle
+            puzzleDbs={puzzleDbs}
+            opened={addOpened}
+            setOpened={setAddOpened}
+            setPuzzleDbs={setPuzzleDbs}
+            files={files}
+          />
           <Group grow>
             <div>
               <Text size="sm" c="dimmed">

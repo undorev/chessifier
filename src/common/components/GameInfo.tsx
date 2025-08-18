@@ -1,4 +1,4 @@
-import { Box, Group, Select, SimpleGrid, Text } from "@mantine/core";
+import { Box, Group, Input, Select, SimpleGrid, Slider, Text } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import cx from "clsx";
 import dayjs from "dayjs";
@@ -17,7 +17,7 @@ function GameInfo({
   changeTitle,
 }: {
   headers: GameHeaders;
-  simplified?: boolean;
+  simplified?: "repertoire" | "puzzle";
   changeTitle?: (title: string) => void;
 }) {
   const store = useContext(TreeStateContext);
@@ -41,7 +41,7 @@ function GameInfo({
       <FideInfo opened={blackOpened} setOpened={setBlackOpened} name={headers.black} />
 
       <Group w="100%" wrap="nowrap">
-        {!simplified && (
+        {simplified === "repertoire" && (
           <Text c="dimmed" tt="uppercase" fw="bold" className={classes.colorHover} onClick={() => setWhiteOpened(true)}>
             White
           </Text>
@@ -50,7 +50,13 @@ function GameInfo({
           <ContentEditable
             disabled={disabled}
             html={event}
-            data-placeholder={simplified ? "Enter Opening Title" : "Unknown Event"}
+            data-placeholder={
+              simplified === "repertoire"
+                ? "Enter Opening Title"
+                : simplified === "puzzle"
+                  ? "Enter Puzzle Title"
+                  : "Unknown Event"
+            }
             className={cx(classes.contentEditable, !event && classes.contentEditablePlaceholder)}
             onChange={(e) => {
               setHeaders({
@@ -98,7 +104,23 @@ function GameInfo({
           </Text>
         )}
       </Group>
-      {simplified && (
+      {simplified === "puzzle" && (
+        <Group gap={4}>
+          <Input.Wrapper label="Puzzle Rating" flex={1}>
+            <Slider
+              min={600}
+              max={2800}
+              defaultValue={1500}
+              step={100}
+              label={(value) => value.toFixed(0)}
+              onChange={(value) => setHeaders({ ...headers, white_elo: value })}
+              value={headers.white_elo || 1500}
+              disabled={disabled}
+            />
+          </Input.Wrapper>
+        </Group>
+      )}
+      {simplified === "repertoire" && (
         <Group gap={4}>
           <Text size="sm">opening for</Text>
 

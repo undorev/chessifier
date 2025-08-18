@@ -143,6 +143,7 @@ function BoardAnalysis() {
   const [currentTabSelected, setCurrentTabSelected] = useAtom(currentTabSelectedAtom);
   const practiceTabSelected = useAtomValue(currentPracticeTabAtom);
   const isRepertoire = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "repertoire";
+  const isPuzzle = currentTab?.source?.type === "file" && currentTab.source.metadata.type === "puzzle";
   const practicing = currentTabSelected === "practice" && practiceTabSelected === "train";
 
   return (
@@ -192,15 +193,21 @@ function BoardAnalysis() {
                   {t("Board.Tabs.Graph")}
                 </Tabs.Tab>
               )}
-              <Tabs.Tab value="analysis" leftSection={<IconZoomCheck size="1rem" />}>
-                {t("Board.Tabs.Analysis")}
-              </Tabs.Tab>
-              <Tabs.Tab value="database" leftSection={<IconDatabase size="1rem" />}>
-                {t("Board.Tabs.Database")}
-              </Tabs.Tab>
-              <Tabs.Tab value="annotate" leftSection={<IconNotes size="1rem" />}>
-                {t("Board.Tabs.Annotate")}
-              </Tabs.Tab>
+              {!isPuzzle && (
+                <Tabs.Tab value="analysis" leftSection={<IconZoomCheck size="1rem" />}>
+                  {t("Board.Tabs.Analysis")}
+                </Tabs.Tab>
+              )}
+              {!isPuzzle && (
+                <Tabs.Tab value="database" leftSection={<IconDatabase size="1rem" />}>
+                  {t("Board.Tabs.Database")}
+                </Tabs.Tab>
+              )}
+              {!isPuzzle && (
+                <Tabs.Tab value="annotate" leftSection={<IconNotes size="1rem" />}>
+                  {t("Board.Tabs.Annotate")}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="info" leftSection={<IconInfoCircle size="1rem" />}>
                 {t("Board.Tabs.Info")}
               </Tabs.Tab>
