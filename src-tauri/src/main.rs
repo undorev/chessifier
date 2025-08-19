@@ -20,6 +20,8 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::{fs::create_dir_all};
 
+use fs_extra::dir::{copy, CopyOptions};
+
 use chess::{BestMovesPayload, EngineProcess, ReportProgress};
 use dashmap::DashMap;
 use db::{DatabaseProgress, GameQueryJs, NormalizedGame, PositionStats};
@@ -101,6 +103,114 @@ const REQUIRED_DIRS: &[(BaseDirectory, &str)] = &[
 
 const REQUIRED_FILES: &[(BaseDirectory, &str, &str)] =
     &[(BaseDirectory::AppData, "engines/engines.json", "[]")];
+
+/// Legacy app identifiers that we need to migrate from
+const LEGACY_IDENTIFIERS: &[&str] = &[
+    "org.encroissant.app",
+    "org.chessifier.app"
+];
+
+/// Migrates user data from old app directories to the new one
+///
+/// This function checks for existing data directories from previous app identifiers
+/// and copies all their contents to the new app data directory. It only runs if
+/// the new directory doesn't already exist (first run).
+///
+/// # Arguments
+/// * `app` - The Tauri app handle used to resolve paths
+///
+/// # Returns
+/// * `Ok(())` if migration completed successfully or was skipped
+/// * `Err(String)` if there was an error during migration
+fn migrate_from_legacy_apps(app: &AppHandle) -> Result<(), String> {
+    log::info!("Checking for legacy app data migration");
+    
+    // Get the current app data directory
+    let current_app_data = app.path().app_data_dir()
+        .map_err(|e| format!("Failed to get current app data directory: {e}"))?;
+    
+    // Skip migration if current directory already exists and has content
+    if current_app_data.exists() && current_app_data.read_dir().map_or(false, |mut dir| dir.next().is_some()) {
+        log::info!("Current app data directory already exists with content, skipping migration");
+        return Ok(());
+    }
+    
+    // Look for legacy app directories to migrate from
+    for &legacy_identifier in LEGACY_IDENTIFIERS {
+        let legacy_path = get_legacy_app_data_path(legacy_identifier)
+            .map_err(|e| format!("Failed to get legacy path for {legacy_identifier}: {e}"))?;
+        
+        if legacy_path.exists() && legacy_path.is_dir() {
+            log::info!("Found legacy app data at: {}", legacy_path.display());
+            log::info!("Migrating to: {}", current_app_data.display());
+            
+            // Ensure the parent directory of the current app data exists
+            if let Some(parent) = current_app_data.parent() {
+                create_dir_all(parent).map_err(|e| {
+                    format!("Failed to create parent directory {}: {e}", parent.display())
+                })?;
+            }
+            
+            // Copy options for fs_extra
+            let mut options = CopyOptions::new();
+            options.overwrite = true;
+            options.copy_inside = true;
+            
+            // Copy all contents from legacy directory to new directory
+            copy(&legacy_path, &current_app_data, &options).map_err(|e| {
+                format!("Failed to copy from {} to {}: {e}", 
+                    legacy_path.display(), current_app_data.display())
+            })?;
+            
+            log::info!("Successfully migrated data from {}", legacy_identifier);
+            return Ok(());
+        } else {
+            log::info!("No legacy data found for identifier: {}", legacy_identifier);
+        }
+    }
+    
+    log::info!("No legacy app data found to migrate");
+    Ok(())
+}
+
+/// Gets the app data directory path for a legacy identifier
+///
+/// This function constructs the path where the app data would be stored
+/// for a given app identifier on the current platform.
+///
+/// # Arguments
+/// * `identifier` - The legacy app identifier
+///
+/// # Returns
+/// * `Ok(PathBuf)` with the legacy app data path
+/// * `Err(String)` if the path cannot be determined
+fn get_legacy_app_data_path(identifier: &str) -> Result<PathBuf, String> {
+    #[cfg(target_os = "macos")]
+    {
+        let home = std::env::var("HOME")
+            .map_err(|_| "Could not get HOME environment variable".to_string())?;
+        Ok(PathBuf::from(home)
+            .join("Library")
+            .join("Application Support")
+            .join(identifier))
+    }
+    
+    #[cfg(target_os = "windows")]
+    {
+        let appdata = std::env::var("APPDATA")
+            .map_err(|_| "Could not get APPDATA environment variable".to_string())?;
+        Ok(PathBuf::from(appdata).join(identifier))
+    }
+    
+    #[cfg(target_os = "linux")]
+    {
+        let home = std::env::var("HOME")
+            .map_err(|_| "Could not get HOME environment variable".to_string())?;
+        let config_dir = std::env::var("XDG_CONFIG_HOME")
+            .unwrap_or_else(|_| format!("{}/.config", home));
+        Ok(PathBuf::from(config_dir).join(identifier))
+    }
+}
 
 /// Ensures that all required directories exist, creating them if necessary
 ///
@@ -269,6 +379,9 @@ async fn main() {
         .plugin(tauri_plugin_os::init())
         .setup(move |app| {
             log::info!("Setting up application");
+
+            // Migrate data from legacy app identifiers (first run only)
+            migrate_from_legacy_apps(&app.handle())?;
 
             // Ensure required directories exist
             ensure_required_directories(&app.handle())?;

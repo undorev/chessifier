@@ -3,7 +3,7 @@
   "productName": "Pawn Appétit",
   "version": "1.0.0-alpha",
   "mainBinaryName": "Pawn Appétit",
-  "identifier": "com.pawnappetit.app",
+  "identifier": "com.pawnappetit",
   "bundle": {
     "active": true,
     "category": "BoardGame",
