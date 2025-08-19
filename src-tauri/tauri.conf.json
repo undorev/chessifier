@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Pawn Appétit",
   "version": "1.0.0-alpha",
-  "mainBinaryName": "Pawn Appétit",
+  "mainBinaryName": "pawn-appetit",
   "identifier": "com.pawnappetit",
   "bundle": {
     "active": true,
