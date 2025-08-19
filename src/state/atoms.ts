@@ -190,6 +190,7 @@ export const hidePuzzleRatingAtom = atomWithStorage<boolean>("hide-puzzle-rating
 export const progressivePuzzlesAtom = atomWithStorage<boolean>("progressive-puzzles", false);
 export const jumpToNextPuzzleAtom = atomWithStorage<boolean>("puzzle-jump-immediately", true);
 export const puzzleRatingRangeAtom = atomWithStorage<[number, number]>("puzzle-ratings", [1000, 1500]);
+export const inOrderPuzzlesAtom = atomWithStorage<boolean>("puzzle-in-order", false);
 
 // CP / WDL
 
