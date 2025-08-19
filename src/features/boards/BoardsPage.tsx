@@ -169,7 +169,7 @@ export default function BoardsPage() {
     <DragDropContext
       onDragEnd={({ destination, source }) => {
         if (!destination) return;
-        
+
         if (source.droppableId === "droppable" && destination.droppableId === "droppable") {
           setTabs((prev) => {
             const result = Array.from(prev);
@@ -178,10 +178,10 @@ export default function BoardsPage() {
             return result;
           });
         }
-        
+
         if (source.droppableId === "engines-droppable" && destination.droppableId === "engines-droppable") {
-          const event = new CustomEvent('engineReorder', {
-            detail: { source, destination }
+          const event = new CustomEvent("engineReorder", {
+            detail: { source, destination },
           });
           window.dispatchEvent(event);
         }

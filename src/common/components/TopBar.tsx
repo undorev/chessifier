@@ -177,7 +177,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
       if (autoDetectEnabled) {
         toggleAutoDetection();
       }
-      
+
       const targetTheme = availableThemes.find((theme) => theme.type === value && !theme.isCustom);
 
       if (targetTheme) {

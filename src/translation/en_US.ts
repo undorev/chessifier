@@ -435,6 +435,7 @@ export const en_US = {
     "Settings.Appearance.Theme.Light": "Light",
     "Settings.Appearance.Theme.Dark": "Dark",
     "Settings.Appearance.Theme.Auto": "Auto",
+    "Settings.Appearance.Theme.Custom": "Custom",
     "Settings.Appearance.TitleBar": "Title Bar",
     "Settings.Appearance.TitleBar.Desc": "Choose between native or custom title bar",
     "Settings.Appearance.Language": "Language",

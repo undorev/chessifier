@@ -10,14 +10,23 @@ import {
   initializeThemesAtom,
   removeCustomThemeAtom,
   setThemeAtom,
-  themePreferencesAtom,
+  themePreferencesWithRegistrationAtom,
   toggleAutoDetectionAtom,
+  updateCustomThemeAtom,
 } from "./state";
-import type { ThemeDefinition, ThemeType } from "./types";
+import type { ThemeDefinition, ThemePreferences, ThemeType } from "./types";
+
+const generateUUID = (): string => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 export function useTheme() {
   const computedTheme = useAtomValue(computedThemeAtom);
-  const preferences = useAtomValue(themePreferencesAtom);
+  const preferences = useAtomValue(themePreferencesWithRegistrationAtom);
   const setTheme = useSetAtom(setThemeAtom);
   const addCustomTheme = useSetAtom(addCustomThemeAtom);
   const removeCustomTheme = useSetAtom(removeCustomThemeAtom);
@@ -102,8 +111,9 @@ export function useThemeSwitcher() {
 }
 
 export function useThemeCustomization() {
-  const preferences = useAtomValue(themePreferencesAtom);
+  const preferences = useAtomValue(themePreferencesWithRegistrationAtom);
   const addCustomTheme = useSetAtom(addCustomThemeAtom);
+  const updateCustomTheme = useSetAtom(updateCustomThemeAtom);
   const removeCustomTheme = useSetAtom(removeCustomThemeAtom);
 
   const createCustomTheme = useCallback(
@@ -111,6 +121,7 @@ export function useThemeCustomization() {
       return {
         ...baseTheme,
         ...modifications,
+        uuid: modifications.uuid || generateUUID(),
         name: modifications.name || `custom-${Date.now()}`,
         displayName: modifications.displayName || `Custom ${baseTheme.displayName}`,
         colors: {
@@ -147,9 +158,23 @@ export function useThemeCustomization() {
     [addCustomTheme],
   );
 
+  const saveOrUpdateCustomTheme = useCallback(
+    (theme: ThemeDefinition, isEditing = false) => {
+      const existingTheme = Object.values(preferences.customThemes).find((t) => t.uuid === theme.uuid);
+      const shouldUpdate = isEditing && !!existingTheme;
+
+      if (shouldUpdate) {
+        updateCustomTheme(theme);
+      } else {
+        addCustomTheme(theme);
+      }
+    },
+    [addCustomTheme, updateCustomTheme, preferences.customThemes],
+  );
+
   const deleteCustomTheme = useCallback(
-    (themeName: string) => {
-      removeCustomTheme(themeName);
+    (themeUuid: string) => {
+      removeCustomTheme(themeUuid);
     },
     [removeCustomTheme],
   );
@@ -159,6 +184,7 @@ export function useThemeCustomization() {
       const theme = themeManager.getTheme(themeName);
       if (theme) {
         const duplicated = createCustomTheme(theme, {
+          uuid: generateUUID(),
           name: newName || `${theme.name}-copy`,
           displayName: `${theme.displayName} Copy`,
         });
@@ -180,6 +206,7 @@ export function useThemeCustomization() {
     customThemes: preferences.customThemes,
     createCustomTheme,
     saveCustomTheme,
+    saveOrUpdateCustomTheme,
     deleteCustomTheme,
     duplicateTheme,
     importTheme,
@@ -188,24 +215,24 @@ export function useThemeCustomization() {
 }
 
 export function useThemeDetection() {
-  const [preferences, setPreferences] = useAtom(themePreferencesAtom);
+  const [preferences, setPreferences] = useAtom(themePreferencesWithRegistrationAtom);
 
   const toggleAutoDetection = useCallback(() => {
-    setPreferences((prev) => ({
+    setPreferences((prev: ThemePreferences) => ({
       ...prev,
       autoDetectSystemTheme: !prev.autoDetectSystemTheme,
     }));
   }, [setPreferences]);
 
   const enableAutoDetection = useCallback(() => {
-    setPreferences((prev) => ({
+    setPreferences((prev: ThemePreferences) => ({
       ...prev,
       autoDetectSystemTheme: true,
     }));
   }, [setPreferences]);
 
   const disableAutoDetection = useCallback(() => {
-    setPreferences((prev) => ({
+    setPreferences((prev: ThemePreferences) => ({
       ...prev,
       autoDetectSystemTheme: false,
     }));
@@ -260,7 +287,7 @@ export function useThemeValues() {
 }
 
 export function useThemePersistence() {
-  const preferences = useAtomValue(themePreferencesAtom);
+  const preferences = useAtomValue(themePreferencesWithRegistrationAtom);
   const addCustomTheme = useSetAtom(addCustomThemeAtom);
 
   const exportAllThemes = useCallback(() => {

@@ -1,7 +1,7 @@
 import { appDataDir, resolve } from "@tauri-apps/api/path";
-import type { FileMetadata, Directory, FileInfoMetadata } from "@/features/files/components/file";
-import { BaseDirectory, readDir, exists, readTextFile, type DirEntry } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, type DirEntry, exists, readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { commands, type PuzzleDatabaseInfo } from "@/bindings";
+import type { Directory, FileInfoMetadata, FileMetadata } from "@/features/files/components/file";
 import { unwrap } from "./unwrap";
 
 export type Completion = "correct" | "incorrect" | "incomplete";
@@ -55,9 +55,9 @@ export async function getPuzzleDatabases(localFiles: (FileMetadata | Directory)[
           description: "Custom puzzle collection",
           puzzleCount: unwrap(await commands.countPgnGames(file.path)),
           storageSize: stats.last_modified,
-          path: file.path
+          path: file.path,
         };
-      })
+      }),
     );
     console.log("Loaded local puzzle files:", localPuzzles);
   } catch (err) {

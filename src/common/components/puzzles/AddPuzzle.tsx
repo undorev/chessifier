@@ -5,8 +5,8 @@ import { type Dispatch, type SetStateAction, useState } from "react";
 import useSWRImmutable from "swr/immutable";
 import { commands, events, type PuzzleDatabaseInfo } from "@/bindings";
 import ProgressButton from "@/common/components/ProgressButton";
+import type { Directory, FileMetadata } from "@/features/files/components/file";
 import { getDefaultPuzzleDatabases } from "@/utils/db";
-import { type FileMetadata, type Directory } from "@/features/files/components/file";
 import { formatBytes, formatNumber } from "@/utils/format";
 import { getPuzzleDatabases } from "@/utils/puzzles";
 

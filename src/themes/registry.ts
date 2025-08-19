@@ -32,6 +32,10 @@ export class ThemeManager {
     return this.getAllThemes()[name] || null;
   }
 
+  getThemeByUuid(uuid: string): ThemeDefinition | null {
+    return Object.values(this.getAllThemes()).find((theme) => theme.uuid === uuid) || null;
+  }
+
   getThemesByType(type: ThemeType): ThemeDefinition[] {
     return Object.values(this.getAllThemes()).filter((theme) => theme.type === type);
   }
@@ -49,8 +53,8 @@ export class ThemeManager {
   }
 
   registerTheme(theme: ThemeDefinition): void {
-    if (!theme.name || !theme.colors) {
-      throw new Error("Theme must have a name and colors");
+    if (!theme.name || !theme.colors || !theme.uuid) {
+      throw new Error("Theme must have a name, uuid, and colors");
     }
 
     this.customThemes[theme.name] = theme;
@@ -96,7 +100,10 @@ export class ThemeManager {
       throw new Error("Theme must have a colors object");
     }
 
+    const uuid = (data.uuid as string) || this.generateUUID();
+
     const normalizedTheme: ThemeDefinition = {
+      uuid,
       name: data.name,
       displayName: (data.displayName as string) || data.name,
       type: (data.type as ThemeType) || "light",
@@ -136,7 +143,16 @@ export class ThemeManager {
     return normalizedTheme;
   }
 
+  private generateUUID(): string {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
   getThemeMetadata(): Array<{
+    uuid: string;
     name: string;
     displayName: string;
     type: ThemeType;
@@ -147,6 +163,7 @@ export class ThemeManager {
     const allThemes = this.getAllThemes();
 
     return Object.values(allThemes).map((theme) => ({
+      uuid: theme.uuid,
       name: theme.name,
       displayName: theme.displayName,
       type: theme.type,

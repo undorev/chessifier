@@ -1,14 +1,12 @@
 import {
   ActionIcon,
-  Badge,
   Button,
   Card,
-  Code,
+  Center,
   Group,
-  Menu,
   Modal,
-  Popover,
   rem,
+  SegmentedControl,
   Stack,
   Text,
   Textarea,
@@ -18,15 +16,13 @@ import { useId } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
-  IconCopy,
-  IconDots,
   IconDownload,
   IconEdit,
-  IconFileExport,
   IconFileImport,
   IconMoon,
   IconPalette,
   IconSun,
+  IconSunMoon,
   IconTrash,
   IconUpload,
   IconX,
@@ -38,144 +34,73 @@ import { useTheme, useThemeCustomization, useThemeDetection } from "../hooks";
 import type { ThemeDefinition } from "../types";
 import ThemeEditor from "./ThemeEditor";
 
-interface ThemeCardProps {
-  theme: {
-    name: string;
-    displayName: string;
-    type: "light" | "dark";
-    description?: string;
-    author?: string;
-    isCustom: boolean;
-  };
-  isActive: boolean;
-  onSelect: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onDuplicate?: () => void;
-  onExport?: () => void;
-}
-
-function ThemeCard({ theme, isActive, onSelect, onEdit, onDelete, onDuplicate, onExport }: ThemeCardProps) {
-  return (
-    <Card
-      p="md"
-      withBorder
-      style={{
-        cursor: "pointer",
-        borderColor: isActive ? "var(--mantine-primary-color-filled)" : undefined,
-        backgroundColor: isActive ? "var(--mantine-color-blue-light)" : undefined,
-      }}
-      onClick={onSelect}
-    >
-      <Group justify="space-between" align="flex-start">
-        <Group gap="sm" style={{ flex: 1 }}>
-          {theme.type === "light" ? (
-            <IconSun size={rem(20)} color="var(--mantine-color-yellow-6)" />
-          ) : (
-            <IconMoon size={rem(20)} color="var(--mantine-color-indigo-6)" />
-          )}
-
-          <Stack gap={4} style={{ flex: 1 }}>
-            <Group gap="xs">
-              <Text fw={500} size="sm">
-                {theme.displayName}
-              </Text>
-              {theme.isCustom && (
-                <Badge size="xs" variant="light">
-                  Custom
-                </Badge>
-              )}
-            </Group>
-
-            {theme.description && (
-              <Text size="xs" c="dimmed" lineClamp={1}>
-                {theme.description}
-              </Text>
-            )}
-          </Stack>
-        </Group>
-
-        {theme.isCustom && (
-          <Menu shadow="md" width={180}>
-            <Menu.Target>
-              <ActionIcon variant="subtle" size="sm" onClick={(e) => e.stopPropagation()}>
-                <IconDots size={rem(14)} />
-              </ActionIcon>
-            </Menu.Target>
-
-            <Menu.Dropdown>
-              {onEdit && (
-                <Menu.Item
-                  leftSection={<IconEdit size={rem(14)} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                >
-                  Edit
-                </Menu.Item>
-              )}
-
-              {onDuplicate && (
-                <Menu.Item
-                  leftSection={<IconCopy size={rem(14)} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDuplicate();
-                  }}
-                >
-                  Duplicate
-                </Menu.Item>
-              )}
-
-              {onExport && (
-                <Menu.Item
-                  leftSection={<IconDownload size={rem(14)} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onExport();
-                  }}
-                >
-                  Export
-                </Menu.Item>
-              )}
-
-              {onDelete && (
-                <>
-                  <Menu.Divider />
-                  <Menu.Item
-                    leftSection={<IconTrash size={rem(14)} />}
-                    color="red"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete();
-                    }}
-                  >
-                    Delete
-                  </Menu.Item>
-                </>
-              )}
-            </Menu.Dropdown>
-          </Menu>
-        )}
-      </Group>
-    </Card>
-  );
-}
-
 export function ThemeSettings() {
   const { t } = useTranslation();
   const { currentTheme, availableThemes, setTheme, autoDetectEnabled, getTheme } = useTheme();
-  const { createCustomTheme, duplicateTheme, deleteCustomTheme, exportTheme, saveCustomTheme } =
-    useThemeCustomization();
+  const { createCustomTheme, deleteCustomTheme, exportTheme, saveCustomTheme } = useThemeCustomization();
   const { toggleAutoDetection } = useThemeDetection();
   const [editorOpened, setEditorOpened] = useState(false);
   const [editingTheme, setEditingTheme] = useState<ThemeDefinition | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [exportModalOpen, setExportModalOpen] = useState(false);
   const [importJson, setImportJson] = useState("");
-  const [exportJson, setExportJson] = useState("");
   const fileInputId = useId();
+
+  const handleQuickThemeChange = (value: string) => {
+    if (value === "auto") {
+      if (!autoDetectEnabled) {
+        toggleAutoDetection();
+      }
+    } else if (value === "custom") {
+      if (autoDetectEnabled) {
+        toggleAutoDetection();
+      }
+
+      const currentThemeMetadata = availableThemes.find((t) => t.name === currentTheme?.name);
+      if (!currentThemeMetadata?.isCustom) {
+        const firstCustomTheme = availableThemes.find((theme) => theme.isCustom);
+        if (firstCustomTheme) {
+          setTheme(firstCustomTheme.name);
+        } else {
+          if (currentTheme) {
+            const customTheme = createCustomTheme(currentTheme, {
+              name: `custom-${Date.now()}`,
+              displayName: `Custom ${currentTheme.displayName}`,
+              description: `Custom theme based on ${currentTheme.displayName}`,
+            });
+
+            saveCustomTheme(customTheme);
+            setTheme(customTheme.name);
+
+            notifications.show({
+              title: "Custom Theme Created",
+              message: `Created custom theme "${customTheme.displayName}"`,
+              color: "green",
+              icon: <IconCheck size={18} />,
+            });
+          }
+        }
+      }
+    } else {
+      if (autoDetectEnabled) {
+        toggleAutoDetection();
+      }
+
+      const targetTheme = availableThemes.find((theme) => theme.type === value && !theme.isCustom);
+
+      if (targetTheme) {
+        setTheme(targetTheme.name);
+      }
+    }
+  };
+
+  const getCurrentQuickValue = () => {
+    if (autoDetectEnabled) return "auto";
+
+    const currentThemeMetadata = availableThemes.find((t) => t.name === currentTheme?.name);
+    if (currentThemeMetadata?.isCustom) return "custom";
+
+    return currentTheme?.type || "light";
+  };
 
   const handleManualThemeChange = (themeName: string) => {
     if (autoDetectEnabled) {
@@ -286,25 +211,40 @@ export function ThemeSettings() {
     }
   };
 
-  const handleExportCurrentTheme = () => {
-    if (currentTheme) {
-      setExportJson(JSON.stringify(currentTheme, null, 2));
-      setExportModalOpen(true);
-    }
-  };
-
   const handleExportTheme = (themeName: string) => {
     const data = exportTheme(themeName);
     if (data) {
-      const blob = new Blob([data], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${themeName}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      try {
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${themeName}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        notifications.show({
+          title: "Theme Exported",
+          message: `Successfully exported theme "${themeName}"`,
+          color: "green",
+          icon: <IconCheck size={18} />,
+        });
+      } catch (error) {
+        notifications.show({
+          title: "Export Failed",
+          message: error instanceof Error ? error.message : "Could not export theme.",
+          color: "red",
+          icon: <IconX size={18} />,
+        });
+      }
+    } else {
+      notifications.show({
+        title: "Export Failed",
+        message: `Theme "${themeName}" could not be exported.`,
+        color: "red",
+        icon: <IconX size={18} />,
+      });
     }
   };
 
@@ -318,54 +258,180 @@ export function ThemeSettings() {
           </Text>
         </div>
 
-        <Group gap="xs">
-          <Tooltip label="Import from file">
-            <ActionIcon variant="subtle" component="label" htmlFor={fileInputId}>
-              <IconUpload size={rem(16)} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label="Import from JSON">
-            <ActionIcon variant="subtle" onClick={() => setImportModalOpen(true)}>
-              <IconFileImport size={rem(16)} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label="Export current theme">
-            <ActionIcon variant="subtle" onClick={handleExportCurrentTheme} disabled={!currentTheme}>
-              <IconFileExport size={rem(16)} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Tooltip label="Create custom theme">
-            <ActionIcon variant="subtle" onClick={handleCreateCustomTheme} disabled={!currentTheme}>
-              <IconPalette size={rem(16)} />
-            </ActionIcon>
-          </Tooltip>
-
-          <Popover trapFocus position="top-end" shadow="md">
-            <Popover.Target>
-              <Button variant="default">{currentTheme?.displayName}</Button>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Stack gap="xs">
-                {availableThemes.map((theme) => (
-                  <ThemeCard
-                    key={theme.name}
-                    theme={theme}
-                    isActive={currentTheme?.name === theme.name}
-                    onSelect={() => handleManualThemeChange(theme.name)}
-                    onEdit={theme.isCustom ? () => handleEditTheme(theme.name) : undefined}
-                    onDelete={theme.isCustom ? () => deleteCustomTheme(theme.name) : undefined}
-                    onDuplicate={() => duplicateTheme(theme.name)}
-                    onExport={() => handleExportTheme(theme.name)}
-                  />
-                ))}
-              </Stack>
-            </Popover.Dropdown>
-          </Popover>
-        </Group>
+        <SegmentedControl
+          value={getCurrentQuickValue()}
+          onChange={handleQuickThemeChange}
+          data={[
+            {
+              value: "auto",
+              label: (
+                <Center>
+                  <IconSunMoon size={rem(16)} />
+                  <Text size="sm" ml={10}>
+                    {t("Settings.Appearance.Theme.Auto", "Auto")}
+                  </Text>
+                </Center>
+              ),
+            },
+            {
+              value: "light",
+              label: (
+                <Center>
+                  <IconSun size={rem(16)} />
+                  <Text size="sm" ml={10}>
+                    {t("Settings.Appearance.Theme.Light", "Light")}
+                  </Text>
+                </Center>
+              ),
+            },
+            {
+              value: "dark",
+              label: (
+                <Center>
+                  <IconMoon size={rem(16)} />
+                  <Text size="sm" ml={10}>
+                    {t("Settings.Appearance.Theme.Dark", "Dark")}
+                  </Text>
+                </Center>
+              ),
+            },
+            {
+              value: "custom",
+              label: (
+                <Center>
+                  <IconPalette size={rem(16)} />
+                  <Text size="sm" ml={10}>
+                    {t("Settings.Appearance.Theme.Custom", "Custom")}
+                  </Text>
+                </Center>
+              ),
+            },
+          ]}
+          fullWidth
+        />
       </Group>
+
+      {/* Custom Themes Section */}
+      {getCurrentQuickValue() === "custom" && (
+        <Stack gap="md">
+          <Group justify="space-between">
+            <Text size="sm" fw={500}>
+              Custom Themes
+            </Text>
+            <Group gap="xs">
+              <Tooltip label="Import from file">
+                <ActionIcon variant="subtle" component="label" htmlFor={fileInputId}>
+                  <IconUpload size={rem(16)} />
+                </ActionIcon>
+              </Tooltip>
+
+              <Tooltip label="Import from JSON">
+                <ActionIcon variant="subtle" onClick={() => setImportModalOpen(true)}>
+                  <IconFileImport size={rem(16)} />
+                </ActionIcon>
+              </Tooltip>
+
+              <Button
+                variant="outline"
+                leftSection={<IconPalette size={rem(16)} />}
+                size="xs"
+                onClick={handleCreateCustomTheme}
+                disabled={!currentTheme}
+              >
+                Create New Theme
+              </Button>
+            </Group>
+          </Group>
+
+          <Stack gap="xs">
+            {availableThemes
+              .filter((theme) => theme.isCustom)
+              .map((theme) => (
+                <Card
+                  key={theme.name}
+                  p="sm"
+                  withBorder
+                  style={{
+                    cursor: "pointer",
+                    borderColor: currentTheme?.name === theme.name ? "var(--mantine-primary-color-filled)" : undefined,
+                    backgroundColor: currentTheme?.name === theme.name ? "var(--mantine-color-blue-light)" : undefined,
+                  }}
+                  onClick={() => handleManualThemeChange(theme.name)}
+                >
+                  <Group justify="space-between" align="center">
+                    <Group gap="sm">
+                      {theme.type === "light" ? (
+                        <IconSun size={rem(16)} color="var(--mantine-color-yellow-6)" />
+                      ) : (
+                        <IconMoon size={rem(16)} color="var(--mantine-color-indigo-6)" />
+                      )}
+                      <div>
+                        <Text size="sm" fw={500}>
+                          {theme.displayName}
+                        </Text>
+                        {theme.description && (
+                          <Text size="xs" c="dimmed">
+                            {theme.description}
+                          </Text>
+                        )}
+                      </div>
+                    </Group>
+
+                    <Group gap="xs">
+                      <Tooltip label="Edit theme">
+                        <ActionIcon
+                          variant="subtle"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditTheme(theme.name);
+                          }}
+                        >
+                          <IconEdit size={rem(14)} />
+                        </ActionIcon>
+                      </Tooltip>
+
+                      <Tooltip label="Export theme">
+                        <ActionIcon
+                          variant="subtle"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExportTheme(theme.name);
+                          }}
+                        >
+                          <IconDownload size={rem(14)} />
+                        </ActionIcon>
+                      </Tooltip>
+
+                      <Tooltip label="Delete theme">
+                        <ActionIcon
+                          variant="subtle"
+                          size="sm"
+                          color="red"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCustomTheme(theme.uuid);
+                          }}
+                        >
+                          <IconTrash size={rem(14)} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                  </Group>
+                </Card>
+              ))}
+
+            {availableThemes.filter((theme) => theme.isCustom).length === 0 && (
+              <Text size="sm" c="dimmed" ta="center" py="xl">
+                No custom themes yet. Create your first custom theme to get started.
+              </Text>
+            )}
+          </Stack>
+        </Stack>
+      )}
+
+      <input type="file" id={fileInputId} accept=".json" style={{ display: "none" }} onChange={handleFileImport} />
 
       <ThemeEditor
         theme={editingTheme}
@@ -398,36 +464,6 @@ export function ThemeSettings() {
             <Button onClick={handleImportTheme} disabled={!importJson.trim()}>
               Import Theme
             </Button>
-          </Group>
-        </Stack>
-      </Modal>
-
-      <Modal opened={exportModalOpen} onClose={() => setExportModalOpen(false)} title="Export Theme" size="lg">
-        <Stack gap="md">
-          <Text size="sm" c="dimmed">
-            Copy the JSON content below to share or backup this theme:
-          </Text>
-
-          <Code block>
-            <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{exportJson}</pre>
-          </Code>
-
-          <Group justify="flex-end">
-            <Button
-              variant="subtle"
-              onClick={() => {
-                navigator.clipboard.writeText(exportJson);
-                notifications.show({
-                  title: "Copied!",
-                  message: "Theme JSON copied to clipboard",
-                  color: "green",
-                  icon: <IconCheck size={18} />,
-                });
-              }}
-            >
-              Copy to Clipboard
-            </Button>
-            <Button onClick={() => setExportModalOpen(false)}>Close</Button>
           </Group>
         </Stack>
       </Modal>

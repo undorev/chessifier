@@ -112,6 +112,7 @@
   "Menu.CopyVariationPGN": "Copy Variation PGN",
   "Menu.DeleteMove": "Delete Move",
   "Settings.Appearance.Theme.Auto": "Auto",
+  "Settings.Appearance.Theme.Custom": "Custom",
   "Settings.Appearance.hideDashboardOnStartup": "Hide Dashboard on Startup",
   "Settings.Appearance.hideDashboardOnStartup.Desc": "Open Boards instead of Dashboard when the app starts",
   "Puzzle.JumpToNextPuzzleImmediately": "Jump to next puzzle immediately"
