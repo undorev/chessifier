@@ -1,4 +1,4 @@
-import { Flex, Progress, Select, Stack, Text } from "@mantine/core";
+import { Flex, Paper, Progress, Select, Stack, Text } from "@mantine/core";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import useSWRImmutable from "swr/immutable";
@@ -122,26 +122,34 @@ function Databases() {
       {error && <Text ta="center">Error loading databases: {error}</Text>}
       {personalInfo &&
         (personalInfo.length === 0 ? (
-          <Stack>
-            <Flex justify="center">
-              <Select
-                value={name}
-                data={players}
-                onChange={(e) => setName(e || "")}
-                clearable={false}
-                fw="bold"
-                styles={{
-                  input: {
-                    textAlign: "center",
-                    fontSize: "1.25rem",
-                  },
-                }}
-              />
-            </Flex>
-            <Text ta="center" fw="bold" my="auto" fz="lg">
-              No databases found
-            </Text>
-          </Stack>
+          <Paper
+            h="100%"
+            shadow="sm"
+            p="md"
+            withBorder
+            style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}
+          >
+            <Stack>
+              <Flex justify="center">
+                <Select
+                  value={name}
+                  data={players}
+                  onChange={(e) => setName(e || "")}
+                  clearable={false}
+                  fw="bold"
+                  styles={{
+                    input: {
+                      textAlign: "center",
+                      fontSize: "1.25rem",
+                    },
+                  }}
+                />
+              </Flex>
+              <Text ta="center" fw="bold" my="auto" fz="lg">
+                No databases found
+              </Text>
+            </Stack>
+          </Paper>
         ) : (
           <PersonalPlayerCard
             name={name}
