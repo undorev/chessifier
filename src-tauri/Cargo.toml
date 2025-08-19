@@ -1,5 +1,5 @@
 [package]
-name = "PawnAppétit"
+name = "pawn-appetit"
 version = "1.0.0-alpha"
 description = "A Modern Chess Database"
 authors = ["ChessKitchen Team"]

@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Pawn Appétit",
+  "productName": "Pawn Appetit",
   "version": "1.0.0-alpha",
   "mainBinaryName": "pawn-appetit",
   "identifier": "com.pawnappetit",
@@ -40,7 +40,7 @@
     },
     "resources": [],
     "targets": "all",
-    "createUpdaterArtifacts": "v1Compatible"
+    "createUpdaterArtifacts": true
   },
   "build": {
     "beforeDevCommand": "pnpm start-vite",

@@ -9,66 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
 
 [[package]]
-name = "PawnAppétit"
-version = "1.0.0-alpha"
-dependencies = [
- "axum",
- "bincode",
- "btoi",
- "bzip2 0.4.4",
- "chrono",
- "csv",
- "dashmap 6.1.0",
- "derivative",
- "diesel",
- "fs_extra",
- "futures-util",
- "governor",
- "lazy_static",
- "log",
- "nonzero_ext",
- "oauth2",
- "once_cell",
- "pgn-reader",
- "postgrest",
- "quick-xml 0.31.0",
- "rand 0.8.5",
- "rayon",
- "regex",
- "reqwest 0.12.22",
- "rusqlite",
- "serde",
- "serde_json",
- "shakmaty",
- "specta",
- "specta-typescript",
- "strsim",
- "sysinfo",
- "tar",
- "tauri",
- "tauri-build",
- "tauri-plugin-cli",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-http",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-os",
- "tauri-plugin-process",
- "tauri-plugin-shell",
- "tauri-plugin-updater",
- "tauri-plugin-window-state",
- "tauri-specta",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "uuid",
- "vampirc-uci",
- "zip 2.4.2",
- "zstd",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3701,6 +3641,66 @@ name = "pathdiff"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
+
+[[package]]
+name = "pawn-appetit"
+version = "1.0.0-alpha"
+dependencies = [
+ "axum",
+ "bincode",
+ "btoi",
+ "bzip2 0.4.4",
+ "chrono",
+ "csv",
+ "dashmap 6.1.0",
+ "derivative",
+ "diesel",
+ "fs_extra",
+ "futures-util",
+ "governor",
+ "lazy_static",
+ "log",
+ "nonzero_ext",
+ "oauth2",
+ "once_cell",
+ "pgn-reader",
+ "postgrest",
+ "quick-xml 0.31.0",
+ "rand 0.8.5",
+ "rayon",
+ "regex",
+ "reqwest 0.12.22",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "shakmaty",
+ "specta",
+ "specta-typescript",
+ "strsim",
+ "sysinfo",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-cli",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-http",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-os",
+ "tauri-plugin-process",
+ "tauri-plugin-shell",
+ "tauri-plugin-updater",
+ "tauri-plugin-window-state",
+ "tauri-specta",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+ "vampirc-uci",
+ "zip 2.4.2",
+ "zstd",
+]
 
 [[package]]
 name = "pbkdf2"
