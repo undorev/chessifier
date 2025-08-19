@@ -1,5 +1,73 @@
 # Pawn Appétit
 
+## v1.0.0-alpha
+
+### ✨ Features
+
+* **Package Management**
+
+  * Introduced a new `package_manager` module to handle installation tasks
+  * Added commands to check package manager availability, install packages, and verify installation
+  * Implemented support for **brew**, **apt**, **dnf**, and **pacman**
+  * Updated `EnginesPage` and `AddEngine` to leverage package management features
+  * Refactored engine installation logic to support multiple methods (download, brew, package)
+  * Added utilities to detect installed engines and locate executables
+  * Updated engine definitions with installation metadata
+* **Puzzles** – thanks [dotneB](https://github.com/dotneB) 🎉
+
+  * Added **local puzzle database** (first pass)
+  * Enhanced puzzle generation ordering (rating & id for Lichess, index order for files)
+  * Updated `GameInfo` to support custom puzzle UI
+* **Openings Repertoire Graph** – thanks [gm-m](https://github.com/gm-m) 🎉
+
+  * Added a new **Graph tab** in `BoardAnalysis` for visualizing move paths
+  * Introduced `GraphPanel` using **D3.js** with zoom and interaction support
+  * Added translations for the graph tab and *center graph* action
+* **Theme System**
+
+  * Implemented a comprehensive **theme management system**
+  * Added theme registration, customization, and persistence
+  * Integrated Mantine bridge for compatibility
+* **Online Games** – thanks [undorev](https://github.com/undorev) 🎉
+
+  * Added **recent online games** import from **Chess.com** and **Lichess.org**
+* **Legacy Migration**
+
+  * Added legacy app data migration functionality
+  * Updated Tauri identifier for compatibility
+
+### 🛠 Improvements & Refactors
+
+* **Engines**
+
+  * Optimized option setting in `EngineProcess`
+  * Refactored drag-and-drop functionality for engine reordering in `AnalysisPanel` and `BoardsPage`
+* **General**
+
+  * Standardized naming conventions for packages and product name
+  * Updated workflows to use **pnpm v10**
+  * Added `packageManager` field to `package.json`
+
+### 🐛 Fixes
+
+* **Board & Orientation** – thanks [dotneB](https://github.com/dotneB) 🎉
+
+  * Fixed board orientation stability
+  * Fixed `countPgnGames` caching of `pgn_offsets` for new files
+* **Engines & Analysis**
+
+  * Fixed handling of game analysis for online games – thanks [undorev](https://github.com/undorev) 🎉
+  * Fixed PGN save to collection – thanks [gm-m](https://github.com/gm-m) 🎉
+* **UI & Interaction**
+
+  * Fixed drag-and-drop for engine reordering
+  * Fixed board preview update – thanks [gm-m](https://github.com/gm-m) 🎉
+
+### 🧹 Chores
+
+* Renamed app from **Chessifier → Pawn Appétit**
+* Updated `mainBinaryName` to follow lowercase convention
+
 ## v0.3.2
 
 ### ✨ Features
@@ -99,7 +167,6 @@
 * Updated screenshots
 * Updated dependencies
 * Updated `vampirc-uci` dependency source to Pawn Appétit repository
-
 
 ## v0.2.0
 
