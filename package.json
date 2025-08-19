@@ -2,6 +2,7 @@
   "name": "pawn-appetit",
   "version": "1.0.0-alpha",
   "type": "module",
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "start-vite": "vite",
     "build-vite": "tsc --noEmit && vite build",
