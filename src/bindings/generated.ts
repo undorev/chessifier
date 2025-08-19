@@ -83,15 +83,16 @@ async memorySize() : Promise<bigint> {
  * * `file` - Path to the puzzle database
  * * `min_rating` - Minimum puzzle rating to include
  * * `max_rating` - Maximum puzzle rating to include
+ * * `random` - Randomize puzzle in cache
  * 
  * # Returns
  * * `Ok(Puzzle)` if a puzzle was found
  * * `Err(Error::NoPuzzles)` if no puzzles match the criteria
  * * Other errors if there was a problem accessing the database
  */
-async getPuzzle(file: string, minRating: number, maxRating: number) : Promise<Result<Puzzle, string>> {
+async getPuzzle(file: string, minRating: number, maxRating: number, random: boolean) : Promise<Result<Puzzle, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_puzzle", { file, minRating, maxRating }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_puzzle", { file, minRating, maxRating, random }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
