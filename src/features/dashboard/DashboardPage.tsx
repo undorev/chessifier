@@ -13,8 +13,8 @@ import {
   Image,
   Progress,
   RingProgress,
-  Select,
   ScrollArea,
+  Select,
   SimpleGrid,
   Stack,
   Table,
@@ -24,7 +24,6 @@ import {
   Title,
 } from "@mantine/core";
 import {
-  IconRefresh,
   IconArrowRight,
   IconBolt,
   IconBook2,
@@ -33,27 +32,28 @@ import {
   IconClock,
   IconFlame,
   IconPuzzle,
+  IconRefresh,
   IconStopwatch,
   IconTrophy,
   IconUpload,
 } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
+import { info } from "@tauri-apps/plugin-log";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { Outcome } from "@/bindings";
 import { lessons } from "@/features/learn/constants/lessons";
 import { practices } from "@/features/learn/constants/practices";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { useUserStatsStore } from "@/state/userStatsStore";
 import { type Achievement, getAchievements } from "@/utils/achievements";
+import { type ChessComGame, fetchLastChessComGames, getChesscomGame } from "@/utils/chess.com/api";
 import { type DailyGoal, getDailyGoals } from "@/utils/dailyGoals";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
-import { getPuzzleStats, getTodayPuzzleCount } from "@/utils/puzzleStreak";
-import { genID, type Tab } from "@/utils/tabs";
-import { type ChessComGame, fetchLastChessComGames, getChesscomGame } from "@/utils/chess.com/api";
 import { fetchLastLichessGames } from "@/utils/lichess/api";
-import { info } from "@tauri-apps/plugin-log";
-import { createTab } from "@/utils/tabs";
+import { getPuzzleStats, getTodayPuzzleCount } from "@/utils/puzzleStreak";
+import { createTab, genID, type Tab } from "@/utils/tabs";
 
 function getChessTitle(rating: number): string {
   if (rating >= 2500) return "Grandmaster";
@@ -133,20 +133,11 @@ export default function DashboardPage() {
     ratingHistory = { blitz, rapid, bullet };
   }
 
-  const lichessUsernames = [
-    ...new Set(
-      sessions.map((s) => s.lichess?.username).filter(Boolean) as string[],
-    ),
-  ];
-  const chessComUsernames = [
-    ...new Set(
-      sessions.map((s) => s.chessCom?.username).filter(Boolean) as string[],
-    ),
-  ];
+  const lichessUsernames = [...new Set(sessions.map((s) => s.lichess?.username).filter(Boolean) as string[])];
+  const chessComUsernames = [...new Set(sessions.map((s) => s.chessCom?.username).filter(Boolean) as string[])];
 
-  const [selectedLichessUser, setSelectedLichessUser] = useState<string | null>('all');
-  const [selectedChessComUser, setSelectedChessComUser] = useState<string | null>('all');
-
+  const [selectedLichessUser, setSelectedLichessUser] = useState<string | null>("all");
+  const [selectedChessComUser, setSelectedChessComUser] = useState<string | null>("all");
 
   const [recentGames, setRecentGames] = useState<GameRecord[]>([]);
   useEffect(() => {
@@ -157,11 +148,10 @@ export default function DashboardPage() {
   const [lichessGames, setLichessGames] = useState<any[]>([]);
   useEffect(() => {
     const fetchGames = async () => {
-      const usersToFetch = selectedLichessUser === 'all' ? lichessUsernames : (selectedLichessUser ? [selectedLichessUser] : []);
+      const usersToFetch =
+        selectedLichessUser === "all" ? lichessUsernames : selectedLichessUser ? [selectedLichessUser] : [];
       if (usersToFetch.length > 0) {
-        const allGamesPromises = usersToFetch.map((username) =>
-          fetchLastLichessGames(username, 50),
-        );
+        const allGamesPromises = usersToFetch.map((username) => fetchLastLichessGames(username, 50));
         const gamesArrays = await Promise.all(allGamesPromises);
         const combinedGames = gamesArrays.flat();
         combinedGames.sort((a, b) => b.createdAt - a.createdAt);
@@ -173,16 +163,15 @@ export default function DashboardPage() {
     fetchGames();
   }, [sessions, lastLichessUpdate, selectedLichessUser]);
 
-   const [lastChessComUpdate, setLastChessComUpdate] = useState(Date.now());
+  const [lastChessComUpdate, setLastChessComUpdate] = useState(Date.now());
   const [chessComGames, setChessComGames] = useState<ChessComGame[]>([]);
   useEffect(() => {
     const fetchGames = async () => {
-      const usersToFetch = selectedChessComUser === 'all' ? chessComUsernames : (selectedChessComUser ? [selectedChessComUser] : []);
-       if (usersToFetch.length > 0) {
+      const usersToFetch =
+        selectedChessComUser === "all" ? chessComUsernames : selectedChessComUser ? [selectedChessComUser] : [];
+      if (usersToFetch.length > 0) {
         info(`Fetching Chess.com games for: ${JSON.stringify(usersToFetch)}`);
-        const allGamesPromises = usersToFetch.map((username) =>
-          fetchLastChessComGames(username),
-        );
+        const allGamesPromises = usersToFetch.map((username) => fetchLastChessComGames(username));
         const gamesArrays = await Promise.all(allGamesPromises);
 
         const combinedGames = gamesArrays.flat();
@@ -634,13 +623,9 @@ export default function DashboardPage() {
                         if (diffMs < 60 * 60 * 1000) {
                           dateStr = `${Math.floor(diffMs / (60 * 1000))}m ago`;
                         } else if (diffMs < 24 * 60 * 60 * 1000) {
-                          dateStr = `${Math.floor(
-                            diffMs / (60 * 60 * 1000),
-                          )}h ago`;
+                          dateStr = `${Math.floor(diffMs / (60 * 60 * 1000))}h ago`;
                         } else {
-                          dateStr = `${Math.floor(
-                            diffMs / (24 * 60 * 60 * 1000),
-                          )}d ago`;
+                          dateStr = `${Math.floor(diffMs / (24 * 60 * 60 * 1000))}d ago`;
                         }
                         return (
                           <Table.Tr key={g.id}>
@@ -650,33 +635,16 @@ export default function DashboardPage() {
                                   {" "}
                                   {(opponent.name ?? "?")[0]?.toUpperCase()}{" "}
                                 </Avatar>
-                                <Text>
-                                  {opponent.name ??
-                                    (opponent.engine
-                                      ? `Engine (${opponent.engine})`
-                                      : "?")}
-                                </Text>
+                                <Text>{opponent.name ?? (opponent.engine ? `Engine (${opponent.engine})` : "?")}</Text>
                               </Group>
                             </Table.Td>
                             <Table.Td>
                               <Badge variant="light">{color}</Badge>
                             </Table.Td>
                             <Table.Td>
-                              <Badge
-                                color={
-                                  g.result === "1-0"
-                                    ? "teal"
-                                    : g.result === "0-1"
-                                    ? "red"
-                                    : "gray"
-                                }
-                              >
+                              <Badge color={g.result === "1-0" ? "teal" : g.result === "0-1" ? "red" : "gray"}>
                                 {" "}
-                                {g.result === "1-0"
-                                  ? "Win"
-                                  : g.result === "0-1"
-                                  ? "Loss"
-                                  : g.result}{" "}
+                                {g.result === "1-0" ? "Win" : g.result === "0-1" ? "Loss" : g.result}{" "}
                               </Badge>
                             </Table.Td>
                             <Table.Td>
@@ -725,16 +693,12 @@ export default function DashboardPage() {
                     value={selectedChessComUser}
                     onChange={setSelectedChessComUser}
                     data={[
-                      { value: 'all', label: 'All Accounts' },
-                      ...chessComUsernames.map(name => ({ value: name, label: name }))
+                      { value: "all", label: "All Accounts" },
+                      ...chessComUsernames.map((name) => ({ value: name, label: name })),
                     ]}
                     disabled={chessComUsernames.length <= 1}
                   />
-                  <ActionIcon
-                    variant="subtle"
-                    onClick={() => setLastChessComUpdate(Date.now())}
-                    mt="xl"
-                  >
+                  <ActionIcon variant="subtle" onClick={() => setLastChessComUpdate(Date.now())} mt="xl">
                     <IconRefresh size="1rem" />
                   </ActionIcon>
                 </Group>
@@ -752,15 +716,11 @@ export default function DashboardPage() {
                     </Table.Thead>
                     <Table.Tbody>
                       {chessComGames.map((g) => {
-                        const isUserWhite = chessComUsernames.includes(
-                          g.white.username,
-                        );
+                        const isUserWhite = chessComUsernames.includes(g.white.username);
                         const opponent = isUserWhite ? g.black : g.white;
                         const userAccount = isUserWhite ? g.white : g.black;
                         const color = isUserWhite ? "White" : "Black";
-                        const result = isUserWhite
-                          ? g.white.result
-                          : g.black.result;
+                        const result = isUserWhite ? g.white.result : g.black.result;
                         return (
                           <Table.Tr key={g.url}>
                             <Table.Td>
@@ -780,10 +740,9 @@ export default function DashboardPage() {
                                 color={
                                   result === "win"
                                     ? "teal"
-                                    : result === "checkmated" ||
-                                      result === "resigned"
-                                    ? "red"
-                                    : "gray"
+                                    : result === "checkmated" || result === "resigned"
+                                      ? "red"
+                                      : "gray"
                                 }
                               >
                                 {" "}
@@ -793,9 +752,7 @@ export default function DashboardPage() {
                             <Table.Td>
                               <Text size="xs">{userAccount.username}</Text>
                             </Table.Td>
-                            <Table.Td c="dimmed">
-                              {new Date(g.end_time * 1000).toLocaleDateString()}
-                            </Table.Td>
+                            <Table.Td c="dimmed">{new Date(g.end_time * 1000).toLocaleDateString()}</Table.Td>
                             <Table.Td>
                               <Group gap="xs" wrap="nowrap">
                                 <Button
@@ -810,7 +767,11 @@ export default function DashboardPage() {
                                         date: new Date(g.end_time * 1000).toLocaleDateString(),
                                         white: g.white.username,
                                         black: g.black.username,
-                                        result: g.white.result === 'win' ? '1-0' : g.black.result === 'win' ? '0-1' : '1/2-1/2',
+                                        result: (g.white.result === "win"
+                                          ? "1-0"
+                                          : g.black.result === "win"
+                                            ? "0-1"
+                                            : "1/2-1/2") as Outcome,
                                         fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                                       };
                                       createTab({
@@ -821,7 +782,7 @@ export default function DashboardPage() {
                                         setTabs,
                                         setActiveTab,
                                         pgn: g.pgn,
-                                        headers: headersForAnalysis, //complains that headersForAnalysis.result isnt of type Outcome (not a real issue but should be fixed)
+                                        headers: headersForAnalysis,
                                       });
                                       navigate({ to: "/boards" });
                                     }
@@ -829,13 +790,7 @@ export default function DashboardPage() {
                                 >
                                   Analyse
                                 </Button>
-                                <Button
-                                  size="xs"
-                                  variant="light"
-                                  component="a"
-                                  href={g.url}
-                                  target="_blank"
-                                >
+                                <Button size="xs" variant="light" component="a" href={g.url} target="_blank">
                                   View Online
                                 </Button>
                               </Group>
@@ -850,22 +805,18 @@ export default function DashboardPage() {
 
               <Tabs.Panel value="lichess" pt="xs">
                 <Group justify="space-between" mb="sm">
-                   <Select
+                  <Select
                     label="Select Account"
                     placeholder="Filter by account"
                     value={selectedLichessUser}
                     onChange={setSelectedLichessUser}
                     data={[
-                      { value: 'all', label: 'All Accounts' },
-                      ...lichessUsernames.map(name => ({ value: name, label: name }))
+                      { value: "all", label: "All Accounts" },
+                      ...lichessUsernames.map((name) => ({ value: name, label: name })),
                     ]}
                     disabled={lichessUsernames.length <= 1}
                   />
-                  <ActionIcon
-                    variant="subtle"
-                    onClick={() => setLastLichessUpdate(Date.now())}
-                    mt="xl"
-                  >
+                  <ActionIcon variant="subtle" onClick={() => setLastLichessUpdate(Date.now())} mt="xl">
                     <IconRefresh size="1rem" />
                   </ActionIcon>
                 </Group>
@@ -883,12 +834,8 @@ export default function DashboardPage() {
                     </Table.Thead>
                     <Table.Tbody>
                       {lichessGames.map((g) => {
-                        const isUserWhite = lichessUsernames.includes(
-                          g.players.white.user?.name,
-                        );
-                        const opponent = isUserWhite
-                          ? g.players.black
-                          : g.players.white;
+                        const isUserWhite = lichessUsernames.includes(g.players.white.user?.name);
+                        const opponent = isUserWhite ? g.players.black : g.players.white;
                         const userAccount = isUserWhite ? g.players.white : g.players.black;
                         const color = isUserWhite ? "White" : "Black";
                         return (
@@ -906,27 +853,17 @@ export default function DashboardPage() {
                               <Badge variant="light">{color}</Badge>
                             </Table.Td>
                             <Table.Td>
-                              <Badge
-                                color={
-                                  g.winner === color.toLowerCase()
-                                    ? "teal"
-                                    : g.winner
-                                    ? "red"
-                                    : "gray"
-                                }
-                              >
+                              <Badge color={g.winner === color.toLowerCase() ? "teal" : g.winner ? "red" : "gray"}>
                                 {" "}
                                 {g.status}{" "}
                               </Badge>
                             </Table.Td>
-                             <Table.Td>
+                            <Table.Td>
                               <Text size="xs">{userAccount.user?.name}</Text>
                             </Table.Td>
-                            <Table.Td c="dimmed">
-                              {new Date(g.createdAt).toLocaleDateString()}
-                            </Table.Td>
+                            <Table.Td c="dimmed">{new Date(g.createdAt).toLocaleDateString()}</Table.Td>
                             <Table.Td>
-                               <Group gap="xs" wrap="nowrap">
+                              <Group gap="xs" wrap="nowrap">
                                 <Button
                                   size="xs"
                                   variant="light"
@@ -939,7 +876,11 @@ export default function DashboardPage() {
                                         date: new Date(g.createdAt).toLocaleDateString(),
                                         white: g.players.white.user?.name || "Unknown",
                                         black: g.players.black.user?.name || "Unknown",
-                                        result: g.winner === 'white' ? '1-0' : g.winner === 'black' ? '0-1' : '1/2-1/2',
+                                        result: (g.winner === "white"
+                                          ? "1-0"
+                                          : g.winner === "black"
+                                            ? "0-1"
+                                            : "1/2-1/2") as Outcome,
                                         fen: g.lastFen,
                                       };
 
@@ -951,7 +892,7 @@ export default function DashboardPage() {
                                         setTabs,
                                         setActiveTab,
                                         pgn: g.pgn,
-                                        headers: headersForAnalysis, //complains that headersForAnalysis.result isnt of type Outcome (not a real issue but should be fixed)
+                                        headers: headersForAnalysis,
                                       });
                                       navigate({ to: "/boards" });
                                     }

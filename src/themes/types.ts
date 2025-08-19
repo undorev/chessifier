@@ -132,6 +132,7 @@ export interface ThemeBorderRadius {
 }
 
 export interface ThemeDefinition {
+  uuid: string;
   name: string;
   displayName: string;
   type: "light" | "dark";
@@ -157,5 +158,5 @@ export type ThemeType = "light" | "dark";
 export interface ThemePreferences {
   activeTheme: string;
   autoDetectSystemTheme: boolean;
-  customThemes: Record<string, ThemeDefinition>;
+  customThemes: Record<string, ThemeDefinition>; // Now keyed by UUID instead of name
 }

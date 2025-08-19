@@ -81,9 +81,9 @@ function AnalysisPanel() {
       });
     };
 
-    window.addEventListener('engineReorder', handleEngineReorder as EventListener);
+    window.addEventListener("engineReorder", handleEngineReorder as EventListener);
     return () => {
-      window.removeEventListener('engineReorder', handleEngineReorder as EventListener);
+      window.removeEventListener("engineReorder", handleEngineReorder as EventListener);
     };
   }, [setEngines]);
 

@@ -1,6 +1,7 @@
 import type { ThemeDefinition } from "./types";
 
 export const classicLightTheme: ThemeDefinition = {
+  uuid: "builtin-classic-light",
   name: "classic-light",
   displayName: "Classic Light",
   type: "light",

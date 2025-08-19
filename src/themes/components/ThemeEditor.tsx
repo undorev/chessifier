@@ -14,7 +14,7 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconLayout, IconPalette, IconTypography } from "@tabler/icons-react";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeCustomization } from "../hooks";
 import type { ThemeDefinition } from "../types";
 
@@ -22,126 +22,143 @@ interface ThemeEditorProps {
   theme: ThemeDefinition | null;
   opened: boolean;
   onClose: () => void;
-  onSave?: (theme: ThemeDefinition) => void;
 }
 
-export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps) {
-  const { saveCustomTheme } = useThemeCustomization();
+export function ThemeEditor({ theme, opened, onClose }: ThemeEditorProps) {
+  const { saveOrUpdateCustomTheme } = useThemeCustomization();
   const [activeTab, setActiveTab] = useState<string>("general");
 
-  const getDefaultTheme = (): ThemeDefinition => ({
-    name: "",
-    displayName: "",
-    type: "light",
-    description: "",
-    author: "",
-    version: "1.0.0",
-    colors: {
-      "editor.background": "#ffffff",
-      "editor.foreground": "#000000",
-      "editor.selectionBackground": "#007acc20",
-      "editor.lineHighlightBackground": "#f5f5f5",
-      "editor.cursorForeground": "#000000",
-      "button.background": "#007acc",
-      "button.foreground": "#ffffff",
-      "button.hoverBackground": "#005a9e",
-      "button.border": "#007acc",
-      "input.background": "#ffffff",
-      "input.foreground": "#000000",
-      "input.border": "#cccccc",
-      "input.focusBorder": "#007acc",
-      "dropdown.background": "#ffffff",
-      "dropdown.foreground": "#000000",
-      "dropdown.border": "#cccccc",
-      "panel.background": "#f8f8f8",
-      "panel.border": "#cccccc",
-      "sidebar.background": "#f8f8f8",
-      "sidebar.foreground": "#000000",
-      "sidebar.border": "#cccccc",
-      "tab.activeBackground": "#ffffff",
-      "tab.activeForeground": "#000000",
-      "tab.inactiveBackground": "#f8f8f8",
-      "tab.inactiveForeground": "#666666",
-      "tab.border": "#cccccc",
-      "tab.hoverBackground": "#ffffff",
-      "list.activeSelectionBackground": "#007acc",
-      "list.activeSelectionForeground": "#ffffff",
-      "list.inactiveSelectionBackground": "#007acc20",
-      "list.hoverBackground": "#f5f5f5",
-      "notification.background": "#ffffff",
-      "notification.foreground": "#000000",
-      "notification.border": "#cccccc",
-      "badge.background": "#007acc",
-      "badge.foreground": "#ffffff",
-      "progress.background": "#cccccc",
-      "progress.foreground": "#007acc",
-      "scrollbar.shadow": "rgba(0, 0, 0, 0.1)",
-      "scrollbar.thumb": "#cccccc",
-      "scrollbar.thumbHover": "#999999",
-      "board.lightSquare": "#f0d9b5",
-      "board.darkSquare": "#b58863",
-      "board.selectedSquare": "#007acc",
-      "board.lastMoveSquare": "#ffeb3b",
-      "board.checkSquare": "#f44336",
-      "board.coordinate": "#8b7355",
-      "piece.shadow": "rgba(0, 0, 0, 0.3)",
-      "analysis.bestMove": "#4caf50",
-      "analysis.goodMove": "#2196f3",
-      "analysis.inaccuracy": "#ff9800",
-      "analysis.mistake": "#ff5722",
-      "analysis.blunder": "#f44336",
-      "status.info": "#2196f3",
-      "status.warning": "#ff9800",
-      "status.error": "#f44336",
-      "status.success": "#4caf50",
-      "text.primary": "#000000",
-      "text.secondary": "#666666",
-      "text.disabled": "#999999",
-      "text.link": "#007acc",
-      "border.primary": "#cccccc",
-      "border.secondary": "#e0e0e0",
-      "border.focus": "#007acc",
-      "shadow.primary": "rgba(0, 0, 0, 0.1)",
-      "shadow.secondary": "rgba(0, 0, 0, 0.05)",
-    },
-    typography: {
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      fontSize: "14px",
-      fontWeight: "400",
-      lineHeight: "1.5",
-      letterSpacing: "0",
-    },
-    spacing: {
-      xs: "4px",
-      sm: "8px",
-      md: "16px",
-      lg: "24px",
-      xl: "32px",
-    },
-    borderRadius: {
-      xs: "2px",
-      sm: "4px",
-      md: "6px",
-      lg: "8px",
-      xl: "12px",
-    },
-  });
+  const getDefaultTheme = useCallback(
+    (): ThemeDefinition => ({
+      uuid: "",
+      name: "",
+      displayName: "",
+      type: "light",
+      description: "",
+      author: "",
+      version: "1.0.0",
+      colors: {
+        "editor.background": "#ffffff",
+        "editor.foreground": "#000000",
+        "editor.selectionBackground": "#007acc20",
+        "editor.lineHighlightBackground": "#f5f5f5",
+        "editor.cursorForeground": "#000000",
+        "button.background": "#007acc",
+        "button.foreground": "#ffffff",
+        "button.hoverBackground": "#005a9e",
+        "button.border": "#007acc",
+        "input.background": "#ffffff",
+        "input.foreground": "#000000",
+        "input.border": "#cccccc",
+        "input.focusBorder": "#007acc",
+        "dropdown.background": "#ffffff",
+        "dropdown.foreground": "#000000",
+        "dropdown.border": "#cccccc",
+        "panel.background": "#f8f8f8",
+        "panel.border": "#cccccc",
+        "sidebar.background": "#f8f8f8",
+        "sidebar.foreground": "#000000",
+        "sidebar.border": "#cccccc",
+        "tab.activeBackground": "#ffffff",
+        "tab.activeForeground": "#000000",
+        "tab.inactiveBackground": "#f8f8f8",
+        "tab.inactiveForeground": "#666666",
+        "tab.border": "#cccccc",
+        "tab.hoverBackground": "#ffffff",
+        "list.activeSelectionBackground": "#007acc",
+        "list.activeSelectionForeground": "#ffffff",
+        "list.inactiveSelectionBackground": "#007acc20",
+        "list.hoverBackground": "#f5f5f5",
+        "notification.background": "#ffffff",
+        "notification.foreground": "#000000",
+        "notification.border": "#cccccc",
+        "badge.background": "#007acc",
+        "badge.foreground": "#ffffff",
+        "progress.background": "#cccccc",
+        "progress.foreground": "#007acc",
+        "scrollbar.shadow": "rgba(0, 0, 0, 0.1)",
+        "scrollbar.thumb": "#cccccc",
+        "scrollbar.thumbHover": "#999999",
+        "board.lightSquare": "#f0d9b5",
+        "board.darkSquare": "#b58863",
+        "board.selectedSquare": "#007acc",
+        "board.lastMoveSquare": "#ffeb3b",
+        "board.checkSquare": "#f44336",
+        "board.coordinate": "#8b7355",
+        "piece.shadow": "rgba(0, 0, 0, 0.3)",
+        "analysis.bestMove": "#4caf50",
+        "analysis.goodMove": "#2196f3",
+        "analysis.inaccuracy": "#ff9800",
+        "analysis.mistake": "#ff5722",
+        "analysis.blunder": "#f44336",
+        "status.info": "#2196f3",
+        "status.warning": "#ff9800",
+        "status.error": "#f44336",
+        "status.success": "#4caf50",
+        "text.primary": "#000000",
+        "text.secondary": "#666666",
+        "text.disabled": "#999999",
+        "text.link": "#007acc",
+        "border.primary": "#cccccc",
+        "border.secondary": "#e0e0e0",
+        "border.focus": "#007acc",
+        "shadow.primary": "rgba(0, 0, 0, 0.1)",
+        "shadow.secondary": "rgba(0, 0, 0, 0.05)",
+      },
+      typography: {
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: "14px",
+        fontWeight: "400",
+        lineHeight: "1.5",
+        letterSpacing: "0",
+      },
+      spacing: {
+        xs: "4px",
+        sm: "8px",
+        md: "16px",
+        lg: "24px",
+        xl: "32px",
+      },
+      borderRadius: {
+        xs: "2px",
+        sm: "4px",
+        md: "6px",
+        lg: "8px",
+        xl: "12px",
+      },
+    }),
+    [],
+  );
+
+  const formKey = useMemo(() => {
+    return theme?.name || "new-theme";
+  }, [theme?.name]);
+
+  const initialValues = useMemo(() => {
+    return theme || getDefaultTheme();
+  }, [theme, getDefaultTheme]);
 
   const form = useForm<ThemeDefinition>({
-    initialValues: theme || getDefaultTheme(),
+    initialValues,
   });
+
+  useEffect(() => {
+    if (theme) form.setValues(theme);
+  }, [theme, form.setValues]);
 
   const handleSave = (values: ThemeDefinition) => {
     try {
-      if (onSave) {
-        onSave(values);
-      } else {
-        saveCustomTheme(values);
-      }
+      const isEditing = !!theme?.uuid;
+      const themeToSave = {
+        ...values,
+        uuid: values.uuid || (isEditing ? theme.uuid : generateUUID()),
+      };
+
+      saveOrUpdateCustomTheme(themeToSave, isEditing);
 
       notifications.show({
         title: "Theme saved",
-        message: `Successfully saved "${values.displayName}"`,
+        message: `Successfully ${isEditing ? "updated" : "created"} "${values.displayName}"`,
         color: "green",
         icon: <IconCheck size={18} />,
       });
@@ -156,6 +173,15 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
     }
   };
 
+  // Utility function to generate UUID
+  const generateUUID = (): string => {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
+
   return (
     <Modal
       opened={opened}
@@ -163,12 +189,15 @@ export function ThemeEditor({ theme, opened, onClose, onSave }: ThemeEditorProps
       title={
         <Group gap="xs">
           <IconPalette size={20} />
-          <Text fw={500}>{theme ? `Edit "${theme.displayName}"` : "Create New Theme"}</Text>
+          <Text fw={500}>Edit "{theme?.displayName}"</Text>
         </Group>
       }
       size="lg"
     >
-      <form key={theme?.name || "new"} onSubmit={form.onSubmit(handleSave)}>
+      <form key={formKey} onSubmit={form.onSubmit(handleSave)}>
+        {/* Hidden field to preserve UUID */}
+        <input type="hidden" {...form.getInputProps("uuid")} />
+
         <Tabs value={activeTab} onChange={(value) => value && setActiveTab(value)}>
           <Tabs.List>
             <Tabs.Tab value="general">General</Tabs.Tab>

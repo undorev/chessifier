@@ -5,6 +5,7 @@
   "Errors.InvalidHaldmoves": "Invalid halfmove number",
   "Errors.InvalidPockets": "Invalid pockets",
   "Errors.InvalidRemainingChecks": "Invalid remaining checks",
+  "Settings.Appearance.Theme.Custom": "Custom",
   "Settings.Appearance.hideDashboardOnStartup": "Hide Dashboard on Startup",
   "Settings.Appearance.hideDashboardOnStartup.Desc": "Open Boards instead of Dashboard when the app starts"
 }

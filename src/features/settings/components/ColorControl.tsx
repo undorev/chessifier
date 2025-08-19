@@ -1,9 +1,17 @@
-import { CheckIcon, ColorSwatch, Group, Input, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import {
+  CheckIcon,
+  ColorSwatch,
+  Group,
+  Input,
+  SimpleGrid,
+  useMantineColorScheme,
+  useMantineTheme,
+} from "@mantine/core";
 import { useColorScheme } from "@mantine/hooks";
 import { useAtom } from "jotai";
 import { primaryColorAtom } from "@/state/atoms";
 
-export default function ColorControl() {
+export default function ColorControl({ disabled }: { disabled?: boolean }) {
   const [primaryColor, setPrimaryColor] = useAtom(primaryColorAtom);
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
@@ -17,6 +25,7 @@ export default function ColorControl() {
           : theme.colors[color][5]
       }
       component="button"
+      disabled={disabled}
       key={color}
       onClick={() => setPrimaryColor(color)}
       radius="sm"
@@ -30,6 +39,7 @@ export default function ColorControl() {
             ? theme.colors[color][2]
             : theme.white,
         flex: "1 0 calc(15% - 4px)",
+        ...(disabled ? { cursor: "not-allowed", opacity: 0.5 } : {}),
       }}
     >
       {primaryColor === color && <CheckIcon width={12} height={12} />}
@@ -38,7 +48,9 @@ export default function ColorControl() {
 
   return (
     <Input.Wrapper labelElement="div">
-      <Group gap={2}>{colors}</Group>
+      <SimpleGrid cols={7} spacing="xs" verticalSpacing="xs">
+        {colors}
+      </SimpleGrid>
     </Input.Wrapper>
   );
 }

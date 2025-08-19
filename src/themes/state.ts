@@ -9,9 +9,30 @@ export const themePreferencesAtom = atomWithStorage<ThemePreferences>("theme-pre
   customThemes: {},
 });
 
-export const activeThemeAtom = atom(
+export const themePreferencesWithRegistrationAtom = atom(
   (get) => {
     const preferences = get(themePreferencesAtom);
+
+    Object.values(preferences.customThemes).forEach((theme) => {
+      if (!themeManager.hasTheme(theme.name)) {
+        try {
+          themeManager.registerTheme(theme);
+        } catch (error) {
+          console.warn(`Failed to register custom theme ${theme.name}:`, error);
+        }
+      }
+    });
+
+    return preferences;
+  },
+  (_get, set, newPreferences: ThemePreferences | ((prev: ThemePreferences) => ThemePreferences)) => {
+    set(themePreferencesAtom, newPreferences);
+  },
+);
+
+export const activeThemeAtom = atom(
+  (get) => {
+    const preferences = get(themePreferencesWithRegistrationAtom);
     const theme = themeManager.getTheme(preferences.activeTheme);
 
     if (!theme) {
@@ -25,11 +46,11 @@ export const activeThemeAtom = atom(
   },
   (get, set, newTheme: string | ThemeDefinition) => {
     const themeName = typeof newTheme === "string" ? newTheme : newTheme.name;
-    const preferences = get(themePreferencesAtom);
+    const preferences = get(themePreferencesWithRegistrationAtom);
 
     if (typeof newTheme === "object") {
       themeManager.registerTheme(newTheme);
-      set(themePreferencesAtom, {
+      set(themePreferencesWithRegistrationAtom, {
         ...preferences,
         customThemes: {
           ...preferences.customThemes,
@@ -39,7 +60,7 @@ export const activeThemeAtom = atom(
         autoDetectSystemTheme: false,
       });
     } else {
-      set(themePreferencesAtom, {
+      set(themePreferencesWithRegistrationAtom, {
         ...preferences,
         activeTheme: themeName,
         autoDetectSystemTheme: false,
@@ -51,7 +72,7 @@ export const activeThemeAtom = atom(
 export const systemColorSchemeAtom = atom<"light" | "dark">("light");
 
 export const computedThemeAtom = atom((get) => {
-  const preferences = get(themePreferencesAtom);
+  const preferences = get(themePreferencesWithRegistrationAtom);
   const activeTheme = get(activeThemeAtom);
   const systemScheme = get(systemColorSchemeAtom);
 
@@ -74,7 +95,7 @@ export const computedThemeAtom = atom((get) => {
 });
 
 export const availableThemesAtom = atom((get) => {
-  const preferences = get(themePreferencesAtom);
+  const preferences = get(themePreferencesWithRegistrationAtom);
 
   const _ = preferences.customThemes;
   return themeManager.getThemeMetadata();
@@ -85,39 +106,65 @@ export const setThemeAtom = atom(null, (_get, set, themeName: string) => {
 });
 
 export const addCustomThemeAtom = atom(null, (get, set, theme: ThemeDefinition) => {
-  const preferences = get(themePreferencesAtom);
+  const preferences = get(themePreferencesWithRegistrationAtom);
   themeManager.registerTheme(theme);
 
-  set(themePreferencesAtom, {
+  set(themePreferencesWithRegistrationAtom, {
     ...preferences,
     customThemes: {
       ...preferences.customThemes,
-      [theme.name]: theme,
+      [theme.uuid]: theme,
     },
     autoDetectSystemTheme: false,
   });
 });
 
-export const removeCustomThemeAtom = atom(null, (get, set, themeName: string) => {
-  const preferences = get(themePreferencesAtom);
+export const updateCustomThemeAtom = atom(null, (get, set, theme: ThemeDefinition) => {
+  const preferences = get(themePreferencesWithRegistrationAtom);
 
-  if (preferences.customThemes[themeName]) {
-    themeManager.removeTheme(themeName);
+  const existingTheme = Object.values(preferences.customThemes).find((t) => t.uuid === theme.uuid);
 
-    const { [themeName]: _, ...remainingThemes } = preferences.customThemes;
+  if (existingTheme) {
+    if (existingTheme.name !== theme.name) {
+      themeManager.removeTheme(existingTheme.name);
+    }
 
-    set(themePreferencesAtom, {
+    themeManager.registerTheme(theme);
+
+    set(themePreferencesWithRegistrationAtom, {
+      ...preferences,
+      customThemes: {
+        ...preferences.customThemes,
+        [theme.uuid]: theme,
+      },
+      activeTheme: preferences.activeTheme === existingTheme.name ? theme.name : preferences.activeTheme,
+    });
+  }
+});
+
+export const removeCustomThemeAtom = atom(null, (get, set, themeUuid: string) => {
+  const preferences = get(themePreferencesWithRegistrationAtom);
+  const themeToRemove = preferences.customThemes[themeUuid];
+
+  if (themeToRemove) {
+    themeManager.removeTheme(themeToRemove.name);
+
+    const { [themeUuid]: _, ...remainingThemes } = preferences.customThemes;
+    const isLastCustomTheme = Object.keys(remainingThemes).length === 0;
+    const wasActiveTheme = preferences.activeTheme === themeToRemove.name;
+
+    set(themePreferencesWithRegistrationAtom, {
       ...preferences,
       customThemes: remainingThemes,
-
-      activeTheme: preferences.activeTheme === themeName ? defaultThemeRegistry.defaultTheme : preferences.activeTheme,
+      activeTheme: wasActiveTheme ? defaultThemeRegistry.defaultTheme : preferences.activeTheme,
+      autoDetectSystemTheme: wasActiveTheme || isLastCustomTheme ? true : preferences.autoDetectSystemTheme,
     });
   }
 });
 
 export const toggleAutoDetectionAtom = atom(null, (get, set) => {
-  const preferences = get(themePreferencesAtom);
-  set(themePreferencesAtom, {
+  const preferences = get(themePreferencesWithRegistrationAtom);
+  set(themePreferencesWithRegistrationAtom, {
     ...preferences,
     autoDetectSystemTheme: !preferences.autoDetectSystemTheme,
   });
@@ -125,15 +172,15 @@ export const toggleAutoDetectionAtom = atom(null, (get, set) => {
 
 export const importThemeFromJSONAtom = atom(null, (get, set, jsonString: string) => {
   const theme = themeManager.loadThemeFromJSON(jsonString);
-  const preferences = get(themePreferencesAtom);
+  const preferences = get(themePreferencesWithRegistrationAtom);
 
   themeManager.registerTheme(theme);
 
-  set(themePreferencesAtom, {
+  set(themePreferencesWithRegistrationAtom, {
     ...preferences,
     customThemes: {
       ...preferences.customThemes,
-      [theme.name]: theme,
+      [theme.uuid]: theme,
     },
     autoDetectSystemTheme: false,
   });
@@ -142,7 +189,7 @@ export const importThemeFromJSONAtom = atom(null, (get, set, jsonString: string)
 });
 
 export const initializeThemesAtom = atom(null, (get, set) => {
-  const preferences = get(themePreferencesAtom);
+  const preferences = get(themePreferencesWithRegistrationAtom);
 
   Object.values(preferences.customThemes).forEach((theme) => {
     try {

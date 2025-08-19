@@ -64,8 +64,8 @@ export default function Page() {
   const [moveNotationType, setMoveNotationType] = useAtom(moveNotationTypeAtom);
   const [computedTheme] = useAtom<ThemeDefinition | null>(computedThemeAtom);
 
-  const allSettings = useMemo((): SettingItem[] => {
-    const items: SettingItem[] = [
+  const allSettings = useMemo(
+    (): SettingItem[] => [
       {
         id: "piece-dest",
         title: t("Settings.PieceDest"),
@@ -356,6 +356,34 @@ export default function Page() {
         ),
       },
       {
+        id: "theme",
+        title: t("Settings.Appearance.Theme"),
+        description: t("Settings.Appearance.Theme.Desc"),
+        tab: "appearance",
+        component: <ThemeSettings />,
+      },
+      {
+        id: "accent-color",
+        title: t("Settings.Appearance.AccentColor"),
+        description: t("Settings.Appearance.AccentColor.Desc"),
+        tab: "appearance",
+        component: (
+          <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
+            <div>
+              <Text>{t("Settings.Appearance.AccentColor")}</Text>
+              <Text size="xs" c="dimmed">
+                {t("Settings.Appearance.AccentColor.Desc")}
+              </Text>
+            </div>
+            <div>
+              <ColorControl
+                disabled={computedTheme?.name !== "classic-light" && computedTheme?.name !== "classic-dark"}
+              />
+            </div>
+          </Group>
+        ),
+      },
+      {
         id: "language",
         title: t("Settings.Appearance.Language"),
         description: t("Settings.Appearance.Language.Desc"),
@@ -526,13 +554,6 @@ export default function Page() {
         ),
       },
       {
-        id: "theme",
-        title: t("Settings.Appearance.Theme"),
-        description: t("Settings.Appearance.Theme.Desc"),
-        tab: "appearance",
-        component: <ThemeSettings />,
-      },
-      {
         id: "volume",
         title: t("Settings.Sound.Volume"),
         description: t("Settings.Sound.Volume.Desc"),
@@ -600,57 +621,22 @@ export default function Page() {
         tab: "directories",
         component: <TelemetrySettings className={classes.item} />,
       },
-      // Insert accent-color setting conditionally so it appears near other appearance controls
-    ];
-
-    if (computedTheme) {
-      const themeName = computedTheme.name;
-      const isClassic = themeName === "classic-light" || themeName === "classic-dark";
-      if (isClassic) {
-        const accentItem: SettingItem = {
-          id: "accent-color",
-          title: t("Settings.Appearance.AccentColor"),
-          description: t("Settings.Appearance.AccentColor.Desc"),
-          tab: "appearance",
-          component: (
-            <Group justify="space-between" wrap="nowrap" gap="xl" className={classes.item}>
-              <div>
-                <Text>{t("Settings.Appearance.AccentColor")}</Text>
-                <Text size="xs" c="dimmed">
-                  {t("Settings.Appearance.AccentColor.Desc")}
-                </Text>
-              </div>
-              <div style={{ width: 200 }}>
-                <ColorControl />
-              </div>
-            </Group>
-          ),
-        };
-
-        const themeIdx = items.findIndex((s) => s.id === "theme");
-        if (themeIdx >= 0) {
-          items.splice(themeIdx + 1, 0, accentItem);
-        } else {
-          items.push(accentItem);
-        }
-      }
-    }
-
-    return items;
-  }, [
-    t,
-    i18n.language,
-    i18n.changeLanguage,
-    isNative,
-    setIsNative,
-    moveMethod,
-    setMoveMethod,
-    moveNotationType,
-    setMoveNotationType,
-    filesDirectory,
-    setFilesDirectory,
-    computedTheme,
-  ]);
+    ],
+    [
+      t,
+      i18n.language,
+      i18n.changeLanguage,
+      isNative,
+      setIsNative,
+      moveMethod,
+      setMoveMethod,
+      moveNotationType,
+      setMoveNotationType,
+      filesDirectory,
+      setFilesDirectory,
+      computedTheme,
+    ],
+  );
 
   const filteredSettings = useMemo(() => {
     if (!search.trim()) return null;

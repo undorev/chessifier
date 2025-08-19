@@ -33,18 +33,14 @@ import ChallengeHistory from "@/common/components/ChallengeHistory";
 import GameNotation from "@/common/components/GameNotation";
 import MoveControls from "@/common/components/MoveControls";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
-import {
-  type Directory,
-  type FileMetadata,
-  processEntriesRecursively,
-} from "@/features/files/components/file";
+import { type Directory, type FileMetadata, processEntriesRecursively } from "@/features/files/components/file";
 import {
   activeTabAtom,
   currentPuzzleAtom,
   hidePuzzleRatingAtom,
+  inOrderPuzzlesAtom,
   jumpToNextPuzzleAtom,
   progressivePuzzlesAtom,
-  inOrderPuzzlesAtom,
   puzzleRatingRangeAtom,
   selectedPuzzleDbAtom,
   tabsAtom,
