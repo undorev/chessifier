@@ -44,6 +44,7 @@ import {
   hidePuzzleRatingAtom,
   jumpToNextPuzzleAtom,
   progressivePuzzlesAtom,
+  inOrderPuzzlesAtom,
   puzzleRatingRangeAtom,
   selectedPuzzleDbAtom,
   tabsAtom,
@@ -57,7 +58,20 @@ import { unwrap } from "@/utils/unwrap";
 import AddPuzzle from "./AddPuzzle";
 import PuzzleBoard from "./PuzzleBoard";
 
-const PuzzleDbFromPgnCache = new Map<string, { puzzle?: Puzzle; tokens: Token[]; rating: number; index: number }[]>();
+type CachedPuzzle = {
+  puzzle?: Puzzle;
+  tokens: Token[];
+  rating: number;
+  index: number;
+};
+type PuzzleCacheEntry = {
+  minRating: number;
+  maxRating: number;
+  random: boolean;
+  counter: number;
+  puzzles: CachedPuzzle[];
+};
+const PuzzleDbFromPgnCache = new Map<string, PuzzleCacheEntry>();
 
 const useFileDirectory = (dir: string) => {
   const { data, error, isLoading, mutate } = useSWR("file-directory", async () => {
@@ -117,9 +131,15 @@ function Puzzles({ id }: { id: string }) {
     }
   }
 
-  async function generatePuzzleFromPgn(db: string, minRating: number, maxRating: number) {
+  async function generatePuzzleFromPgn(db: string, minRating: number, maxRating: number, random: boolean) {
     let localPuzzleDb = PuzzleDbFromPgnCache.get(db);
-    if (!localPuzzleDb) {
+    const resetCache = localPuzzleDb
+      ? localPuzzleDb.minRating !== minRating ||
+        localPuzzleDb.maxRating !== maxRating ||
+        localPuzzleDb.random !== random ||
+        localPuzzleDb.counter >= localPuzzleDb.puzzles.length
+      : false;
+    if (!localPuzzleDb || resetCache) {
       const count = unwrap(await commands.countPgnGames(db));
       const games = unwrap(await commands.readGames(db, 0, count - 1));
       const puzzles = await Promise.all(
@@ -130,12 +150,21 @@ function Puzzles({ id }: { id: string }) {
           return { rating, index: i, tokens };
         }),
       );
-      PuzzleDbFromPgnCache.set(db, puzzles);
-      localPuzzleDb = puzzles;
+      localPuzzleDb = {
+        counter: 0,
+        minRating,
+        maxRating,
+        random,
+        puzzles: puzzles.filter((p) => p.rating >= minRating && p.rating <= maxRating),
+      };
+      PuzzleDbFromPgnCache.set(db, localPuzzleDb);
     }
-    const possiblePuzzles = localPuzzleDb.filter((p) => p.rating >= minRating && p.rating <= maxRating);
+    const possiblePuzzles = localPuzzleDb.puzzles;
     if (possiblePuzzles.length === 0) return null;
-    const selectedGame = possiblePuzzles[Math.floor(Math.random() * possiblePuzzles.length)];
+    const selectedGame = random
+      ? possiblePuzzles[Math.floor(Math.random() * possiblePuzzles.length)]
+      : possiblePuzzles[localPuzzleDb.counter % possiblePuzzles.length];
+    localPuzzleDb.counter++;
     if (!selectedGame.puzzle) {
       const headers = getPgnHeaders(selectedGame.tokens);
       const puzzleFen = headers.fen.trim() || INITIAL_BOARD_FEN;
@@ -195,7 +224,7 @@ function Puzzles({ id }: { id: string }) {
     let puzzle: Puzzle;
     if (dbInfo.path.endsWith(".db3")) {
       // Handle .db3 database puzzles
-      const res = await commands.getPuzzle(db, range[0], range[1]);
+      const res = await commands.getPuzzle(db, range[0], range[1], !inOrder);
       const dbPuzzle = unwrap(res);
       puzzle = {
         ...dbPuzzle,
@@ -203,7 +232,7 @@ function Puzzles({ id }: { id: string }) {
         completion: "incomplete",
       };
     } else {
-      const dbPuzzle = await generatePuzzleFromPgn(db, range[0], range[1]);
+      const dbPuzzle = await generatePuzzleFromPgn(db, range[0], range[1], !inOrder);
       if (!dbPuzzle) {
         throw new Error("Unable to generate a puzzle from local file within the requested range");
       }
@@ -230,6 +259,7 @@ function Puzzles({ id }: { id: string }) {
 
   const [progressive, setProgressive] = useAtom(progressivePuzzlesAtom);
   const [hideRating, setHideRating] = useAtom(hidePuzzleRatingAtom);
+  const [inOrder, setInOrder] = useAtom(inOrderPuzzlesAtom);
 
   const [, setTabs] = useAtom(tabsAtom);
   const setActiveTab = useSetAtom(activeTabAtom);
@@ -323,6 +353,11 @@ function Puzzles({ id }: { id: string }) {
             <Input.Wrapper label="Hide Rating">
               <Center>
                 <Checkbox checked={hideRating} onChange={(event) => setHideRating(event.currentTarget.checked)} />
+              </Center>
+            </Input.Wrapper>
+            <Input.Wrapper label="In Order">
+              <Center>
+                <Checkbox checked={inOrder} onChange={(event) => setInOrder(event.currentTarget.checked)} />
               </Center>
             </Input.Wrapper>
           </Group>

@@ -24,6 +24,8 @@ struct PuzzleCache {
     max_rating: u16,
     /// Maximum number of puzzles to cache at once
     cache_size: usize,
+
+    random: bool,
 }
 
 impl PuzzleCache {
@@ -35,6 +37,7 @@ impl PuzzleCache {
             min_rating: 0,
             max_rating: 0,
             cache_size: 20, // Default cache size
+            random: true,
         }
     }
 
@@ -59,30 +62,43 @@ impl PuzzleCache {
     /// * `file` - Path to the puzzle database
     /// * `min_rating` - Minimum puzzle rating to include
     /// * `max_rating` - Maximum puzzle rating to include
+    /// * `random` - Randomize puzzle in cache
     ///
     /// # Returns
     /// * `Ok(())` if puzzles were loaded successfully
     /// * `Err(Error)` if there was a problem loading puzzles
-    fn get_puzzles(&mut self, file: &str, min_rating: u16, max_rating: u16) -> Result<(), Error> {
+    fn get_puzzles(&mut self, file: &str, min_rating: u16, max_rating: u16, random: bool) -> Result<(), Error> {
         if self.cache.is_empty()
             || self.min_rating != min_rating
             || self.max_rating != max_rating
+            || self.random != random
             || self.counter >= self.cache_size
         {
             self.cache.clear();
             self.counter = 0;
 
             let mut db = diesel::SqliteConnection::establish(file)?;
-            let new_puzzles = puzzles::table
-                .filter(puzzles::rating.le(max_rating as i32))
-                .filter(puzzles::rating.ge(min_rating as i32))
-                .order(sql::<Bool>("RANDOM()"))
-                .limit(self.cache_size as i64)
-                .load::<Puzzle>(&mut db)?;
+            let new_puzzles = if random {
+                puzzles::table
+                    .filter(puzzles::rating.le(max_rating as i32))
+                    .filter(puzzles::rating.ge(min_rating as i32))
+                    .order(sql::<Bool>("RANDOM()"))
+                    .limit(self.cache_size as i64)
+                    .load::<Puzzle>(&mut db)?
+            } else {
+                puzzles::table
+                    .filter(puzzles::rating.le(max_rating as i32))
+                    .filter(puzzles::rating.ge(min_rating as i32))
+                    .order(puzzles::id.asc())
+                    .order(puzzles::rating.asc())
+                    .limit(self.cache_size as i64)
+                    .load::<Puzzle>(&mut db)?
+            };
 
             self.cache = new_puzzles.into_iter().collect();
             self.min_rating = min_rating;
             self.max_rating = max_rating;
+            self.random = random
         }
 
         Ok(())
@@ -113,6 +129,7 @@ impl PuzzleCache {
 /// * `file` - Path to the puzzle database
 /// * `min_rating` - Minimum puzzle rating to include
 /// * `max_rating` - Maximum puzzle rating to include
+/// * `random` - Randomize puzzle in cache
 ///
 /// # Returns
 /// * `Ok(Puzzle)` if a puzzle was found
@@ -120,14 +137,13 @@ impl PuzzleCache {
 /// * Other errors if there was a problem accessing the database
 #[tauri::command]
 #[specta::specta]
-pub fn get_puzzle(file: String, min_rating: u16, max_rating: u16) -> Result<Puzzle, Error> {
+pub fn get_puzzle(file: String, min_rating: u16, max_rating: u16, random: bool) -> Result<Puzzle, Error> {
     static PUZZLE_CACHE: Lazy<Mutex<PuzzleCache>> = Lazy::new(|| Mutex::new(PuzzleCache::new()));
 
     let mut cache = PUZZLE_CACHE
         .lock()
         .map_err(|e| Error::MutexLockFailed(format!("Failed to lock puzzle cache: {}", e)))?;
-    cache.get_puzzles(&file, min_rating, max_rating)?;
-
+    cache.get_puzzles(&file, min_rating, max_rating, random)?;
     // Get a reference to the next puzzle and clone it only if found
     match cache.get_next_puzzle() {
         Some(puzzle) => Ok(puzzle.clone()),
