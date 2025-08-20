@@ -2,7 +2,7 @@ use std::{
     fmt::Display,
     path::PathBuf,
     process::Stdio,
-    sync::Arc,
+    sync::{Arc, LazyLock},
     time::{Duration, Instant},
 };
 
@@ -33,6 +33,15 @@ use crate::{
     error::Error,
     AppState,
 };
+
+// Create rate limiter once as a static
+static PROGRESS_RATE_LIMITER: LazyLock<RateLimiter<governor::state::direct::NotKeyed, governor::state::InMemoryState, governor::clock::DefaultClock>> = 
+    LazyLock::new(|| RateLimiter::direct(Quota::per_second(nonzero!(5u32))));
+
+// Constants for magic numbers
+const ENGINE_STOP_DELAY_MS: u64 = 50;
+const COMPLETION_PROGRESS: f64 = 100.0;
+const NEAR_COMPLETION_PROGRESS: f64 = 99.99;
 
 #[derive(Debug, Clone, Serialize, Type)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
@@ -132,52 +141,63 @@ impl EngineProcess {
     }
 
     async fn set_options(&mut self, options: EngineOptions) -> Result<(), Error> {
+        // Parse and validate the position
         let fen: Fen = options.fen.parse()?;
-        let mut pos: Chess = match fen.into_position(CastlingMode::Chess960) {
-            Ok(p) => p,
-            Err(e) => e.ignore_too_much_material()?,
+        let mut current_position: Chess = match fen.into_position(CastlingMode::Chess960) {
+            Ok(position) => position,
+            Err(error) => error.ignore_too_much_material()?,
         };
         
-        for m in &options.moves {
-            let uci = UciMove::from_ascii(m.as_bytes())?;
-            let mv = uci.to_move(&pos)?;
-            pos.play_unchecked(&mv);
+        // Apply all moves to get the current position
+        for move_str in &options.moves {
+            let uci_move = UciMove::from_ascii(move_str.as_bytes())?;
+            let chess_move = uci_move.to_move(&current_position)?;
+            current_position.play_unchecked(&chess_move);
         }
         
-        let multipv = options
-            .extra_options
-            .iter()
-            .find(|x| x.name == "MultiPV")
-            .and_then(|x| x.value.parse().ok())
-            .unwrap_or(1)
-            .min(pos.legal_moves().len() as u16);
+        // Extract and validate MultiPV setting
+        let multi_pv_value = self.extract_multi_pv_value(&options.extra_options)?;
+        let legal_move_count = current_position.legal_moves().len() as u16;
+        self.real_multipv = multi_pv_value.min(legal_move_count);
 
-        self.real_multipv = multipv;
-
-        let mut options_to_set = Vec::new();
-        
-        for new_option in &options.extra_options {
-            let current_option = self.options.extra_options.iter()
-                .find(|opt| opt.name == new_option.name);
-            
-            if current_option.map_or(true, |opt| opt.value != new_option.value) {
-                options_to_set.push(new_option);
+        // Set engine options that have changed
+        for option in &options.extra_options {
+            if !self.options.extra_options.contains(option) {
+                self.set_option(&option.name, &option.value).await?;
             }
         }
-        
-        for option in options_to_set {
-            self.set_option(&option.name, &option.value).await?;
-        }
 
-        if options.fen != self.options.fen || options.moves != self.options.moves {
+        // Update position if it has changed
+        let position_changed = options.fen != self.options.fen || options.moves != self.options.moves;
+        if position_changed {
             self.set_position(&options.fen, &options.moves).await?;
         }
+
+        // Reset state for new analysis
+        self.reset_analysis_state();
+        self.options = options.clone();
         
+        Ok(())
+    }
+
+    /// Extract MultiPV value from engine options with proper error handling
+    fn extract_multi_pv_value(&self, extra_options: &[EngineOption]) -> Result<u16, Error> {
+        let multi_pv_str = extra_options
+            .iter()
+            .find(|option| option.name == "MultiPV")
+            .map(|option| option.value.as_str())
+            .unwrap_or("1");
+            
+        multi_pv_str.parse::<u16>()
+            .map_err(|_| Error::InvalidMultiPvValue(multi_pv_str.to_string()))
+            .map(|value| if value == 0 { 1 } else { value })
+    }
+
+    /// Reset analysis state when starting new analysis
+    fn reset_analysis_state(&mut self) {
         self.last_depth = 0;
-        self.options = options;
         self.best_moves.clear();
         self.last_best_moves.clear();
-        Ok(())
     }
 
     async fn set_position(&mut self, fen: &str, moves: &[String]) -> Result<(), Error> {
@@ -287,8 +307,9 @@ fn parse_uci_attrs(
     attrs: Vec<UciInfoAttribute>,
     fen: &Fen,
     moves: &[String],
-) -> Result<BestMoves, Error> {
+) -> Result<Option<BestMoves>, Error> {
     let mut best_moves = BestMoves::default();
+    let mut has_pv = false; // Track if we found a PV (principal variation)
 
     let mut pos: Chess = match fen.clone().into_position(CastlingMode::Chess960) {
         Ok(p) => p,
@@ -305,6 +326,7 @@ fn parse_uci_attrs(
     for a in attrs {
         match a {
             UciInfoAttribute::Pv(m) => {
+                has_pv = true;
                 for mv in m {
                     let uci: UciMove = mv.to_string().parse()?;
                     let m = uci.to_move(&pos)?;
@@ -332,15 +354,22 @@ fn parse_uci_attrs(
         }
     }
 
-    if best_moves.san_moves.is_empty() {
+    // Only return an error if we expected moves but the PV was empty
+    // If there's no PV attribute at all, this is a normal info message without moves
+    if has_pv && best_moves.san_moves.is_empty() {
         return Err(Error::NoMovesFound);
+    }
+    
+    // If this info message doesn't contain moves, return None to indicate it should be skipped
+    if !has_pv {
+        return Ok(None);
     }
 
     if turn == Color::Black {
         best_moves.score = invert_score(best_moves.score);
     }
 
-    Ok(best_moves)
+    Ok(Some(best_moves))
 }
 
 fn start_engine(path: PathBuf) -> Result<Child, Error> {
@@ -495,150 +524,226 @@ pub async fn get_best_moves(
     app: tauri::AppHandle,
     state: tauri::State<'_, AppState>,
 ) -> Result<Option<(f32, Vec<BestMoves>)>, Error> {
-    let path = PathBuf::from(&engine);
+    let engine_path = PathBuf::from(&engine);
+    let process_key = (tab.clone(), engine.clone());
 
-    let key = (tab.clone(), engine.clone());
+    // Try to reuse existing engine process
+    if let Some(existing_result) = try_reuse_existing_process(&process_key, &options, &go_mode, &state).await? {
+        return Ok(Some(existing_result));
+    }
 
-    if state.engine_processes.contains_key(&key) {
-        {
-            let process = state.engine_processes.get_mut(&key).unwrap();
-            let mut process = process.lock().await;
-            if options == process.options && go_mode == process.go_mode && process.running {
-                return Ok(Some((
-                    process.last_progress,
-                    process.last_best_moves.clone(),
-                )));
-            }
-            process.stop().await?;
-        }
-        // give time for engine to stop and process previous lines
-        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        {
-            let process = state.engine_processes.get_mut(&key).unwrap();
-            let mut process = process.lock().await;
-            process.set_options(options.clone()).await?;
-            process.go(&go_mode).await?;
-        }
+    // Create new engine process
+    let (new_process, reader) = create_new_engine_process(engine_path, &options, &go_mode).await?;
+    let process_arc = Arc::new(Mutex::new(new_process));
+    
+    // Insert into state before starting the analysis loop
+    state.engine_processes.insert(process_key.clone(), process_arc.clone());
+
+    // Start the analysis loop
+    let result = run_analysis_loop(reader, process_arc, &id, &tab, &app).await;
+    
+    // Clean up process from state
+    state.engine_processes.remove(&process_key);
+    
+    if let Err(ref error) = result {
+        log::error!("Engine analysis failed: tab: {}, engine: {}, error: {:?}", tab, engine, error);
+    } else {
+        log::info!("Engine process finished: tab: {}, engine: {}", tab, engine);
+    }
+    
+    result.map(|_| None)
+}
+
+/// Try to reuse an existing engine process if conditions are met
+async fn try_reuse_existing_process(
+    process_key: &(String, String),
+    options: &EngineOptions,
+    go_mode: &GoMode,
+    state: &tauri::State<'_, AppState>,
+) -> Result<Option<(f32, Vec<BestMoves>)>, Error> {
+    let Some(process_ref) = state.engine_processes.get(process_key) else {
         return Ok(None);
+    };
+
+    let mut process = process_ref.lock().await;
+    
+    // Check if we can return cached results
+    if *options == process.options && *go_mode == process.go_mode && process.running {
+        return Ok(Some((
+            process.last_progress,
+            process.last_best_moves.clone(),
+        )));
     }
 
-    let (mut process, mut reader) = EngineProcess::new(path).await?;
+    // Stop the current analysis and restart with new parameters
+    process.stop().await?;
+    drop(process); // Release lock before sleep
+    
+    tokio::time::sleep(Duration::from_millis(ENGINE_STOP_DELAY_MS)).await;
+    
+    let mut process = process_ref.lock().await;
     process.set_options(options.clone()).await?;
-    process.go(&go_mode).await?;
-
-    let process = Arc::new(Mutex::new(process));
-
-    state.engine_processes.insert(key.clone(), process.clone());
-
-    let lim = RateLimiter::direct(Quota::per_second(nonzero!(5u32)));
-    let mut last_best_moves_payload: Option<BestMovesPayload> = None;
-    let tick_duration: Duration = Duration::from_millis(50);
-    let min_time_before_first_info = Duration::from_millis(200);
-    let min_time_before_subsequent_info = Duration::from_millis(500);
-    let max_time_before_subsequent_info = Duration::from_millis(1000);
-
-    loop {
-        match tokio::time::timeout(tick_duration, reader.next_line()).await {
-            Ok(Ok(Some(line))) => {
-                let mut proc = process.lock().await;
-                match parse_one(&line) {
-                    UciMessage::Info(attrs) => {
-                        if let Ok(best_moves) =
-                            parse_uci_attrs(attrs, &proc.options.fen.parse()?, &proc.options.moves)
-                        {
-                            let multipv = best_moves.multipv;
-                            let cur_depth = best_moves.depth;
-                            let cur_nodes = best_moves.nodes;
-                            if multipv as usize == proc.best_moves.len() + 1 {
-                                proc.best_moves.push(best_moves);
-                                if multipv == proc.real_multipv {
-                                    if proc.best_moves.iter().all(|x| x.depth == cur_depth)
-                                        && cur_depth >= proc.last_depth
-                                        && lim.check().is_ok()
-                                    {
-                                        let progress = match proc.go_mode {
-                                            GoMode::Depth(depth) => {
-                                                (cur_depth as f64 / depth as f64) * 100.0
-                                            }
-                                            GoMode::Time(time) => {
-                                                (proc.start.elapsed().as_millis() as f64
-                                                    / time as f64)
-                                                    * 100.0
-                                            }
-                                            GoMode::Nodes(nodes) => {
-                                                (cur_nodes as f64 / nodes as f64) * 100.0
-                                            }
-                                            GoMode::PlayersTime(_) => 99.99,
-                                            GoMode::Infinite => 99.99,
-                                        };
-                                        let best_moves_payload = BestMovesPayload {
-                                            best_lines: proc.best_moves.clone(),
-                                            engine: id.to_string(),
-                                            tab: tab.to_string(),
-                                            fen: proc.options.fen.clone(),
-                                            moves: proc.options.moves.clone(),
-                                            progress,
-                                        };
-                                        if proc.last_event_sent.map_or(
-                                            proc.start.elapsed() < min_time_before_first_info,
-                                            |t| t.elapsed() < min_time_before_subsequent_info,
-                                        ) {
-                                            last_best_moves_payload = Some(best_moves_payload);
-                                        } else {
-                                            proc.last_event_sent = Some(Instant::now());
-                                            best_moves_payload.emit(&app)?;
-                                            last_best_moves_payload = None;
-                                        }
-
-                                        proc.last_depth = cur_depth;
-                                        proc.last_best_moves = proc.best_moves.clone();
-                                        proc.last_progress = progress as f32;
-                                    }
-                                    proc.best_moves.clear();
-                                }
-                            }
-                        }
-                    }
-                    UciMessage::BestMove { .. } => {
-                        BestMovesPayload {
-                            best_lines: proc.last_best_moves.clone(),
-                            engine: id.clone(),
-                            tab: tab.clone(),
-                            fen: proc.options.fen.clone(),
-                            moves: proc.options.moves.clone(),
-                            progress: 100.0,
-                        }
-                        .emit(&app)?;
-
-                        proc.last_progress = 100.0;
-                    }
-                    _ => {}
-                }
-                proc.logs.push(EngineLog::Engine(line));
-            }
-            Err(_) => {
-                if let Some(best_moves_payload) = last_best_moves_payload.clone() {
-                    let mut proc = process.lock().await;
-                    if proc
-                        .last_event_sent
-                        .map_or(proc.start.elapsed() >= min_time_before_first_info, |t| {
-                            t.elapsed() >= max_time_before_subsequent_info
-                        })
-                    {
-                        proc.last_event_sent = Some(Instant::now());
-                        best_moves_payload.emit(&app)?;
-                        last_best_moves_payload = None;
-                    }
-                }
-            }
-            _ => {
-                break;
-            }
-        }
-    }
-    info!("Engine process finished: tab: {}, engine: {}", tab, engine);
-    state.engine_processes.remove(&key);
+    process.go(go_mode).await?;
+    
     Ok(None)
+}
+
+/// Create a new engine process with the given options
+async fn create_new_engine_process(
+    engine_path: PathBuf,
+    options: &EngineOptions,
+    go_mode: &GoMode,
+) -> Result<(EngineProcess, Lines<BufReader<ChildStdout>>), Error> {
+    let (mut process, reader) = EngineProcess::new(engine_path).await?;
+    process.set_options(options.clone()).await?;
+    process.go(go_mode).await?;
+    Ok((process, reader))
+}
+
+/// Main analysis loop that processes UCI messages
+async fn run_analysis_loop(
+    mut reader: Lines<BufReader<ChildStdout>>,
+    process_arc: Arc<Mutex<EngineProcess>>,
+    id: &str,
+    tab: &str,
+    app: &tauri::AppHandle,
+) -> Result<(), Error> {
+    while let Some(line) = reader.next_line().await? {
+        let mut process_guard = process_arc.lock().await;
+        
+        match parse_one(&line) {
+            UciMessage::Info(attrs) => {
+                handle_info_message(attrs, &mut process_guard, id, tab, app).await?;
+            }
+            UciMessage::BestMove { .. } => {
+                handle_best_move_message(&process_guard, id, tab, app).await?;
+            }
+            _ => {} // Ignore other UCI messages
+        }
+        
+        process_guard.logs.push(EngineLog::Engine(line));
+    }
+    
+    Ok(())
+}
+
+/// Handle UCI Info messages containing analysis data
+async fn handle_info_message(
+    attrs: Vec<UciInfoAttribute>,
+    process: &mut EngineProcess,
+    id: &str,
+    tab: &str,
+    app: &tauri::AppHandle,
+) -> Result<(), Error> {
+    // Parse UCI attributes - this may return None for info messages without moves
+    let Some(best_moves) = parse_uci_attrs(attrs, &process.options.fen.parse()?, &process.options.moves)? else {
+        // This info message doesn't contain moves (e.g., just depth/nodes updates), skip it
+        return Ok(());
+    };
+    
+    let multipv = best_moves.multipv;
+    let current_depth = best_moves.depth;
+    
+    // Check if this is the expected next line in the multi-PV sequence
+    if multipv as usize != process.best_moves.len() + 1 {
+        return Ok(());
+    }
+    
+    process.best_moves.push(best_moves);
+    
+    // If we've collected all expected lines for this depth
+    if multipv == process.real_multipv {
+        if should_emit_progress_update(process, current_depth)? {
+            emit_progress_update(process, id, tab, app, current_depth).await?;
+        }
+        process.best_moves.clear();
+    }
+    
+    Ok(())
+}
+
+/// Determine if we should emit a progress update
+fn should_emit_progress_update(process: &EngineProcess, current_depth: u32) -> Result<bool, Error> {
+    let all_same_depth = process.best_moves.iter().all(|moves| moves.depth == current_depth);
+    let depth_progressed = current_depth >= process.last_depth;
+    let rate_limit_ok = PROGRESS_RATE_LIMITER.check().is_ok();
+    
+    Ok(all_same_depth && depth_progressed && rate_limit_ok)
+}
+
+/// Emit a progress update event
+async fn emit_progress_update(
+    process: &mut EngineProcess,
+    id: &str,
+    tab: &str,
+    app: &tauri::AppHandle,
+    current_depth: u32,
+) -> Result<(), Error> {
+    let progress = calculate_progress(process)?;
+    
+    let payload = BestMovesPayload {
+        best_lines: process.best_moves.clone(),
+        engine: id.to_string(),
+        tab: tab.to_string(),
+        fen: process.options.fen.clone(),
+        moves: process.options.moves.clone(),
+        progress,
+    };
+    
+    payload.emit(app)?;
+    
+    // Update process state
+    process.last_depth = current_depth;
+    process.last_best_moves = process.best_moves.clone();
+    process.last_progress = progress as f32;
+    
+    Ok(())
+}
+
+/// Calculate analysis progress based on the go mode
+fn calculate_progress(process: &EngineProcess) -> Result<f64, Error> {
+    let progress = match &process.go_mode {
+        GoMode::Depth(target_depth) => {
+            let current_depth = process.best_moves.first()
+                .map(|moves| moves.depth)
+                .unwrap_or(0) as f64;
+            (current_depth / *target_depth as f64) * COMPLETION_PROGRESS
+        }
+        GoMode::Time(target_time_ms) => {
+            let elapsed_ms = process.start.elapsed().as_millis() as f64;
+            (elapsed_ms / *target_time_ms as f64) * COMPLETION_PROGRESS
+        }
+        GoMode::Nodes(target_nodes) => {
+            let current_nodes = process.best_moves.first()
+                .map(|moves| moves.nodes)
+                .unwrap_or(0) as f64;
+            (current_nodes / *target_nodes as f64) * COMPLETION_PROGRESS
+        }
+        GoMode::PlayersTime(_) | GoMode::Infinite => NEAR_COMPLETION_PROGRESS,
+    };
+    
+    Ok(progress.min(COMPLETION_PROGRESS))
+}
+
+/// Handle UCI BestMove message (analysis completion)
+async fn handle_best_move_message(
+    process: &EngineProcess,
+    id: &str,
+    tab: &str,
+    app: &tauri::AppHandle,
+) -> Result<(), Error> {
+    let payload = BestMovesPayload {
+        best_lines: process.last_best_moves.clone(),
+        engine: id.to_string(),
+        tab: tab.to_string(),
+        fen: process.options.fen.clone(),
+        moves: process.options.moves.clone(),
+        progress: COMPLETION_PROGRESS,
+    };
+    
+    payload.emit(app)?;
+    
+    Ok(())
 }
 
 #[derive(Serialize, Debug, Default, Type)]
@@ -744,7 +849,7 @@ pub async fn analyze_game(
         while let Ok(Some(line)) = reader.next_line().await {
             match parse_one(&line) {
                 UciMessage::Info(attrs) => {
-                    if let Ok(best_moves) =
+                    if let Ok(Some(best_moves)) =
                         parse_uci_attrs(attrs, &proc.options.fen.parse()?, moves)
                     {
                         let multipv = best_moves.multipv;

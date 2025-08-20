@@ -104,6 +104,9 @@ pub enum Error {
 
     #[error("Package manager error: {0}")]
     PackageManager(String),
+
+    #[error("Invalid MultiPV value: {0}")]
+    InvalidMultiPvValue(String),
 }
 
 impl serde::Serialize for Error {
