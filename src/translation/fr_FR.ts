@@ -122,6 +122,9 @@ export const fr_FR = {
 
     "Tab.NewTab": "Nouvel onglet",
 
+    "Dashboard.Welcome.FirstOpen": "Bienvenu chez Pawn Appétit!",
+    "Dashboard.Welcome.Back": "Bon retour!",
+    "Dashboard.Welcome.Desc": "Prêt à jouer votre prochain meilleur coup ?",
     "Dashboard.Card.PlayChess.Title": "Jouer",
     "Dashboard.Card.PlayChess.Desc": "Jouer contre un moteur ou un ami",
     "Dashboard.Card.PlayChess.Button": "Jouer",
