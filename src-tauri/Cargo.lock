@@ -806,63 +806,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
-name = "pawn-appetit"
-version = "0.3.2"
-dependencies = [
- "axum",
- "bincode",
- "btoi",
- "bzip2 0.4.4",
- "chrono",
- "csv",
- "dashmap 6.1.0",
- "derivative",
- "diesel",
- "futures-util",
- "governor",
- "lazy_static",
- "log",
- "nonzero_ext",
- "oauth2",
- "once_cell",
- "pgn-reader",
- "quick-xml 0.31.0",
- "rand 0.8.5",
- "rayon",
- "regex",
- "reqwest 0.12.22",
- "rusqlite",
- "serde",
- "serde_json",
- "shakmaty",
- "specta",
- "specta-typescript",
- "strsim",
- "sysinfo",
- "tar",
- "tauri",
- "tauri-build",
- "tauri-plugin-cli",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-http",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-os",
- "tauri-plugin-process",
- "tauri-plugin-shell",
- "tauri-plugin-updater",
- "tauri-plugin-window-state",
- "tauri-specta",
- "tempfile",
- "thiserror 1.0.69",
- "tokio",
- "vampirc-uci",
- "zip 2.4.2",
- "zstd",
-]
-
-[[package]]
 name = "chrono"
 version = "0.4.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3729,6 +3672,66 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
 
 [[package]]
+name = "pawn-appetit"
+version = "0.3.2"
+dependencies = [
+ "axum",
+ "bincode",
+ "btoi",
+ "bzip2 0.4.4",
+ "chrono",
+ "csv",
+ "dashmap 6.1.0",
+ "derivative",
+ "diesel",
+ "fs_extra",
+ "futures-util",
+ "governor",
+ "lazy_static",
+ "log",
+ "nonzero_ext",
+ "oauth2",
+ "once_cell",
+ "pgn-reader",
+ "postgrest",
+ "quick-xml 0.31.0",
+ "rand 0.8.5",
+ "rayon",
+ "regex",
+ "reqwest 0.12.22",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "shakmaty",
+ "specta",
+ "specta-typescript",
+ "strsim",
+ "sysinfo",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-cli",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-http",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-os",
+ "tauri-plugin-process",
+ "tauri-plugin-shell",
+ "tauri-plugin-updater",
+ "tauri-plugin-window-state",
+ "tauri-specta",
+ "tempfile",
+ "thiserror 1.0.69",
+ "tokio",
+ "uuid",
+ "vampirc-uci",
+ "zip 2.4.2",
+ "zstd",
+]
+
+[[package]]
 name = "pbkdf2"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5725,7 +5728,7 @@ dependencies = [
  "serde_json",
  "tauri-utils",
  "tauri-winres",
- "toml 0.9.4",
+ "toml 0.9.2",
  "walkdir",
 ]
 
@@ -5783,7 +5786,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri-utils",
- "toml 0.9.4",
+ "toml 0.9.2",
  "walkdir",
 ]
 
@@ -6117,7 +6120,7 @@ dependencies = [
  "serde_with",
  "swift-rs",
  "thiserror 2.0.12",
- "toml 0.9.4",
+ "toml 0.9.2",
  "url",
  "urlpattern",
  "uuid",
