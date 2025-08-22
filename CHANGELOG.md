@@ -1,5 +1,7 @@
 # Pawn Appétit
 
+## v0.4.0
+
 ## v0.3.2
 
 ### ✨ Features
