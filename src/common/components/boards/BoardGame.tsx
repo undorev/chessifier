@@ -353,7 +353,7 @@ function BoardGame() {
         return;
       }
       const currentTurn = pos.turn;
-      const player = currentTurn === "white" ? players.white : players.black;
+      const player = currentTurn === "white" ? players.white : players.black;      
 
       if (player.type === "engine" && player.engine) {
         commands.getBestMoves(
@@ -368,6 +368,7 @@ function BoardGame() {
                   black: blackTime ?? 0,
                   winc: player.timeControl.increment ?? 0,
                   binc: player.timeControl.increment ?? 0,
+                  depth: player.go.t === "Depth" ? player.go.c : 1,
                 },
               }
             : player.go,

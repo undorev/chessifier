@@ -35,7 +35,8 @@ use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager, Window};
 
 use crate::chess::{
-    analyze_game, get_engine_config, get_engine_logs, kill_engine, kill_engines, stop_engine,
+    analyze_game, get_engine_config, get_engine_logs, get_engine_status, kill_engine, kill_engines, 
+    stop_engine, cleanup_tab_engines,
 };
 use crate::db::{
     clear_games, convert_pgn, create_indexes, delete_database, delete_db_game, delete_empty_games,
@@ -292,7 +293,9 @@ async fn main() {
             stop_engine,
             kill_engine,
             kill_engines,
+            cleanup_tab_engines,
             get_engine_logs,
+            get_engine_status,
             memory_size,
             get_puzzle,
             search_opening_name,

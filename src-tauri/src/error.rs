@@ -104,6 +104,27 @@ pub enum Error {
 
     #[error("Package manager error: {0}")]
     PackageManager(String),
+
+    #[error("Invalid MultiPV value: {0}")]
+    InvalidMultiPvValue(String),
+
+    #[error("Engine timeout: {0}")]
+    EngineTimeout(String),
+
+    #[error("Engine crashed: {0}")]
+    EngineCrashed(String),
+
+    #[error("Engine unresponsive")]
+    EngineUnresponsive,
+
+    #[error("Hash allocation failed: {0}")]
+    HashAllocationFailed(String),
+
+    #[error("Invalid engine state: {0}")]
+    InvalidEngineState(String),
+
+    #[error("Engine communication error: {0}")]
+    EngineCommunication(String),
 }
 
 impl serde::Serialize for Error {
@@ -121,6 +142,55 @@ impl Type for Error {
         _generics: specta::Generics,
     ) -> specta::datatype::DataType {
         specta::datatype::DataType::Primitive(specta::datatype::PrimitiveType::String)
+    }
+}
+
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        match self {
+            Error::NoStdin => Error::NoStdin,
+            Error::NoStdout => Error::NoStdout,
+            Error::NoMovesFound => Error::NoMovesFound,
+            Error::SearchStopped => Error::SearchStopped,
+            Error::MissingReferenceDatabase => Error::MissingReferenceDatabase,
+            Error::NoOpeningFound => Error::NoOpeningFound,
+            Error::NoMatchFound => Error::NoMatchFound,
+            Error::NoPuzzles => Error::NoPuzzles,
+            Error::NotDistinctPlayers => Error::NotDistinctPlayers,
+            Error::InvalidBinaryData => Error::InvalidBinaryData,
+            Error::MutexLockFailed(msg) => Error::MutexLockFailed(msg.clone()),
+            Error::PackageManager(msg) => Error::PackageManager(msg.clone()),
+            Error::InvalidMultiPvValue(msg) => Error::InvalidMultiPvValue(msg.clone()),
+            Error::EngineTimeout(msg) => Error::EngineTimeout(msg.clone()),
+            Error::EngineCrashed(msg) => Error::EngineCrashed(msg.clone()),
+            Error::EngineUnresponsive => Error::EngineUnresponsive,
+            Error::HashAllocationFailed(msg) => Error::HashAllocationFailed(msg.clone()),
+            Error::InvalidEngineState(msg) => Error::InvalidEngineState(msg.clone()),
+            Error::EngineCommunication(msg) => Error::EngineCommunication(msg.clone()),
+            // For complex error types that can't be cloned easily, create a generic error
+            Error::Io(_) => Error::EngineCommunication("IO Error".to_string()),
+            Error::Zip(_) => Error::EngineCommunication("Zip Error".to_string()),
+            Error::BincodeEncode(_) => Error::EngineCommunication("Encode Error".to_string()),
+            Error::BincodeDecode(_) => Error::EngineCommunication("Decode Error".to_string()),
+            Error::XmlDeserialize(_) => Error::EngineCommunication("XML Error".to_string()),
+            Error::ParseInt(_) => Error::InvalidMultiPvValue("Parse Error".to_string()),
+            Error::Tauri(_) => Error::EngineCommunication("Tauri Error".to_string()),
+            Error::TauriShell(_) => Error::EngineCommunication("Shell Error".to_string()),
+            Error::TauriOpener(_) => Error::EngineCommunication("Opener Error".to_string()),
+            Error::Reqwest(_) => Error::EngineCommunication("Network Error".to_string()),
+            Error::ChessPosition(_) => Error::InvalidEngineState("Invalid Position".to_string()),
+            Error::IllegalUciMove(_) => Error::InvalidEngineState("Illegal Move".to_string()),
+            Error::ParseUciMove(_) => Error::InvalidEngineState("Parse Move Error".to_string()),
+            Error::Fen(_) => Error::InvalidEngineState("FEN Error".to_string()),
+            Error::ParseSan(_) => Error::InvalidEngineState("SAN Error".to_string()),
+            Error::IllegalSan(_) => Error::InvalidEngineState("Illegal SAN".to_string()),
+            Error::Diesel(_) => Error::EngineCommunication("Database Error".to_string()),
+            Error::DieselConnection(_) => Error::EngineCommunication("DB Connection Error".to_string()),
+            Error::R2d2(_) => Error::EngineCommunication("Connection Pool Error".to_string()),
+            Error::SystemTime(_) => Error::EngineTimeout("System Time Error".to_string()),
+            Error::FromUtf8Error(_) => Error::EngineCommunication("UTF8 Error".to_string()),
+            Error::FormatError(_) => Error::EngineCommunication("Format Error".to_string()),
+        }
     }
 }
 

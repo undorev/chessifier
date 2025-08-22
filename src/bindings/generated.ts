@@ -61,9 +61,25 @@ async killEngines(tab: string) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async cleanupTabEngines(tab: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("cleanup_tab_engines", { tab }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getEngineLogs(engine: string, tab: string) : Promise<Result<EngineLog[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_engine_logs", { engine, tab }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getEngineStatus(engine: string, tab: string) : Promise<Result<string | null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_engine_status", { engine, tab }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -519,7 +535,7 @@ export type DatabaseInfo = { title: string; description: string; player_count: n
 export type DatabaseProgress = { id: string; progress: number }
 export type DownloadProgress = { progress: number; id: string; finished: boolean }
 export type EngineConfig = { name: string; options: UciOptionConfig[] }
-export type EngineLog = { type: "gui"; value: string } | { type: "engine"; value: string }
+export type EngineLog = { type: "gui"; value: string } | { type: "engine"; value: string } | { type: "error"; value: string } | { type: "warning"; value: string }
 export type EngineOption = { name: string; value: string }
 export type EngineOptions = { fen: string; moves: string[]; extraOptions: EngineOption[] }
 export type Event = { id: number; name: string | null }
@@ -538,7 +554,7 @@ export type Player = { id: number; name: string | null; elo: number | null }
 export type PlayerGameInfo = { site_stats_data: SiteStatsData[] }
 export type PlayerQuery = { options: QueryOptions<PlayerSort>; name?: string | null; range?: [number, number] | null }
 export type PlayerSort = "id" | "name" | "elo"
-export type PlayersTime = { white: number; black: number; winc: number; binc: number }
+export type PlayersTime = { white: number; black: number; winc: number; binc: number; depth: number }
 export type PositionQueryJs = { fen: string; type_: string }
 export type PositionStats = { move: string; white: number; draw: number; black: number }
 export type Puzzle = { id: number; fen: string; moves: string; rating: number; rating_deviation: number; popularity: number; nb_plays: number }
