@@ -154,7 +154,7 @@ export default function ImportModal({ context, id }: ContextModalProps<{ modalBo
     .exhaustive();
 
   const disabled = match(importType)
-    .with("PGN", () => !pgnTarget.target)
+    .with("PGN", () => !pgnTarget.target || (save && !filename.trim()))
     .with("Link", () => !link)
     .with("FEN", () => !fen)
     .exhaustive();
