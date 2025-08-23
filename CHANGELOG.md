@@ -2,6 +2,110 @@
 
 ## v0.4.0
 
+### ✨ Features
+
+* **Engines**
+
+  * Enhanced **package management**
+
+* **Analysis**
+
+  * Enhanced **analysis tab creation** with detailed game headers and **PGN generation**
+  * Added **Graph tab** to openings repertoire - thanks [gm-m](https://github.com/gm-m) 🎉
+  * Added **recent online games import** from **Chess.com** and **Lichess.org** - thanks [undorev](https://github.com/undorev) 🎉
+
+* **Puzzles**
+
+  * Unified **PGN source input** for Import and Create modals - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Added **local puzzle database (first pass)** - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Generated puzzles in **deterministic order** (by rating/id for Lichess, index for files) - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Translated most **puzzle-related labels** - thanks [dotneB](https://github.com/dotneB) 🎉
+
+* **Theme & UI**
+
+  * Introduced **comprehensive theme management system**
+  * Enhanced **ThemeSettings** with quick theme selection and custom theme management
+  * Improved **ThemeSelector** with stable orientation and better state management
+  * Added **drag-and-drop engine reordering** in AnalysisPanel and BoardsPage
+  * Updated **application icon** on macOS
+  * Improved **GameInfo** to support custom puzzle UI - thanks [dotneB](https://github.com/dotneB) 🎉
+
+* **Telemetry**
+
+  * Added **telemetry toggle** in Settings
+  * Enhanced **telemetry settings** and database setup
+
+* **Settings & Translations**
+
+  * Translated **language list in Settings** - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Added **common white/black translations** - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Improved **plural handling** in i18n with i18next contexts - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Added more **French translations** - thanks [dotneB](https://github.com/dotneB) 🎉
+
+* **Data & Migration**
+
+  * Added **legacy app data migration functionality**
+
+### 🛠 Improvements & Refactors
+
+* **Engine**
+
+  * Refactored **EngineProcess management and UCI communication**
+
+    * Better process spawning, I/O handling, option management, and error resilience
+    * Enhanced MultiPV handling, novelty detection, sacrifice evaluation, and logging
+  * Optimized **engine option setting**
+  * Improved **engine selection logic** to include *go mode*
+
+* **Theme & UI**
+
+  * Refactored **ThemeSettings** and editor components for consistent state management
+  * Disabled **auto-detection** for theme changes
+  * Improved **board orientation** handling and preview updates - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Fixed paper rendering in **accounts page**
+
+* **Codebase**
+
+  * Improved **type safety** across modules
+  * Streamlined **OAuth authentication logic** and removed unused imports
+
+### 🐛 Fixes
+
+* **Puzzles**
+
+  * Enhanced puzzle **difficulty adjustment logic** based on completion status
+
+* **Gameplay & Analysis**
+
+  * Fixed **game analysis** handling for online games - thanks [undorev](https://github.com/undorev) 🎉
+  * Fixed **engine options** not applying in games against computer - thanks [undorev](https://github.com/undorev) 🎉
+  * Fixed **immediate result emission** and throttling in `get_best_moves`
+  * Fixed **PGN save** import when filename was empty - thanks [gm-m](https://github.com/gm-m) 🎉
+  * Fixed **save PGN to collection** - thanks [gm-m](https://github.com/gm-m) 🎉
+  * Fixed **clicking import in dashboard** without loaded boards - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Fixed **countPgnGames caching** of new files - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Fixed **exercise pieces reset** and move tracking
+  * Fixed **move evaluation feedback** messaging
+
+* **UI**
+
+  * Corrected **Armenian display name**
+  * Fixed **icon sizes** in ThemeSettings by replacing `rem()` with numeric values - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Stabilized **board orientation** - thanks [dotneB](https://github.com/dotneB) 🎉
+  * Fixed **next lesson title**
+
+### 📚 Documentation
+
+* Updated **README**
+
+### 🧹 Chores
+
+* Updated **dependencies**
+* Updated **translations**
+* Updated **pnpm CLI to v10** in workflows
+* Added `packageManager` field to `package.json`
+* Updated **biome configs and ignores** - thanks [dotneB](https://github.com/dotneB) 🎉
+
 ## v0.3.2
 
 ### ✨ Features
@@ -12,7 +116,7 @@
 
 * **Improved error handling** across various modules
 * **Exercise reset**: pieces now correctly return to initial positions
-* **Board orientation** now respects player roles – thanks [gm-m](https://github.com/gm-m) 🎉
+* **Board orientation** now respects player roles - thanks [gm-m](https://github.com/gm-m) 🎉
 
 ## v0.3.1
 
@@ -100,7 +204,6 @@
 * Updated screenshots
 * Updated dependencies
 * Updated `vampirc-uci` dependency source to Pawn Appétit repository
-
 
 ## v0.2.0
 
