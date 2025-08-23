@@ -1,6 +1,6 @@
 {
   "name": "pawn-appetit",
-  "version": "0.4.0-alpha",
+  "version": "0.4.0-beta",
   "type": "module",
   "packageManager": "pnpm@10.15.0",
   "scripts": {
