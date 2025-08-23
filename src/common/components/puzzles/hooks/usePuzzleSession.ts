@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import { useContext } from "react";
 import { useStore } from "zustand";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
-import { currentPuzzleAtom, playerRatingAtom } from "@/state/atoms";
+import { currentPuzzleAtom, puzzlePlayerRatingAtom } from "@/state/atoms";
 import { logger } from "@/utils/logger";
 import type { Completion, Puzzle } from "@/utils/puzzles";
 import { PUZZLE_DEBUG_LOGS, updateElo } from "@/utils/puzzles";
@@ -19,7 +19,7 @@ export const usePuzzleSession = (id: string) => {
     defaultValue: [],
   });
   const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
-  const [playerRating, setPlayerRating] = useAtom(playerRatingAtom);
+  const [playerRating, setPlayerRating] = useAtom(puzzlePlayerRatingAtom);
 
   const setPuzzle = (puzzle: { fen: string; moves: string[] }) => {
     setFen(puzzle.fen);

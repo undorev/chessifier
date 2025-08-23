@@ -14,7 +14,7 @@ import {
   hidePuzzleRatingAtom,
   inOrderPuzzlesAtom,
   jumpToNextPuzzleAtom,
-  playerRatingAtom,
+  puzzlePlayerRatingAtom,
   progressivePuzzlesAtom,
 } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
@@ -68,7 +68,7 @@ function Puzzles({ id }: { id: string }) {
   const [hideRating, setHideRating] = useAtom(hidePuzzleRatingAtom);
   const [inOrder, setInOrder] = useAtom(inOrderPuzzlesAtom);
   const [jumpToNext, setJumpToNext] = useAtom(jumpToNextPuzzleAtom);
-  const [playerRating] = useAtom(playerRatingAtom);
+  const [playerRating] = useAtom(puzzlePlayerRatingAtom);
 
   // Computed values
   const currentPuzzleData = puzzles?.[currentPuzzle];

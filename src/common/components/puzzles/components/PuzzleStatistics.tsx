@@ -2,7 +2,7 @@ import { Badge, Group, Text } from "@mantine/core";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { hidePuzzleRatingAtom, maxPlayerRatingAtom, playerRatingAtom } from "@/state/atoms";
+import { hidePuzzleRatingAtom, maxPuzzlePlayerRatingAtom, puzzlePlayerRatingAtom } from "@/state/atoms";
 import { logger } from "@/utils/logger";
 import type { Puzzle } from "@/utils/puzzles";
 import { PUZZLE_DEBUG_LOGS } from "@/utils/puzzles";
@@ -14,8 +14,8 @@ interface PuzzleStatisticsProps {
 export const PuzzleStatistics = ({ currentPuzzle }: PuzzleStatisticsProps) => {
   const { t } = useTranslation();
   const [hideRating] = useAtom(hidePuzzleRatingAtom);
-  const [playerRating] = useAtom(playerRatingAtom);
-  const [maxPlayerRating, setMaxPlayerRating] = useAtom(maxPlayerRatingAtom);
+  const [playerRating] = useAtom(puzzlePlayerRatingAtom);
+  const [maxPlayerRating, setMaxPlayerRating] = useAtom(maxPuzzlePlayerRatingAtom);
   const [showNewMax, setShowNewMax] = useState(false);
 
   const displayRating = currentPuzzle?.completion === "incomplete" && hideRating ? "?" : currentPuzzle?.rating;
