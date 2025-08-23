@@ -281,8 +281,40 @@ async fn close_splashscreen(window: Window) -> Result<(), String> {
     Ok(())
 }
 
+/// Gets the log level from environment variable or defaults to Info
+fn get_log_level() -> LevelFilter {
+    match std::env::var("RUST_LOG").as_deref() {
+        Ok("trace") => LevelFilter::Trace,
+        Ok("debug") => LevelFilter::Debug,
+        Ok("info") => LevelFilter::Info,
+        Ok("warn") => LevelFilter::Warn,
+        Ok("error") => LevelFilter::Error,
+        Ok("off") => LevelFilter::Off,
+        _ => {
+            // Check for more specific patterns like "debug", "app=debug", etc.
+            if let Ok(rust_log) = std::env::var("RUST_LOG") {
+                if rust_log.contains("debug") {
+                    return LevelFilter::Debug;
+                } else if rust_log.contains("trace") {
+                    return LevelFilter::Trace;
+                } else if rust_log.contains("warn") {
+                    return LevelFilter::Warn;
+                } else if rust_log.contains("error") {
+                    return LevelFilter::Error;
+                }
+            }
+            // Default to Debug in debug builds, Info in release builds
+            #[cfg(debug_assertions)]
+            return LevelFilter::Debug;
+            #[cfg(not(debug_assertions))]
+            return LevelFilter::Info;
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
+    
     let specta_builder = tauri_specta::Builder::new()
         .commands(tauri_specta::collect_commands!(
             close_splashscreen,
@@ -364,12 +396,17 @@ async fn main() {
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_log::Builder::new()
-                .target(tauri_plugin_log::Target::new(
-                    tauri_plugin_log::TargetKind::LogDir {
-                        file_name: Some("pawn-appetit".to_string()),
-                    },
-                ))
-                .level(LevelFilter::Info).build())
+                .targets([
+                    tauri_plugin_log::Target::new(
+                        tauri_plugin_log::TargetKind::LogDir {
+                            file_name: Some("pawn-appetit".to_string()),
+                        },
+                    ),
+                    tauri_plugin_log::Target::new(
+                        tauri_plugin_log::TargetKind::Stdout,
+                    ),
+                ])
+                .level(get_log_level()).build())
         .invoke_handler(specta_builder.invoke_handler())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())

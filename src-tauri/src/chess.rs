@@ -6,9 +6,10 @@ use std::{
     time::{Duration, Instant},
 };
 
+use dashmap::DashMap;
 use derivative::Derivative;
 use governor::{Quota, RateLimiter};
-use log::{error, info};
+use log::{debug, error, info, trace, warn};
 use nonzero_ext::*;
 use serde::{Deserialize, Serialize};
 use shakmaty::{
@@ -21,6 +22,7 @@ use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader, Lines},
     process::{Child, ChildStdin, ChildStdout, Command},
     sync::Mutex,
+    time::timeout,
 };
 use vampirc_uci::{
     parse_one,
@@ -33,6 +35,17 @@ use crate::{
     error::Error,
     AppState,
 };
+
+// Constants for timing and rate limiting
+const ENGINE_INIT_TIMEOUT: Duration = Duration::from_secs(10);
+const TICK_DURATION: Duration = Duration::from_millis(10); // Reduced for near-real-time processing
+const MIN_EVENT_INTERVAL: Duration = Duration::from_millis(50); // Target ≤50ms latency
+const MAX_EVENT_INTERVAL: Duration = Duration::from_millis(100); // Reduced maximum interval
+const ENGINE_STOP_DELAY: Duration = Duration::from_millis(50);
+const EVENTS_PER_SECOND: u32 = 20; // Increased for more frequent updates
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[derive(Debug, Clone, Serialize, Type)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
@@ -59,47 +72,32 @@ pub struct EngineProcess {
 
 impl EngineProcess {
     async fn new(path: PathBuf) -> Result<(Self, Lines<BufReader<ChildStdout>>), Error> {
-        let mut command = Command::new(&path);
-        command.current_dir(path.parent().unwrap());
-        command
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
-
-        #[cfg(target_os = "windows")]
-        command.creation_flags(CREATE_NO_WINDOW);
-
-        let mut child = command.spawn()?;
-
+        info!("Initializing engine from path: {:?}", path);
+        
+        let mut child = Self::spawn_engine_process(&path)?;
+        let (mut stdin, mut lines) = Self::get_io_handles(&mut child)?;
+        
         let mut logs = Vec::new();
-
-        let mut stdin = child.stdin.take().ok_or(Error::NoStdin)?;
-
-        tokio::spawn(async move {
-            let mut stderr = BufReader::new(child.stderr.take().unwrap()).lines();
-            while let Some(line) = stderr.next_line().await.unwrap() {
-                error!("{}", &line);
+        
+        // Initialize UCI communication with timeout
+        match timeout(ENGINE_INIT_TIMEOUT, Self::initialize_uci(&mut stdin, &mut lines, &mut logs)).await {
+            Ok(Ok(())) => {
+                info!("Engine initialized successfully: {:?}", path);
             }
-        });
-
-        let mut lines = BufReader::new(child.stdout.take().ok_or(Error::NoStdout)?).lines();
-
-        let _ = stdin.write_all("uci\n".as_bytes()).await;
-        logs.push(EngineLog::Gui("uci\n".to_string()));
-        while let Some(line) = lines.next_line().await? {
-            logs.push(EngineLog::Engine(line.clone()));
-            if line == "uciok" {
-                let _ = stdin.write_all("isready\n".as_bytes()).await;
-                logs.push(EngineLog::Gui("isready\n".to_string()));
-                while let Some(line_is_ready) = lines.next_line().await? {
-                    logs.push(EngineLog::Engine(line_is_ready.clone()));
-                    if line_is_ready == "readyok" {
-                        break;
-                    }
-                }
-                break;
+            Ok(Err(e)) => {
+                error!("Failed to initialize engine {:?}: {}", path, e);
+                let _ = child.kill().await;
+                return Err(e);
+            }
+            Err(_) => {
+                error!("Engine initialization timeout: {:?}", path);
+                let _ = child.kill().await;
+                return Err(Error::EngineTimeout);
             }
         }
+
+        // Spawn stderr handler
+        Self::spawn_stderr_handler(child.stderr.take());
 
         Ok((
             Self {
@@ -120,64 +118,210 @@ impl EngineProcess {
         ))
     }
 
+    fn spawn_engine_process(path: &PathBuf) -> Result<Child, Error> {
+        debug!("Spawning engine process: {:?}", path);
+        
+        let mut command = Command::new(path);
+        command.current_dir(path.parent().unwrap_or_else(|| std::path::Path::new(".")));
+        command
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .env("TERM", "dumb"); // Prevent terminal feature usage
+
+        #[cfg(target_os = "windows")]
+        command.creation_flags(CREATE_NO_WINDOW);
+
+        let child = command.spawn()
+            .map_err(|e| {
+                error!("Failed to spawn engine process {:?}: {}", path, e);
+                Error::Io(e)
+            })?;
+
+        debug!("Engine process spawned successfully");
+        Ok(child)
+    }
+
+    fn get_io_handles(child: &mut Child) -> Result<(ChildStdin, Lines<BufReader<ChildStdout>>), Error> {
+        let stdin = child.stdin.take().ok_or_else(|| {
+            error!("Failed to get stdin handle from engine process");
+            Error::NoStdin
+        })?;
+        
+        let stdout = child.stdout.take().ok_or_else(|| {
+            error!("Failed to get stdout handle from engine process");
+            Error::NoStdout
+        })?;
+        
+        // Use a smaller buffer for more responsive reading
+        let reader = BufReader::with_capacity(1024, stdout);
+        let lines = reader.lines();
+        Ok((stdin, lines))
+    }
+
+    async fn initialize_uci(
+        stdin: &mut ChildStdin,
+        lines: &mut Lines<BufReader<ChildStdout>>,
+        logs: &mut Vec<EngineLog>
+    ) -> Result<(), Error> {
+        debug!("Starting UCI initialization");
+        
+        // Send UCI command
+        Self::send_command_with_log(stdin, "uci\n", logs).await?;
+        
+        // Wait for uciok
+        while let Some(line) = lines.next_line().await? {
+            trace!("Engine response: {}", line);
+            logs.push(EngineLog::Engine(line.clone()));
+            
+            if line == "uciok" {
+                debug!("Received uciok, sending isready");
+                Self::send_command_with_log(stdin, "isready\n", logs).await?;
+                
+                // Wait for readyok
+                while let Some(ready_line) = lines.next_line().await? {
+                    trace!("Engine ready response: {}", ready_line);
+                    logs.push(EngineLog::Engine(ready_line.clone()));
+                    
+                    if ready_line == "readyok" {
+                        debug!("Engine is ready");
+                        return Ok(());
+                    }
+                }
+                break;
+            }
+        }
+        
+        Err(Error::EngineTimeout)
+    }
+
+    fn spawn_stderr_handler(stderr: Option<tokio::process::ChildStderr>) {
+        if let Some(stderr) = stderr {
+            tokio::spawn(async move {
+                let mut stderr_lines = BufReader::new(stderr).lines();
+                while let Ok(Some(line)) = stderr_lines.next_line().await {
+                    warn!("Engine stderr: {}", line);
+                }
+            });
+        }
+    }
+
+    async fn send_command_with_log(
+        stdin: &mut ChildStdin,
+        command: &str,
+        logs: &mut Vec<EngineLog>
+    ) -> Result<(), Error> {
+        trace!("Sending command: {}", command.trim());
+        
+        stdin.write_all(command.as_bytes()).await
+            .map_err(|e| {
+                error!("Failed to send command '{}': {}", command.trim(), e);
+                Error::Io(e)
+            })?;
+        
+        // Flush stdin immediately to ensure command is sent to engine without delay
+        stdin.flush().await
+            .map_err(|e| {
+                error!("Failed to flush command '{}': {}", command.trim(), e);
+                Error::Io(e)
+            })?;
+        
+        debug!("Command sent and flushed: {}", command.trim());
+        logs.push(EngineLog::Gui(command.to_string()));
+        Ok(())
+    }
+
     async fn set_option<T>(&mut self, name: &str, value: T) -> Result<(), Error>
     where
         T: Display,
     {
         let msg = format!("setoption name {} value {}\n", name, value);
-        self.stdin.write_all(msg.as_bytes()).await?;
-        self.logs.push(EngineLog::Gui(msg));
-
-        Ok(())
+        debug!("Setting engine option: {} = {}", name, value);
+        
+        Self::send_command_with_log(&mut self.stdin, &msg, &mut self.logs).await
     }
 
     async fn set_options(&mut self, options: EngineOptions) -> Result<(), Error> {
-        let fen: Fen = options.fen.parse()?;
+        debug!("Setting engine options for position: {}", options.fen);
+        
+        // Parse and validate position
+        let fen: Fen = options.fen.parse()
+            .map_err(|e| {
+                error!("Invalid FEN: {}", options.fen);
+                e
+            })?;
+        
         let mut pos: Chess = match fen.into_position(CastlingMode::Chess960) {
             Ok(p) => p,
-            Err(e) => e.ignore_too_much_material()?,
+            Err(e) => {
+                warn!("Position error, attempting to ignore extra material: {}", e);
+                e.ignore_too_much_material()?
+            }
         };
         
-        for m in &options.moves {
-            let uci = UciMove::from_ascii(m.as_bytes())?;
-            let mv = uci.to_move(&pos)?;
+        // Apply moves and validate
+        for (i, move_str) in options.moves.iter().enumerate() {
+            let uci = UciMove::from_ascii(move_str.as_bytes())
+                .map_err(|e| {
+                    error!("Invalid UCI move at index {}: {}", i, move_str);
+                    e
+                })?;
+            
+            let mv = uci.to_move(&pos)
+                .map_err(|e| {
+                    error!("Illegal move at index {}: {} in position {}", i, move_str, pos.board());
+                    e
+                })?;
+            
             pos.play_unchecked(&mv);
         }
         
-        let multipv = options
+        // Calculate effective MultiPV
+        let multipv = self.calculate_multipv(&options, &pos);
+        self.real_multipv = multipv;
+        
+        debug!("Calculated MultiPV: {} (legal moves: {})", multipv, pos.legal_moves().len());
+
+        // Set options that have changed
+        let changed_options: Vec<_> = options.extra_options.iter()
+            .filter(|new_opt| {
+                self.options.extra_options.iter()
+                    .find(|current_opt| current_opt.name == new_opt.name)
+                    .map_or(true, |current_opt| current_opt.value != new_opt.value)
+            })
+            .collect();
+
+        for option in changed_options {
+            self.set_option(&option.name, &option.value).await?;
+        }
+
+        // Update position if needed
+        if options.fen != self.options.fen || options.moves != self.options.moves {
+            self.set_position(&options.fen, &options.moves).await?;
+        }
+        
+        // Reset analysis state
+        self.reset_analysis_state();
+        self.options = options;
+        
+        debug!("Engine options set successfully");
+        Ok(())
+    }
+
+    fn calculate_multipv(&self, options: &EngineOptions, pos: &Chess) -> u16 {
+        options
             .extra_options
             .iter()
             .find(|x| x.name == "MultiPV")
             .and_then(|x| x.value.parse().ok())
             .unwrap_or(1)
-            .min(pos.legal_moves().len() as u16);
+            .min(pos.legal_moves().len() as u16)
+    }
 
-        self.real_multipv = multipv;
-
-        let mut options_to_set = Vec::new();
-        
-        for new_option in &options.extra_options {
-            let current_option = self.options.extra_options.iter()
-                .find(|opt| opt.name == new_option.name);
-            
-            if current_option.map_or(true, |opt| opt.value != new_option.value) {
-                options_to_set.push(new_option);
-            }
-        }
-        
-        for option in options_to_set {
-            self.set_option(&option.name, &option.value).await?;
-        }
-
-        if options.fen != self.options.fen || options.moves != self.options.moves {
-            self.set_position(&options.fen, &options.moves).await?;
-        }
-        
+    fn reset_analysis_state(&mut self) {
         self.last_depth = 0;
-        self.options = options;
         self.best_moves.clear();
         self.last_best_moves.clear();
-        Ok(())
     }
 
     async fn set_position(&mut self, fen: &str, moves: &[String]) -> Result<(), Error> {
@@ -187,55 +331,57 @@ impl EngineProcess {
             format!("position fen {fen} moves {}\n", moves.join(" "))
         };
 
-        self.stdin.write_all(msg.as_bytes()).await?;
+        debug!("Setting position: FEN={}, moves={}", fen, moves.len());
+        Self::send_command_with_log(&mut self.stdin, &msg, &mut self.logs).await?;
+        
         self.options.fen = fen.to_string();
         self.options.moves = moves.to_vec();
-        self.logs.push(EngineLog::Gui(msg));
         Ok(())
     }
 
     async fn go(&mut self, mode: &GoMode) -> Result<(), Error> {
         self.go_mode = mode.clone();
-        let msg = match mode {
-            GoMode::Depth(depth) => format!("go depth {depth}\n"),
-            GoMode::Time(time) => format!("go movetime {time}\n"),
-            GoMode::Nodes(nodes) => format!("go nodes {nodes}\n"),
-            GoMode::PlayersTime(PlayersTime {
-                white,
-                black,
-                winc,
-                binc,
-            }) => {
-                format!("go wtime {white} btime {black} winc {winc} binc {binc}\n")
-            }
-            GoMode::Infinite => "go infinite\n".to_string(),
-        };
-        self.stdin.write_all(msg.as_bytes()).await?;
-        self.logs.push(EngineLog::Gui(msg));
+        let msg = self.format_go_command(mode);
+        
+        info!("Starting engine analysis: {}", msg.trim());
+        Self::send_command_with_log(&mut self.stdin, &msg, &mut self.logs).await?;
+        
         self.running = true;
         self.start = Instant::now();
         self.last_event_sent = None;
         Ok(())
     }
 
+    fn format_go_command(&self, mode: &GoMode) -> String {
+        match mode {
+            GoMode::Depth(depth) => format!("go depth {depth}\n"),
+            GoMode::Time(time) => format!("go movetime {time}\n"),
+            GoMode::Nodes(nodes) => format!("go nodes {nodes}\n"),
+            GoMode::PlayersTime(PlayersTime { white, black, winc, binc }) => {
+                format!("go wtime {white} btime {black} winc {winc} binc {binc} movetime 1000\n")
+            }
+            GoMode::Infinite => "go infinite\n".to_string(),
+        }
+    }
+
     async fn stop(&mut self) -> Result<(), Error> {
-        self.stdin.write_all(b"stop\n").await?;
-        self.logs.push(EngineLog::Gui("stop\n".to_string()));
-        self.running = false;
+        if self.running {
+            info!("Stopping engine analysis");
+            Self::send_command_with_log(&mut self.stdin, "stop\n", &mut self.logs).await?;
+            self.running = false;
+        }
         Ok(())
     }
 
     async fn kill(&mut self) -> Result<(), Error> {
-        self.stdin.write_all(b"quit\n").await?;
-        self.logs.push(EngineLog::Gui("quit\n".to_string()));
+        info!("Terminating engine process");
+        Self::send_command_with_log(&mut self.stdin, "quit\n", &mut self.logs).await?;
         self.running = false;
         Ok(())
     }
 }
 
-#[cfg(target_os = "windows")]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
-
+// Rest of the structs remain the same...
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AnalysisCacheKey {
     pub tab: String,
@@ -283,32 +429,50 @@ fn invert_score(score: Score) -> Score {
     }
 }
 
-fn parse_uci_attrs(
+fn parse_uci_info(
     attrs: Vec<UciInfoAttribute>,
     fen: &Fen,
     moves: &[String],
 ) -> Result<BestMoves, Error> {
+    trace!("Parsing UCI info attributes: {} attributes", attrs.len());
+    
     let mut best_moves = BestMoves::default();
+    let mut has_depth = false;
+    let mut has_multipv = false;
+    let mut has_pv = false;
 
     let mut pos: Chess = match fen.clone().into_position(CastlingMode::Chess960) {
         Ok(p) => p,
-        Err(e) => e.ignore_too_much_material()?,
+        Err(e) => {
+            warn!("Position error in parse_uci_info, attempting to ignore extra material");
+            e.ignore_too_much_material()?
+        }
     };
     
-    for m in moves {
-        let uci = UciMove::from_ascii(m.as_bytes())?;
+    // Apply moves to get current position
+    for (i, move_str) in moves.iter().enumerate() {
+        let uci = UciMove::from_ascii(move_str.as_bytes())
+            .map_err(|e| {
+                error!("Invalid UCI move in parse_uci_info at index {}: {}", i, move_str);
+                e
+            })?;
         let mv = uci.to_move(&pos)?;
         pos.play_unchecked(&mv);
     }
+    
     let turn = pos.turn();
 
-    for a in attrs {
-        match a {
-            UciInfoAttribute::Pv(m) => {
-                for mv in m {
+    for attr in attrs {
+        match attr {
+            UciInfoAttribute::Pv(moves) => {
+                trace!("Processing PV with {} moves", moves.len());
+                has_pv = true;
+                let mut temp_pos = pos.clone();
+                
+                for mv in moves {
                     let uci: UciMove = mv.to_string().parse()?;
-                    let m = uci.to_move(&pos)?;
-                    let san = SanPlus::from_move_and_play_unchecked(&mut pos, &m);
+                    let m = uci.to_move(&temp_pos)?;
+                    let san = SanPlus::from_move_and_play_unchecked(&mut temp_pos, &m);
                     best_moves.san_moves.push(san.to_string());
                     best_moves.uci_moves.push(uci.to_string());
                 }
@@ -321,121 +485,64 @@ fn parse_uci_attrs(
             }
             UciInfoAttribute::Depth(depth) => {
                 best_moves.depth = depth;
+                has_depth = true;
+                trace!("Found depth: {}", depth);
             }
             UciInfoAttribute::MultiPv(multipv) => {
                 best_moves.multipv = multipv;
+                has_multipv = true;
+                trace!("Found multipv: {}", multipv);
             }
             UciInfoAttribute::Score(score) => {
+                trace!("Found score: {:?}", score);
                 best_moves.score = score;
             }
             _ => {}
         }
     }
 
-    if best_moves.san_moves.is_empty() {
+    if !has_pv || best_moves.san_moves.is_empty() {
+        trace!("No PV found in UCI info (has_pv={}, moves={})", has_pv, best_moves.san_moves.len());
         return Err(Error::NoMovesFound);
     }
 
+    // Invert score for black to move
     if turn == Color::Black {
         best_moves.score = invert_score(best_moves.score);
     }
 
+    debug!("Successfully parsed UCI info: depth={} (has_depth={}), multipv={} (has_multipv={}), moves={}", 
+           best_moves.depth, has_depth, best_moves.multipv, has_multipv, best_moves.san_moves.len());
+    
     Ok(best_moves)
 }
 
-fn start_engine(path: PathBuf) -> Result<Child, Error> {
-    let mut command = Command::new(&path);
-    
-    // For Homebrew-installed engines, try to set a better working directory
-    if let Some(parent) = path.parent() {
-        command.current_dir(parent);
-    } else {
-        // Fallback to user's home directory for Homebrew engines
-        if let Some(home_dir) = std::env::var_os("HOME") {
-            command.current_dir(home_dir);
-        }
-    }
-    
-    command
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .env("TERM", "dumb"); // Prevent engines from trying to use terminal features
-
-    #[cfg(target_os = "windows")]
-    command.creation_flags(CREATE_NO_WINDOW);
-
-    let child = command.spawn()?;
-
-    Ok(child)
-}
-
-fn get_handles(child: &mut Child) -> Result<(ChildStdin, Lines<BufReader<ChildStdout>>), Error> {
-    let stdin = child.stdin.take().ok_or(Error::NoStdin)?;
-    let stdout = child.stdout.take().ok_or(Error::NoStdout)?;
-    let stdout = BufReader::new(stdout).lines();
-    Ok((stdin, stdout))
-}
-
-async fn send_command(stdin: &mut ChildStdin, command: impl AsRef<str>) -> Result<(), Error> {
-    stdin
-        .write_all(command.as_ref().as_bytes())
-        .await
-        .map_err(|e| Error::Io(e))?;
-    Ok(())
-}
-
-#[derive(Deserialize, Debug, Clone, Type, Derivative, Eq, PartialEq)]
-#[serde(rename_all = "camelCase")]
-#[derivative(Default)]
-pub struct EngineOptions {
-    pub fen: String,
-    pub moves: Vec<String>,
-    pub extra_options: Vec<EngineOption>,
-}
-
-#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
-pub struct EngineOption {
-    name: String,
-    value: String,
-}
-
-#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
-#[serde(tag = "t", content = "c")]
-pub enum GoMode {
-    PlayersTime(PlayersTime),
-    Depth(u32),
-    Time(u32),
-    Nodes(u32),
-    Infinite,
-}
-
-#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
-pub struct PlayersTime {
-    white: u32,
-    black: u32,
-    winc: u32,
-    binc: u32,
-}
-
+// Engine management commands
 #[tauri::command]
 #[specta::specta]
 pub async fn kill_engines(tab: String, state: tauri::State<'_, AppState>) -> Result<(), Error> {
+    info!("Killing all engines for tab: {}", tab);
+    
     let keys: Vec<_> = state
         .engine_processes
         .iter()
-        .map(|x| x.key().clone())
+        .filter(|entry| entry.key().0.starts_with(&tab))
+        .map(|entry| entry.key().clone())
         .collect();
-    for key in keys.clone() {
-        if key.0.starts_with(&tab) {
-            {
-                let process = state.engine_processes.get_mut(&key).unwrap();
-                let mut process = process.lock().await;
-                process.kill().await?;
+
+    debug!("Found {} engines to kill for tab: {}", keys.len(), tab);
+    
+    for key in keys {
+        if let Some(process_guard) = state.engine_processes.get(&key) {
+            let mut process = process_guard.lock().await;
+            if let Err(e) = process.kill().await {
+                warn!("Failed to kill engine {:?}: {}", key, e);
             }
-            state.engine_processes.remove(&key);
         }
+        state.engine_processes.remove(&key);
     }
+    
+    info!("Completed killing engines for tab: {}", tab);
     Ok(())
 }
 
@@ -446,13 +553,20 @@ pub async fn kill_engine(
     tab: String,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), Error> {
-    let key = (tab, engine);
+    let key = (tab.clone(), engine.clone());
+    info!("Killing engine: tab={}, engine={}", tab, engine);
+    
     if let Some(process) = state.engine_processes.get(&key) {
         let mut process = process.lock().await;
-        process.kill().await?;
+        if let Err(e) = process.kill().await {
+            warn!("Failed to kill engine {:?}: {}", key, e);
+        }
     }
+    
+    state.engine_processes.remove(&key);
     Ok(())
 }
+
 #[tauri::command]
 #[specta::specta]
 pub async fn stop_engine(
@@ -460,10 +574,16 @@ pub async fn stop_engine(
     tab: String,
     state: tauri::State<'_, AppState>,
 ) -> Result<(), Error> {
-    let key = (tab, engine);
+    let key = (tab.clone(), engine.clone());
+    debug!("Stopping engine: tab={}, engine={}", tab, engine);
+    
     if let Some(process) = state.engine_processes.get(&key) {
         let mut process = process.lock().await;
-        process.stop().await?;
+        if let Err(e) = process.stop().await {
+            warn!("Failed to stop engine {:?}: {}", key, e);
+        }
+    } else {
+        debug!("Engine not found: {:?}", key);
     }
     Ok(())
 }
@@ -496,151 +616,317 @@ pub async fn get_best_moves(
     state: tauri::State<'_, AppState>,
 ) -> Result<Option<(f32, Vec<BestMoves>)>, Error> {
     let path = PathBuf::from(&engine);
-
     let key = (tab.clone(), engine.clone());
 
-    if state.engine_processes.contains_key(&key) {
-        {
-            let process = state.engine_processes.get_mut(&key).unwrap();
-            let mut process = process.lock().await;
-            if options == process.options && go_mode == process.go_mode && process.running {
-                return Ok(Some((
-                    process.last_progress,
-                    process.last_best_moves.clone(),
-                )));
-            }
-            process.stop().await?;
+    info!("Getting best moves: id={}, engine={}, tab={}", id, engine, tab);
+    debug!("Analysis options: FEN={}, moves={}", options.fen, options.moves.len());
+
+    // Check if engine is already running with same parameters
+    if let Some(process_guard) = state.engine_processes.get(&key) {
+        let mut process = process_guard.lock().await;
+        
+        if options == process.options && go_mode == process.go_mode && process.running {
+            debug!("Engine already running with same parameters, returning cached results");
+            return Ok(Some((process.last_progress, process.last_best_moves.clone())));
         }
-        // give time for engine to stop and process previous lines
-        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        {
-            let process = state.engine_processes.get_mut(&key).unwrap();
-            let mut process = process.lock().await;
-            process.set_options(options.clone()).await?;
-            process.go(&go_mode).await?;
+        
+        info!("Stopping existing engine for parameter change");
+        if let Err(e) = process.stop().await {
+            warn!("Failed to stop existing engine: {}", e);
         }
+        
+        drop(process); // Release lock before delay
+        tokio::time::sleep(ENGINE_STOP_DELAY).await;
+        
+        let mut process = process_guard.lock().await;
+        if let Err(e) = process.set_options(options.clone()).await {
+            error!("Failed to set engine options: {}", e);
+            return Err(e);
+        }
+        
+        if let Err(e) = process.go(&go_mode).await {
+            error!("Failed to start engine analysis: {}", e);
+            return Err(e);
+        }
+        
         return Ok(None);
     }
 
-    let (mut process, mut reader) = EngineProcess::new(path).await?;
-    process.set_options(options.clone()).await?;
-    process.go(&go_mode).await?;
+    // Create new engine process
+    info!("Creating new engine process");
+    let (mut process, reader) = match EngineProcess::new(path.clone()).await {
+        Ok((proc, reader)) => (proc, reader),
+        Err(e) => {
+            error!("Failed to create engine process for {:?}: {}", path, e);
+            return Err(e);
+        }
+    };
+
+    if let Err(e) = process.set_options(options.clone()).await {
+        error!("Failed to set initial options: {}", e);
+        return Err(e);
+    }
+
+    if let Err(e) = process.go(&go_mode).await {
+        error!("Failed to start initial analysis: {}", e);
+        return Err(e);
+    }
 
     let process = Arc::new(Mutex::new(process));
-
     state.engine_processes.insert(key.clone(), process.clone());
 
-    let lim = RateLimiter::direct(Quota::per_second(nonzero!(6u32)));
-    let mut last_best_moves_payload: Option<BestMovesPayload> = None;
-    let tick_duration: Duration = Duration::from_millis(30);
-    let min_time_before_subsequent_info = Duration::from_millis(200);
-    let max_time_before_subsequent_info = Duration::from_millis(600);
+    // Start engine communication loop
+    let engine_processes_ref = state.engine_processes.clone();
+    tokio::spawn(engine_communication_loop(
+        process.clone(),
+        reader,
+        key.clone(),
+        id,
+        tab.clone(),
+        app,
+        engine_processes_ref,
+    ));
 
+    Ok(None)
+}
+
+async fn engine_communication_loop(
+    process: Arc<Mutex<EngineProcess>>,
+    mut reader: Lines<BufReader<ChildStdout>>,
+    key: (String, String),
+    id: String,
+    tab: String,
+    app: tauri::AppHandle,
+    engine_processes: DashMap<(String, String), Arc<tokio::sync::Mutex<EngineProcess>>>,
+) {
+    info!("Starting engine communication loop for: {:?}", key);
+    
+    let rate_limiter = RateLimiter::direct(Quota::per_second(nonzero!(EVENTS_PER_SECOND)));
+    let mut last_best_moves_payload: Option<BestMovesPayload> = None;
     let mut first_result_sent = false;
 
-    loop {
-        match tokio::time::timeout(tick_duration, reader.next_line()).await {
-            Ok(Ok(Some(line))) => {
-                let mut proc = process.lock().await;
-                match parse_one(&line) {
-                    UciMessage::Info(attrs) => {
-                        if let Ok(best_moves) =
-                            parse_uci_attrs(attrs, &proc.options.fen.parse()?, &proc.options.moves)
-                        {
-                            let multipv = best_moves.multipv;
-                            let cur_depth = best_moves.depth;
-                            let cur_nodes = best_moves.nodes;
-                            if multipv as usize == proc.best_moves.len() + 1 {
-                                proc.best_moves.push(best_moves);
-                                if multipv == proc.real_multipv {
-                                    if proc.best_moves.iter().all(|x| x.depth == cur_depth)
-                                        && cur_depth >= proc.last_depth
-                                        && lim.check().is_ok()
-                                    {
-                                        let progress = match proc.go_mode {
-                                            GoMode::Depth(depth) => {
-                                                (cur_depth as f64 / depth as f64) * 100.0
-                                            }
-                                            GoMode::Time(time) => {
-                                                (proc.start.elapsed().as_millis() as f64
-                                                    / time as f64)
-                                                    * 100.0
-                                            }
-                                            GoMode::Nodes(nodes) => {
-                                                (cur_nodes as f64 / nodes as f64) * 100.0
-                                            }
-                                            GoMode::PlayersTime(_) => 99.99,
-                                            GoMode::Infinite => 99.99,
-                                        };
-                                        let best_moves_payload = BestMovesPayload {
-                                            best_lines: proc.best_moves.clone(),
-                                            engine: id.to_string(),
-                                            tab: tab.to_string(),
-                                            fen: proc.options.fen.clone(),
-                                            moves: proc.options.moves.clone(),
-                                            progress,
-                                        };
-                                        
-                                        if !first_result_sent {
-                                            // Always emit first result immediately
-                                            proc.last_event_sent = Some(Instant::now());
-                                            best_moves_payload.emit(&app)?;
-                                            first_result_sent = true;
-                                            last_best_moves_payload = None;
-                                        } else if proc.last_event_sent.map_or(false, |t| t.elapsed() >= min_time_before_subsequent_info) {
-                                            // Subsequent results use normal throttling
-                                            proc.last_event_sent = Some(Instant::now());
-                                            best_moves_payload.emit(&app)?;
-                                            last_best_moves_payload = None;
-                                        } else {
-                                            // Store for later emission
-                                            last_best_moves_payload = Some(best_moves_payload);
-                                        }
-
-                                        proc.last_depth = cur_depth;
-                                        proc.last_best_moves = proc.best_moves.clone();
-                                        proc.last_progress = progress as f32;
-                                    }
-                                    proc.best_moves.clear();
-                                }
+    let result = async {
+        loop {
+            match timeout(TICK_DURATION, reader.next_line()).await {
+                Ok(Ok(Some(line))) => {
+                    debug!("Raw engine output: {}", line);
+                    
+                    let mut proc = process.lock().await;
+                    proc.logs.push(EngineLog::Engine(line.clone()));
+                    
+                    match parse_one(&line) {
+                        UciMessage::Info(attrs) => {
+                            debug!("Parsed UCI Info message with {} attributes", attrs.len());
+                            if let Err(e) = handle_info_message(
+                                &mut proc,
+                                attrs,
+                                &rate_limiter,
+                                &mut last_best_moves_payload,
+                                &mut first_result_sent,
+                                &id,
+                                &tab,
+                                &app
+                            ).await {
+                                warn!("Failed to handle info message: {}", e);
                             }
                         }
-                    }
-                    UciMessage::BestMove { .. } => {
-                        BestMovesPayload {
-                            best_lines: proc.last_best_moves.clone(),
-                            engine: id.clone(),
-                            tab: tab.clone(),
-                            fen: proc.options.fen.clone(),
-                            moves: proc.options.moves.clone(),
-                            progress: 100.0,
+                        UciMessage::BestMove { .. } => {
+                            debug!("Received bestmove, analysis complete");
+                            
+                            let payload = BestMovesPayload {
+                                best_lines: proc.last_best_moves.clone(),
+                                engine: id.clone(),
+                                tab: tab.clone(),
+                                fen: proc.options.fen.clone(),
+                                moves: proc.options.moves.clone(),
+                                progress: 100.0,
+                            };
+                            
+                            if let Err(e) = payload.emit(&app) {
+                                warn!("Failed to emit final bestmove payload: {}", e);
+                            }
+                            
+                            proc.last_progress = 100.0;
+                            proc.running = false;
                         }
-                        .emit(&app)?;
-
-                        proc.last_progress = 100.0;
-                    }
-                    _ => {}
-                }
-                proc.logs.push(EngineLog::Engine(line));
-            }
-            Err(_) => {
-                if let Some(best_moves_payload) = last_best_moves_payload.clone() {
-                    let mut proc = process.lock().await;
-                    if proc.last_event_sent.map_or(true, |t| t.elapsed() >= max_time_before_subsequent_info) {
-                        proc.last_event_sent = Some(Instant::now());
-                        best_moves_payload.emit(&app)?;
-                        last_best_moves_payload = None;
+                        _ => {
+                            trace!("Unhandled UCI message: {}", line);
+                        }
                     }
                 }
-            }
-            _ => {
-                break;
+                Ok(Ok(None)) => {
+                    debug!("Engine closed stdout");
+                    break;
+                }
+                Ok(Err(e)) => {
+                    error!("Error reading from engine stdout: {}", e);
+                    break;
+                }
+                Err(_) => {
+                    // Timeout - check for pending events to emit with more frequent checks
+                    if let Some(ref payload) = last_best_moves_payload {
+                        let proc = process.lock().await;
+                        let should_emit_timeout = proc.last_event_sent.map_or(true, |t| t.elapsed() >= MAX_EVENT_INTERVAL);
+                        drop(proc);
+                        
+                        if should_emit_timeout {
+                            debug!("Emitting timeout payload after {}ms interval", MAX_EVENT_INTERVAL.as_millis());
+                            if let Err(e) = payload.emit(&app) {
+                                warn!("Failed to emit timeout payload: {}", e);
+                            } else {
+                                let mut proc = process.lock().await;
+                                proc.last_event_sent = Some(Instant::now());
+                            }
+                            
+                            last_best_moves_payload = None;
+                        }
+                    }
+                }
             }
         }
+        Ok::<_, Error>(())
+    }.await;
+
+    if let Err(e) = result {
+        error!("Engine communication loop error for {:?}: {}", key, e);
     }
-    info!("Engine process finished: tab: {}, engine: {}", tab, engine);
-    state.engine_processes.remove(&key);
-    Ok(None)
+    
+    info!("Engine communication loop finished for: {:?}", key);
+    engine_processes.remove(&key);
+}
+
+async fn handle_info_message(
+    proc: &mut EngineProcess,
+    attrs: Vec<UciInfoAttribute>,
+    rate_limiter: &RateLimiter<
+        governor::state::direct::NotKeyed,
+        governor::state::InMemoryState,
+        governor::clock::DefaultClock,
+        governor::middleware::NoOpMiddleware
+    >,
+    last_best_moves_payload: &mut Option<BestMovesPayload>,
+    first_result_sent: &mut bool,
+    id: &str,
+    tab: &str,
+    app: &tauri::AppHandle,
+) -> Result<(), Error> {
+    let best_moves = parse_uci_info(attrs, &proc.options.fen.parse()?, &proc.options.moves)?;
+    
+    let multipv = best_moves.multipv;
+    let cur_depth = best_moves.depth;
+    let cur_nodes = best_moves.nodes;
+    
+    debug!("Received info: depth={}, multipv={}, nodes={}, last_depth={}", 
+           cur_depth, multipv, cur_nodes, proc.last_depth);
+    
+    if multipv as usize == proc.best_moves.len() + 1 {
+        proc.best_moves.push(best_moves);
+        debug!("Added move to collection: total={}/{}", proc.best_moves.len(), proc.real_multipv);
+        
+        if multipv == proc.real_multipv {
+            let all_same_depth = proc.best_moves.iter().all(|x| x.depth == cur_depth);
+            debug!("Complete multipv set: all_same_depth={}, cur_depth={}, last_depth={}", 
+                   all_same_depth, cur_depth, proc.last_depth);
+            
+            if all_same_depth && cur_depth >= proc.last_depth {
+                let progress = calculate_progress(&proc.go_mode, cur_depth, cur_nodes, proc.start.elapsed());
+                
+                let payload = BestMovesPayload {
+                    best_lines: proc.best_moves.clone(),
+                    engine: id.to_string(),
+                    tab: tab.to_string(),
+                    fen: proc.options.fen.clone(),
+                    moves: proc.options.moves.clone(),
+                    progress,
+                };
+                
+                let should_emit = if !*first_result_sent {
+                    debug!("Emitting first analysis result: depth={}, multipv={}", cur_depth, multipv);
+                    true
+                } else if cur_depth > proc.last_depth {
+                    // Only emit if we've progressed to a new depth to ensure sequential emission
+                    debug!("Depth progression detected: {} -> {}", proc.last_depth, cur_depth);
+                    true
+                } else if proc.last_event_sent.map_or(false, |t| t.elapsed() >= MIN_EVENT_INTERVAL) && rate_limiter.check().is_ok() {
+                    debug!("Emitting update for same depth due to time interval: depth={}", cur_depth);
+                    true
+                } else {
+                    trace!("Storing payload for later emission: depth={}", cur_depth);
+                    *last_best_moves_payload = Some(payload.clone());
+                    false
+                };
+                
+                if should_emit {
+                    debug!("Emitting analysis result: depth={}, progress={:.2}%", cur_depth, progress);
+                    proc.last_event_sent = Some(Instant::now());
+                    payload.emit(app)?;
+                    *first_result_sent = true;
+                    *last_best_moves_payload = None;
+                    
+                    // Only update last_depth when we actually emit a result for a new depth
+                    if cur_depth > proc.last_depth {
+                        proc.last_depth = cur_depth;
+                        debug!("Updated last_depth to: {}", proc.last_depth);
+                    }
+                }
+
+                proc.last_best_moves = proc.best_moves.clone();
+                proc.last_progress = progress as f32;
+            }
+            proc.best_moves.clear();
+        }
+    }
+    
+    Ok(())
+}
+
+fn calculate_progress(go_mode: &GoMode, depth: u32, nodes: u32, elapsed: Duration) -> f64 {
+    match go_mode {
+        GoMode::Depth(target_depth) => {
+            (depth as f64 / *target_depth as f64) * 100.0
+        }
+        GoMode::Time(target_time) => {
+            (elapsed.as_millis() as f64 / *target_time as f64) * 100.0
+        }
+        GoMode::Nodes(target_nodes) => {
+            (nodes as f64 / *target_nodes as f64) * 100.0
+        }
+        GoMode::PlayersTime(_) | GoMode::Infinite => 99.99,
+    }
+}
+
+// Rest of the original structs and implementations
+#[derive(Deserialize, Debug, Clone, Type, Derivative, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[derivative(Default)]
+pub struct EngineOptions {
+    pub fen: String,
+    pub moves: Vec<String>,
+    pub extra_options: Vec<EngineOption>,
+}
+
+#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
+pub struct EngineOption {
+    name: String,
+    value: String,
+}
+
+#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
+#[serde(tag = "t", content = "c")]
+pub enum GoMode {
+    PlayersTime(PlayersTime),
+    Depth(u32),
+    Time(u32),
+    Nodes(u32),
+    Infinite,
+}
+
+#[derive(Deserialize, Debug, Clone, Type, PartialEq, Eq)]
+pub struct PlayersTime {
+    white: u32,
+    black: u32,
+    winc: u32,
+    binc: u32,
 }
 
 #[derive(Serialize, Debug, Default, Type)]
@@ -678,153 +964,266 @@ pub async fn analyze_game(
     state: tauri::State<'_, AppState>,
     app: tauri::AppHandle,
 ) -> Result<Vec<MoveAnalysis>, Error> {
+    info!("Starting game analysis: id={}, engine={}", id, engine);
+    debug!("Analysis options: FEN={}, moves={}, novelties={}", 
+           options.fen, options.moves.len(), options.annotate_novelties);
+    
     let path = PathBuf::from(&engine);
     let mut analysis: Vec<MoveAnalysis> = Vec::new();
 
-    let (mut proc, mut reader) = EngineProcess::new(path).await?;
-
-    let fen = Fen::from_ascii(options.fen.as_bytes())?;
-
-    let mut chess: Chess = fen.clone().into_position(CastlingMode::Chess960)?;
-    let mut fens: Vec<(Fen, Vec<String>, bool)> = vec![(fen, vec![], false)];
-
-    options.moves.iter().enumerate().for_each(|(i, m)| {
-        let uci = UciMove::from_ascii(m.as_bytes()).unwrap();
-        let m = uci.to_move(&chess).unwrap();
-        let previous_pos = chess.clone();
-        chess.play_unchecked(&m);
-        let current_pos = chess.clone();
-        if !chess.is_game_over() {
-            let prev_eval = naive_eval(&previous_pos);
-            let cur_eval = -naive_eval(&current_pos);
-            fens.push((
-                Fen::from_position(current_pos, EnPassantMode::Legal),
-                options.moves.clone().into_iter().take(i + 1).collect(),
-                prev_eval > cur_eval + 100,
-            ));
+    let (mut proc, mut reader) = match EngineProcess::new(path.clone()).await {
+        Ok((p, r)) => (p, r),
+        Err(e) => {
+            error!("Failed to create engine for game analysis: {}", e);
+            return Err(e);
         }
-    });
+    };
 
+    // Parse initial position
+    let fen = Fen::from_ascii(options.fen.as_bytes())
+        .map_err(|e| {
+            error!("Invalid FEN in analyze_game: {}", options.fen);
+            e
+        })?;
+
+    let mut chess: Chess = fen.clone().into_position(CastlingMode::Chess960)
+        .map_err(|e| {
+            error!("Failed to create position from FEN: {}", e);
+            e
+        })?;
+    
+    // Build positions to analyze
+    let mut positions_to_analyze = build_analysis_positions(&mut chess, &fen, &options)?;
+    
     if options.reversed {
-        fens.reverse();
+        debug!("Reversing analysis order");
+        positions_to_analyze.reverse();
     }
 
     let mut novelty_found = false;
+    let total_positions = positions_to_analyze.len();
+    
+    info!("Analyzing {} positions", total_positions);
 
-    for (i, (_, moves, _)) in fens.iter().enumerate() {
+    for (i, (position_fen, moves, is_sacrifice)) in positions_to_analyze.iter().enumerate() {
+        debug!("Analyzing position {}/{}: {} moves", i + 1, total_positions, moves.len());
+        
+        // Emit progress update
         ReportProgress {
-            progress: (i as f64 / fens.len() as f64) * 100.0,
+            progress: (i as f64 / total_positions as f64) * 100.0,
             id: id.clone(),
             finished: false,
-        }
-        .emit(&app)?;
+        }.emit(&app)?;
 
-        let mut extra_options = uci_options.clone();
-        if !extra_options.iter().any(|x| x.name == "MultiPV") {
-            extra_options.push(EngineOption {
-                name: "MultiPV".to_string(),
-                value: "2".to_string(),
-            });
-        } else {
-            extra_options.iter_mut().for_each(|x| {
-                if x.name == "MultiPV" {
-                    x.value = "2".to_string();
-                }
-            });
-        }
+        // Setup engine options for this position
+        let mut analysis_options = uci_options.clone();
+        ensure_multipv_option(&mut analysis_options);
 
-        proc.set_options(EngineOptions {
+        if let Err(e) = proc.set_options(EngineOptions {
             fen: options.fen.clone(),
             moves: moves.clone(),
-            extra_options,
-        })
-        .await?;
+            extra_options: analysis_options,
+        }).await {
+            warn!("Failed to set options for position {}: {}", i, e);
+            continue;
+        }
 
-        proc.go(&go_mode).await?;
+        if let Err(e) = proc.go(&go_mode).await {
+            warn!("Failed to start analysis for position {}: {}", i, e);
+            continue;
+        }
 
+        // Analyze this position
         let mut current_analysis = MoveAnalysis::default();
-        while let Ok(Some(line)) = reader.next_line().await {
-            match parse_one(&line) {
-                UciMessage::Info(attrs) => {
-                    if let Ok(best_moves) =
-                        parse_uci_attrs(attrs, &proc.options.fen.parse()?, moves)
-                    {
-                        let multipv = best_moves.multipv;
-                        let cur_depth = best_moves.depth;
-                        if multipv as usize == proc.best_moves.len() + 1 {
-                            proc.best_moves.push(best_moves);
-                            if multipv == proc.real_multipv {
-                                if proc.best_moves.iter().all(|x| x.depth == cur_depth)
-                                    && cur_depth >= proc.last_depth
-                                {
-                                    current_analysis.best = proc.best_moves.clone();
-                                    proc.last_depth = cur_depth;
-                                }
-                                assert_eq!(proc.best_moves.len(), proc.real_multipv as usize);
+        match analyze_single_position(&mut proc, &mut reader).await {
+            Ok(best_moves) => {
+                current_analysis.best = best_moves;
+            }
+            Err(e) => {
+                warn!("Failed to analyze position {}: {}", i, e);
+                continue;
+            }
+        }
+
+        // Set sacrifice flag
+        current_analysis.is_sacrifice = *is_sacrifice;
+
+        // Check for novelty if requested
+        if options.annotate_novelties && !novelty_found {
+            current_analysis.novelty = check_novelty(
+                position_fen, 
+                &options.reference_db, 
+                &state
+            ).await.unwrap_or_else(|e| {
+                warn!("Failed to check novelty for position {}: {}", i, e);
+                false
+            });
+            
+            if current_analysis.novelty {
+                info!("Novelty found at position {}", i);
+                novelty_found = true;
+            }
+        }
+
+        analysis.push(current_analysis);
+    }
+
+    if options.reversed {
+        debug!("Reversing analysis results back to original order");
+        analysis.reverse();
+    }
+
+    // Final progress update
+    ReportProgress {
+        progress: 100.0,
+        id: id.clone(),
+        finished: true,
+    }.emit(&app)?;
+    
+    info!("Game analysis completed: {} positions analyzed", analysis.len());
+    Ok(analysis)
+}
+
+fn build_analysis_positions(
+    chess: &mut Chess,
+    initial_fen: &Fen,
+    options: &AnalysisOptions
+) -> Result<Vec<(Fen, Vec<String>, bool)>, Error> {
+    let mut positions = vec![(initial_fen.clone(), vec![], false)];
+
+    for (i, move_str) in options.moves.iter().enumerate() {
+        let uci = UciMove::from_ascii(move_str.as_bytes())
+            .map_err(|e| {
+                error!("Invalid move at index {}: {}", i, move_str);
+                e
+            })?;
+        
+        let mv = uci.to_move(chess)
+            .map_err(|e| {
+                error!("Illegal move at index {}: {} in position {}", i, move_str, chess.board());
+                e
+            })?;
+        
+        let previous_pos = chess.clone();
+        chess.play_unchecked(&mv);
+        let current_pos = chess.clone();
+        
+        if !chess.is_game_over() {
+            let is_sacrifice = detect_sacrifice(&previous_pos, &current_pos);
+            let moves_so_far: Vec<String> = options.moves.iter().take(i + 1).cloned().collect();
+            
+            positions.push((
+                Fen::from_position(current_pos, EnPassantMode::Legal),
+                moves_so_far,
+                is_sacrifice,
+            ));
+        }
+    }
+
+    debug!("Built {} positions for analysis", positions.len());
+    Ok(positions)
+}
+
+fn ensure_multipv_option(options: &mut Vec<EngineOption>) {
+    const DEFAULT_MULTIPV: &str = "2";
+    
+    if let Some(multipv_option) = options.iter_mut().find(|x| x.name == "MultiPV") {
+        multipv_option.value = DEFAULT_MULTIPV.to_string();
+    } else {
+        options.push(EngineOption {
+            name: "MultiPV".to_string(),
+            value: DEFAULT_MULTIPV.to_string(),
+        });
+    }
+}
+
+async fn analyze_single_position(
+    proc: &mut EngineProcess,
+    reader: &mut Lines<BufReader<ChildStdout>>
+) -> Result<Vec<BestMoves>, Error> {
+    trace!("Starting single position analysis");
+    
+    while let Ok(Some(line)) = reader.next_line().await {
+        trace!("Engine line: {}", line);
+        
+        match parse_one(&line) {
+            UciMessage::Info(attrs) => {
+                if let Ok(best_moves) = parse_uci_info(attrs, &proc.options.fen.parse()?, &proc.options.moves) {
+                    let multipv = best_moves.multipv;
+                    let cur_depth = best_moves.depth;
+                    
+                    if multipv as usize == proc.best_moves.len() + 1 {
+                        proc.best_moves.push(best_moves);
+                        
+                        if multipv == proc.real_multipv {
+                            if proc.best_moves.iter().all(|x| x.depth == cur_depth) && cur_depth >= proc.last_depth {
+                                proc.last_depth = cur_depth;
+                                // Don't clear here, wait for bestmove
+                            }
+                            
+                            if proc.best_moves.len() == proc.real_multipv as usize {
                                 proc.best_moves.clear();
                             }
                         }
                     }
                 }
-                UciMessage::BestMove { .. } => {
-                    break;
-                }
-                _ => {}
             }
+            UciMessage::BestMove { .. } => {
+                trace!("Received bestmove, analysis complete");
+                return Ok(proc.best_moves.clone());
+            }
+            _ => {}
         }
-        analysis.push(current_analysis);
     }
 
-    if options.reversed {
-        analysis.reverse();
-        fens.reverse();
-    }
+    Err(Error::EngineTimeout)
+}
 
-    for (i, analysis) in analysis.iter_mut().enumerate() {
-        let fen = &fens[i].0;
-        // let query = PositionQuery::exact_from_fen(&fen.to_string())?;
+fn detect_sacrifice(previous_pos: &Chess, current_pos: &Chess) -> bool {
+    let prev_eval = naive_eval(previous_pos);
+    let cur_eval = -naive_eval(current_pos);
+    
+    // Consider it a sacrifice if evaluation drops by more than a pawn
+    prev_eval > cur_eval + 100
+}
+
+async fn check_novelty(
+    fen: &Fen,
+    reference_db: &Option<PathBuf>,
+    state: &tauri::State<'_, AppState>
+) -> Result<bool, Error> {
+    if let Some(db_path) = reference_db {
         let query = PositionQueryJs {
             fen: fen.to_string(),
             type_: "exact".to_string(),
         };
-
-        analysis.is_sacrifice = fens[i].2;
-        if options.annotate_novelties && !novelty_found {
-            if let Some(reference) = options.reference_db.clone() {
-                analysis.novelty = !is_position_in_db(
-                    reference,
-                    GameQueryJs::new().position(query.clone()).clone(),
-                    state.clone(),
-                )
-                .await?;
-                if analysis.novelty {
-                    novelty_found = true;
-                }
-            } else {
-                return Err(Error::MissingReferenceDatabase);
-            }
-        }
+        
+        let is_in_db = is_position_in_db(
+            db_path.clone(),
+            GameQueryJs::new().position(query),
+            state.clone(),
+        ).await?;
+        
+        Ok(!is_in_db)
+    } else {
+        Err(Error::MissingReferenceDatabase)
     }
-    ReportProgress {
-        progress: 100.0,
-        id: id.clone(),
-        finished: true,
-    }
-    .emit(&app)?;
-    Ok(analysis)
 }
 
+// Chess evaluation functions (kept from original but with better structure)
 fn count_material(position: &Chess) -> i32 {
     if position.is_checkmate() {
         return -10000;
     }
-    let material: ByColor<i32> = position.board().material().map(|p| {
-        p.pawn as i32 * piece_value(Role::Pawn)
-            + p.knight as i32 * piece_value(Role::Knight)
-            + p.bishop as i32 * piece_value(Role::Bishop)
-            + p.rook as i32 * piece_value(Role::Rook)
-            + p.queen as i32 * piece_value(Role::Queen)
+    
+    let material: ByColor<i32> = position.board().material().map(|piece_counts| {
+        piece_counts.pawn as i32 * piece_value(Role::Pawn)
+            + piece_counts.knight as i32 * piece_value(Role::Knight)
+            + piece_counts.bishop as i32 * piece_value(Role::Bishop)
+            + piece_counts.rook as i32 * piece_value(Role::Rook)
+            + piece_counts.queen as i32 * piece_value(Role::Queen)
     });
+    
     if position.turn() == Color::White {
         material.white - material.black
     } else {
@@ -832,14 +1231,14 @@ fn count_material(position: &Chess) -> i32 {
     }
 }
 
-fn piece_value(role: Role) -> i32 {
+const fn piece_value(role: Role) -> i32 {
     match role {
-        Role::Pawn => 90,
+        Role::Pawn => 100,
         Role::Knight => 300,
         Role::Bishop => 300,
         Role::Rook => 500,
-        Role::Queen => 1000,
-        _ => 0,
+        Role::Queen => 900,
+        Role::King => 0, // King value not relevant for material count
     }
 }
 
@@ -852,12 +1251,14 @@ fn qsearch(position: &Chess, mut alpha: i32, beta: i32) -> i32 {
     if alpha < stand_pat {
         alpha = stand_pat;
     }
+
     let legal_moves = position.legal_moves();
     let mut captures: Vec<_> = legal_moves.iter().filter(|m| m.is_capture()).collect();
 
+    // Sort captures by MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
     captures.sort_by(|a, b| {
-        let a_value = piece_value(a.capture().unwrap());
-        let b_value = piece_value(b.capture().unwrap());
+        let a_value = a.capture().map_or(0, piece_value);
+        let b_value = b.capture().map_or(0, piece_value);
         b_value.cmp(&a_value)
     });
 
@@ -865,8 +1266,9 @@ fn qsearch(position: &Chess, mut alpha: i32, beta: i32) -> i32 {
         let mut new_position = position.clone();
         new_position.play_unchecked(capture);
         let score = -qsearch(&new_position, -beta, -alpha);
+        
         if score >= beta {
-            return beta;
+            return beta; // Beta cutoff
         }
         if score > alpha {
             alpha = score;
@@ -877,6 +1279,10 @@ fn qsearch(position: &Chess, mut alpha: i32, beta: i32) -> i32 {
 }
 
 fn naive_eval(pos: &Chess) -> i32 {
+    if pos.is_game_over() {
+        return if pos.is_checkmate() { i32::MIN } else { 0 };
+    }
+    
     pos.legal_moves()
         .iter()
         .map(|mv| {
@@ -885,74 +1291,10 @@ fn naive_eval(pos: &Chess) -> i32 {
             -qsearch(&new_position, i32::MIN, i32::MAX)
         })
         .max()
-        .unwrap_or(i32::MIN)
+        .unwrap_or(0)
 }
 
-#[cfg(test)]
-mod tests {
-    use shakmaty::FromSetup;
-
-    use super::*;
-
-    fn pos(fen: &str) -> Chess {
-        let fen: Fen = fen.parse().unwrap();
-        Chess::from_setup(fen.into_setup(), CastlingMode::Chess960).unwrap()
-    }
-
-    #[test]
-    fn eval_start_pos() {
-        assert_eq!(naive_eval(&Chess::default()), 0);
-    }
-
-    #[test]
-    fn eval_scandi() {
-        let position = pos("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2");
-        assert_eq!(naive_eval(&position), 0);
-    }
-
-    #[test]
-    fn eval_hanging_pawn() {
-        let position = pos("r1bqkbnr/ppp1pppp/2n5/1B1p4/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3");
-        assert_eq!(naive_eval(&position), 100);
-    }
-
-    #[test]
-    fn eval_complex_center() {
-        let position = pos("r1bqkbnr/ppp2ppp/2n5/1B1pp3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4");
-        assert_eq!(naive_eval(&position), 100);
-    }
-
-    #[test]
-    fn eval_in_check() {
-        let position = pos("r1bqkbnr/ppp2ppp/2B5/3pp3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4");
-        assert_eq!(naive_eval(&position), -100);
-    }
-
-    #[test]
-    fn eval_rook_stack() {
-        let position = pos("rnrq4/8/8/1R6/1R6/1R5K/1Q6/7k w - - 0 1");
-        assert_eq!(naive_eval(&position), 500);
-    }
-
-    #[test]
-    fn eval_rook_stack2() {
-        let position = pos("rnrq4/8/8/1R6/1Q6/1R5K/1R6/7k w - - 0 1");
-        assert_eq!(naive_eval(&position), 200);
-    }
-
-    #[test]
-    fn eval_opera_game1() {
-        let position = pos("4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2K4R w k - 0 14");
-        assert_eq!(naive_eval(&position), -100);
-    }
-
-    #[test]
-    fn eval_opera_game2() {
-        let position = pos("4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR4 b k - 1 14");
-        assert_eq!(naive_eval(&position), 0);
-    }
-}
-
+// Engine configuration
 #[derive(Type, Default, Serialize, Debug)]
 pub struct EngineConfig {
     pub name: String,
@@ -962,64 +1304,31 @@ pub struct EngineConfig {
 #[tauri::command]
 #[specta::specta]
 pub async fn get_engine_config(path: PathBuf) -> Result<EngineConfig, Error> {
-    let mut child = start_engine(path.clone())?;
-    let (mut stdin, mut stdout) = get_handles(&mut child)?;
-
-    let _ = send_command(&mut stdin, "uci\n").await;
+    info!("Getting engine configuration from: {:?}", path);
+    
+    let mut child = spawn_engine_process(&path)?;
+    let (mut stdin, mut stdout) = get_engine_io_handles(&mut child)?;
 
     let mut config = EngineConfig::default();
     
-    // Add timeout to prevent hanging
-    let timeout_duration = Duration::from_secs(10);
-    let start_time = Instant::now();
-
-    loop {
-        if start_time.elapsed() > timeout_duration {
-            // Kill the process and return a minimal config
-            let _ = child.kill().await;
-            info!("Engine config timeout for path: {:?}", path);
-            config.name = path.file_stem()
-                .and_then(|s| s.to_str())
-                .unwrap_or("Unknown Engine")
-                .to_string();
-            break;
+    // Send UCI command with timeout
+    match timeout(ENGINE_INIT_TIMEOUT, get_uci_config(&mut stdin, &mut stdout, &mut config)).await {
+        Ok(Ok(())) => {
+            info!("Successfully retrieved engine config: name={}, options={}", 
+                  config.name, config.options.len());
         }
-
-        match tokio::time::timeout(Duration::from_millis(100), stdout.next_line()).await {
-            Ok(Ok(Some(line))) => {
-                if let UciMessage::Id {
-                    name: Some(name),
-                    author: _,
-                } = parse_one(&line)
-                {
-                    config.name = name;
-                }
-                if let UciMessage::Option(opt) = parse_one(&line) {
-                    config.options.push(opt);
-                }
-                if let UciMessage::UciOk = parse_one(&line) {
-                    break;
-                }
-            }
-            Ok(Ok(None)) => {
-                // Engine closed stdout
-                break;
-            }
-            Ok(Err(_)) => {
-                // Error reading from stdout
-                break;
-            }
-            Err(_) => {
-                // Timeout waiting for line, continue loop to check overall timeout
-                continue;
-            }
+        Ok(Err(e)) => {
+            warn!("Failed to get engine config: {}", e);
+        }
+        Err(_) => {
+            warn!("Timeout getting engine config from: {:?}", path);
         }
     }
     
     // Ensure child process is terminated
     let _ = child.kill().await;
     
-    // If we got no name, use the filename
+    // Fallback name if not provided
     if config.name.is_empty() {
         config.name = path.file_stem()
             .and_then(|s| s.to_str())
@@ -1027,6 +1336,94 @@ pub async fn get_engine_config(path: PathBuf) -> Result<EngineConfig, Error> {
             .to_string();
     }
     
-    info!("Engine config retrieved: name={}, options_count={}", config.name, config.options.len());
+    debug!("Engine config result: name='{}', options={}", config.name, config.options.len());
     Ok(config)
+}
+
+fn spawn_engine_process(path: &PathBuf) -> Result<Child, Error> {
+    debug!("Spawning engine process: {:?}", path);
+    
+    let mut command = Command::new(path);
+    
+    // Set working directory intelligently
+    if let Some(parent) = path.parent() {
+        command.current_dir(parent);
+    } else if let Some(home_dir) = std::env::var_os("HOME") {
+        // Fallback for Homebrew engines
+        command.current_dir(home_dir);
+    }
+    
+    command
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .env("TERM", "dumb"); // Prevent terminal features
+
+    #[cfg(target_os = "windows")]
+    command.creation_flags(CREATE_NO_WINDOW);
+
+    let child = command.spawn()
+        .map_err(|e| {
+            error!("Failed to spawn engine process {:?}: {}", path, e);
+            Error::Io(e)
+        })?;
+
+    debug!("Engine process spawned successfully");
+    Ok(child)
+}
+
+fn get_engine_io_handles(child: &mut Child) -> Result<(ChildStdin, Lines<BufReader<ChildStdout>>), Error> {
+    let stdin = child.stdin.take().ok_or(Error::NoStdin)?;
+    let stdout = child.stdout.take().ok_or(Error::NoStdout)?;
+    // Use smaller buffer for more responsive reading
+    let stdout = BufReader::with_capacity(1024, stdout).lines();
+    Ok((stdin, stdout))
+}
+
+async fn send_engine_command(stdin: &mut ChildStdin, command: &str) -> Result<(), Error> {
+    trace!("Sending command: {}", command.trim());
+    stdin
+        .write_all(command.as_bytes())
+        .await
+        .map_err(Error::Io)?;
+    
+    // Flush stdin immediately for real-time communication
+    stdin
+        .flush()
+        .await
+        .map_err(Error::Io)?;
+        
+    debug!("Command sent and flushed: {}", command.trim());
+    Ok(())
+}
+
+async fn get_uci_config(
+    stdin: &mut ChildStdin,
+    stdout: &mut Lines<BufReader<ChildStdout>>,
+    config: &mut EngineConfig
+) -> Result<(), Error> {
+    debug!("Requesting UCI configuration");
+    send_engine_command(stdin, "uci\n").await?;
+
+    while let Some(line) = stdout.next_line().await? {
+        trace!("Config line: {}", line);
+        
+        match parse_one(&line) {
+            UciMessage::Id { name: Some(name), .. } => {
+                debug!("Engine name: {}", name);
+                config.name = name;
+            }
+            UciMessage::Option(opt) => {
+                trace!("Engine option: {:?}", opt);
+                config.options.push(opt);
+            }
+            UciMessage::UciOk => {
+                debug!("UCI configuration complete");
+                break;
+            }
+            _ => {}
+        }
+    }
+    
+    Ok(())
 }

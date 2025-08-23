@@ -104,6 +104,9 @@ pub enum Error {
 
     #[error("Package manager error: {0}")]
     PackageManager(String),
+
+    #[error("Engine timeout")]
+    EngineTimeout,
 }
 
 impl serde::Serialize for Error {
