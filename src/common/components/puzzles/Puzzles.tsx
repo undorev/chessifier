@@ -206,10 +206,32 @@ function Puzzles({ id }: { id: string }) {
   async function generatePuzzle(db: string) {
     let range = ratingRange;
     if (progressive) {
-      const rating = puzzles?.[currentPuzzle]?.rating;
-      if (rating) {
-        range = [rating + 50, rating + 100];
-        setRatingRange([rating + 50, rating + 100]);
+      // Find the last successfully completed puzzle rating
+      const lastSuccessfulRating = wonPuzzles.length > 0 
+        ? wonPuzzles[wonPuzzles.length - 1].rating 
+        : ratingRange[0];
+      
+      // Get current puzzle completion status
+      const currentPuzzleCompletion = puzzles?.[currentPuzzle]?.completion;
+      const currentRating = puzzles?.[currentPuzzle]?.rating;
+      
+      if (currentPuzzleCompletion === "correct" && currentRating) {
+        // Increase difficulty after successful completion
+        range = [currentRating + 50, currentRating + 100];
+        setRatingRange([currentRating + 50, currentRating + 100]);
+      } else if (currentPuzzleCompletion === "incorrect" && currentRating) {
+        // Decrease difficulty slightly after failure, or stay at last successful level
+        const targetRating = Math.max(lastSuccessfulRating, currentRating - 100);
+        range = [targetRating, targetRating + 50];
+        setRatingRange([targetRating, targetRating + 50]);
+      } else if (currentRating) {
+        // For incomplete puzzles, stay at the same level
+        range = [currentRating, currentRating + 50];
+        setRatingRange([currentRating, currentRating + 50]);
+      } else {
+        // If no current rating, use last successful rating or default range
+        range = [lastSuccessfulRating, lastSuccessfulRating + 50];
+        setRatingRange([lastSuccessfulRating, lastSuccessfulRating + 50]);
       }
     }
 
