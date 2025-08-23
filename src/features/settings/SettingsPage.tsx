@@ -73,7 +73,6 @@ export default function Page() {
     langagues.push({ value: normalizedCode, label: t("language:DisplayName", { lng: normalizedCode }) });
   }
   langagues.sort((a, b) => a.label.localeCompare(b.label));
-  console.dir(langagues);
 
   const allSettings = useMemo(
     (): SettingItem[] => [

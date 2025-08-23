@@ -188,9 +188,14 @@ function tabValue<T extends object | string | boolean | number | null | undefine
 // Puzzles
 export const hidePuzzleRatingAtom = atomWithStorage<boolean>("hide-puzzle-rating", false);
 export const progressivePuzzlesAtom = atomWithStorage<boolean>("progressive-puzzles", false);
-export const jumpToNextPuzzleAtom = atomWithStorage<boolean>("puzzle-jump-immediately", true);
+export const jumpToNextPuzzleAtom = atomWithStorage<"off" | "success" | "success-and-failure">(
+  "puzzle-jump-next",
+  "success",
+);
 export const puzzleRatingRangeAtom = atomWithStorage<[number, number]>("puzzle-ratings", [1000, 1500]);
 export const inOrderPuzzlesAtom = atomWithStorage<boolean>("puzzle-in-order", false);
+export const playerRatingAtom = atomWithStorage<number>("player-rating", 1500);
+export const maxPlayerRatingAtom = atomWithStorage<number>("max-player-rating", 1500);
 
 // CP / WDL
 

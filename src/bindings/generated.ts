@@ -401,6 +401,26 @@ async getPuzzleDbInfo(file: string) : Promise<Result<PuzzleDatabaseInfo, string>
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Gets the minimum and maximum rating range from a puzzle database
+ * 
+ * This function queries the database to find the lowest and highest puzzle ratings.
+ * 
+ * # Arguments
+ * * `file` - Path to the puzzle database
+ * 
+ * # Returns
+ * * `Ok((min_rating, max_rating))` with the rating range
+ * * `Err(Error)` if there was a problem accessing the database
+ */
+async getPuzzleRatingRange(file: string) : Promise<Result<[number, number], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_puzzle_rating_range", { file }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getTelemetryEnabled() : Promise<Result<boolean, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_telemetry_enabled") };

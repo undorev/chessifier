@@ -1,19 +1,19 @@
 import { Box } from "@mantine/core";
 import { useElementSize, useForceUpdate } from "@mantine/hooks";
-import { Chess, type Move, makeUci, type NormalMove, parseSquare } from "chessops";
+import { type Move, makeUci, type NormalMove, parseSquare } from "chessops";
 import { chessgroundDests, chessgroundMove } from "chessops/compat";
-import { parseFen } from "chessops/fen";
 import equal from "fast-deep-equal";
-import { useAtom, useAtomValue } from "jotai";
 import { useContext, useState } from "react";
 import { useStore } from "zustand";
 import { Chessground } from "@/chessground/Chessground";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
-import { jumpToNextPuzzleAtom, showCoordinatesAtom } from "@/state/atoms";
+import { showCoordinatesAtom } from "@/state/atoms";
 import { chessboard } from "@/styles/Chessboard.css";
 import { positionFromFen } from "@/utils/chessops";
+import { logger } from "@/utils/logger";
 import { recordPuzzleSolved } from "@/utils/puzzleStreak";
 import type { Completion, Puzzle } from "@/utils/puzzles";
+import { PUZZLE_DEBUG_LOGS } from "@/utils/puzzles";
 import { getNodeAtPath, treeIteratorMainLine } from "@/utils/treeReducer";
 import PromotionModal from "../boards/PromotionModal";
 
@@ -23,12 +23,14 @@ function PuzzleBoard({
   changeCompletion,
   generatePuzzle,
   db,
+  jumpToNext,
 }: {
   puzzles: Puzzle[];
   currentPuzzle: number;
   changeCompletion: (completion: Completion) => void;
   generatePuzzle: (db: string) => void;
   db: string | null;
+  jumpToNext: "off" | "success" | "success-and-failure";
 }) {
   const store = useContext(TreeStateContext);
   if (!store) {
@@ -39,7 +41,6 @@ function PuzzleBoard({
   const makeMove = useStore(store, (s) => s.makeMove);
   const makeMoves = useStore(store, (s) => s.makeMoves);
   const reset = useForceUpdate();
-  const [jumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
 
   const currentNode = getNodeAtPath(root, position);
 
@@ -84,6 +85,16 @@ function PuzzleBoard({
     const uci = makeUci(move);
     newPos.play(move);
 
+    PUZZLE_DEBUG_LOGS &&
+      logger.debug("Checking move:", {
+        uci,
+        expectedMove: puzzle.moves[currentMove],
+        currentMove,
+        totalMoves: puzzle.moves.length,
+        isCheckmate: newPos.isCheckmate(),
+        isCorrect: puzzle.moves[currentMove] === uci || newPos.isCheckmate(),
+      });
+
     if (puzzle.moves[currentMove] === uci || newPos.isCheckmate()) {
       if (currentMove === puzzle.moves.length - 1) {
         if (puzzle.completion === "incomplete") {
@@ -92,7 +103,8 @@ function PuzzleBoard({
         }
         setEnded(false);
 
-        if (db && jumpToNextPuzzleImmediately) {
+        if (db && (jumpToNext === "success" || jumpToNext === "success-and-failure")) {
+          PUZZLE_DEBUG_LOGS && logger.debug("Auto-generating next puzzle (success)");
           generatePuzzle(db);
         }
       }
@@ -110,6 +122,11 @@ function PuzzleBoard({
       });
       if (!ended) {
         changeCompletion("incorrect");
+
+        if (db && jumpToNext === "success-and-failure") {
+          PUZZLE_DEBUG_LOGS && logger.debug("Auto-generating next puzzle (failure)");
+          generatePuzzle(db);
+        }
       }
       setEnded(true);
     }

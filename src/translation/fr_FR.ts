@@ -180,7 +180,8 @@ export const fr_FR = {
       "Analysez des positions, des parties et des variantes avec de puissants moteurs d'échecs",
     "Dashboard.Card.Analyze.Button": "Analyser",
     "Dashboard.Card.Database.Title": "Accès aux bases de données",
-    "Dashboard.Card.Database.Desc": "Explorez de vastes bases de données d'échecs et étudiez des parties de maîtres pour progresser",
+    "Dashboard.Card.Database.Desc":
+      "Explorez de vastes bases de données d'échecs et étudiez des parties de maîtres pour progresser",
     "Dashboard.Card.Database.Button": "Parcourir",
     "Dashboard.Card.Engine.Title": "Intégration des moteurs",
     "Dashboard.Card.Engine.Desc": "Ajoutez et gérez plusieurs moteurs d'échecs pour personnaliser vos analyses",
@@ -430,10 +431,8 @@ export const fr_FR = {
     "Settings.OpeningReport.MinGames.Desc": "Numbre minimum de parties à considérer pour chaque position",
     "Settings.Anarchy.Desc": "Options fun",
     "Settings.Anarchy.EnPassant": "En Passant forcé",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Vous oblige à jouer En Passant, si c'est un coup candidat.",
-    "Settings.Appearance.Desc":
-      "Personnalisation de l'interface de l'application",
+    "Settings.Anarchy.EnPassant.Desc": "Vous oblige à jouer En Passant, si c'est un coup candidat.",
+    "Settings.Appearance.Desc": "Personnalisation de l'interface de l'application",
     "Settings.Appearance.Theme": "Thème",
     "Settings.Appearance.Theme.Desc": "Thème de couleurs principal",
     "Settings.Appearance.Theme.Light": "Clair",
@@ -472,7 +471,13 @@ export const fr_FR = {
     "PgnInput.MaxDepth": "Profondeur maximale",
     "PgnInput.TotalMoves": "Nombre total de coups",
 
-    "Puzzle.JumpToNextPuzzleImmediately": "Passer au puzzle suivant immédiatement",
+    "Puzzle.JumpToNext": "Passer au puzzle suivant",
+    "Puzzle.JumpToNextOff": "Désactivé",
+    "Puzzle.JumpToNextOnSuccess": "En cas de succès",
+    "Puzzle.JumpToNextOnSuccessAndFailure": "En cas de succès et d'échec",
+    "Puzzle.PlayerRating": "Classement du joueur",
+    "Puzzle.MaxRating": "Classement max",
+    "Puzzle.NewMax": "Nouveau max",
     "Puzzle.Rating": "Classement du puzzle",
     "Puzzle.AverageSuccessRating": "Classement moyen de réussite",
     "Puzzle.AverageFailRating": "Classement moyen d'échec",
