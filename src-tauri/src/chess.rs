@@ -530,12 +530,13 @@ pub async fn get_best_moves(
 
     state.engine_processes.insert(key.clone(), process.clone());
 
-    let lim = RateLimiter::direct(Quota::per_second(nonzero!(5u32)));
+    let lim = RateLimiter::direct(Quota::per_second(nonzero!(6u32)));
     let mut last_best_moves_payload: Option<BestMovesPayload> = None;
-    let tick_duration: Duration = Duration::from_millis(50);
-    let min_time_before_first_info = Duration::from_millis(200);
-    let min_time_before_subsequent_info = Duration::from_millis(500);
-    let max_time_before_subsequent_info = Duration::from_millis(1000);
+    let tick_duration: Duration = Duration::from_millis(30);
+    let min_time_before_subsequent_info = Duration::from_millis(200);
+    let max_time_before_subsequent_info = Duration::from_millis(600);
+
+    let mut first_result_sent = false;
 
     loop {
         match tokio::time::timeout(tick_duration, reader.next_line()).await {
@@ -579,15 +580,21 @@ pub async fn get_best_moves(
                                             moves: proc.options.moves.clone(),
                                             progress,
                                         };
-                                        if proc.last_event_sent.map_or(
-                                            proc.start.elapsed() < min_time_before_first_info,
-                                            |t| t.elapsed() < min_time_before_subsequent_info,
-                                        ) {
-                                            last_best_moves_payload = Some(best_moves_payload);
-                                        } else {
+                                        
+                                        if !first_result_sent {
+                                            // Always emit first result immediately
+                                            proc.last_event_sent = Some(Instant::now());
+                                            best_moves_payload.emit(&app)?;
+                                            first_result_sent = true;
+                                            last_best_moves_payload = None;
+                                        } else if proc.last_event_sent.map_or(false, |t| t.elapsed() >= min_time_before_subsequent_info) {
+                                            // Subsequent results use normal throttling
                                             proc.last_event_sent = Some(Instant::now());
                                             best_moves_payload.emit(&app)?;
                                             last_best_moves_payload = None;
+                                        } else {
+                                            // Store for later emission
+                                            last_best_moves_payload = Some(best_moves_payload);
                                         }
 
                                         proc.last_depth = cur_depth;
@@ -619,12 +626,7 @@ pub async fn get_best_moves(
             Err(_) => {
                 if let Some(best_moves_payload) = last_best_moves_payload.clone() {
                     let mut proc = process.lock().await;
-                    if proc
-                        .last_event_sent
-                        .map_or(proc.start.elapsed() >= min_time_before_first_info, |t| {
-                            t.elapsed() >= max_time_before_subsequent_info
-                        })
-                    {
+                    if proc.last_event_sent.map_or(true, |t| t.elapsed() >= max_time_before_subsequent_info) {
                         proc.last_event_sent = Some(Instant::now());
                         best_moves_payload.emit(&app)?;
                         last_best_moves_payload = None;
