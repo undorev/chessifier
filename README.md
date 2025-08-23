@@ -67,7 +67,7 @@
 
 ## 📈 Performance & Stats
 
-<div align="center">
+<div>
 
 | Metric | Value |
 |--------|-------|
@@ -108,7 +108,7 @@ Here are some screenshots of Pawn Appétit in action:
 
 ### 📥 Download & Install
 
-<div align="center">
+<div>
 
 | Platform | Download |
 |----------|----------|
