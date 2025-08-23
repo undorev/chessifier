@@ -483,7 +483,7 @@ export const fr_FR = {
     "Puzzle.AverageFailRating": "Classement moyen d'échec",
     "Puzzle.SelectDatabase": "Sélectionner une base de données",
     "Puzzle.RatingRange": "Plage de classement",
-    "Puzzle.Progressive": "Progressif",
+    "Puzzle.Progressive": "Adaptatif",
     "Puzzle.HideRating": "Masquer le classement",
     "Puzzle.InOrder": "Dans l'ordre",
 

@@ -516,7 +516,7 @@ export const en_US = {
     "Puzzle.AverageFailRating": "Average Fail Rating",
     "Puzzle.SelectDatabase": "Select database",
     "Puzzle.RatingRange": "Rating Range",
-    "Puzzle.Progressive": "Progressive",
+    "Puzzle.Progressive": "Adaptive",
     "Puzzle.HideRating": "Hide Rating",
     "Puzzle.InOrder": "In Order",
 

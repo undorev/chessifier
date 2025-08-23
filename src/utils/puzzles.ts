@@ -24,6 +24,11 @@ export const ELO_K_FACTOR = 40;
 export const PROGRESSIVE_MIN_PROB = 0.4;
 export const PROGRESSIVE_MAX_PROB = 0.6;
 
+// Adaptive difficulty configuration
+export const ADAPTIVE_CONSECUTIVE_FAILURES = 3;
+export const ADAPTIVE_EASY_MIN_PROB = 0.6;
+export const ADAPTIVE_EASY_MAX_PROB = 0.8;
+
 // Simple Elo-like rating calculations
 export function expectedScore(playerRating: number, puzzleRating: number): number {
   return 1 / (1 + 10 ** ((puzzleRating - playerRating) / 400));
@@ -80,6 +85,43 @@ export function getPuzzleRangeProb(
     });
 
   return range;
+}
+
+// Calculate adaptive probabilities based on recent performance
+export function getAdaptiveProbabilities(recentResults: Completion[]): [number, number] {
+  const consecutiveFailures = recentResults
+    .slice()
+    .reverse()
+    .indexOf("correct");
+
+  const failureCount = consecutiveFailures === -1 ? recentResults.length : consecutiveFailures;
+
+  let minProb = PROGRESSIVE_MIN_PROB;
+  let maxProb = PROGRESSIVE_MAX_PROB;
+
+  if (failureCount >= ADAPTIVE_CONSECUTIVE_FAILURES) {
+    // After 3+ failures, make much easier
+    minProb = ADAPTIVE_EASY_MIN_PROB;
+    maxProb = ADAPTIVE_EASY_MAX_PROB;
+  }
+
+  PUZZLE_DEBUG_LOGS &&
+    logger.debug("Adaptive probabilities:", {
+      recentResults,
+      consecutiveFailures: failureCount,
+      minProb,
+      maxProb,
+    });
+
+  return [minProb, maxProb];
+}
+
+// Enhanced progressive range with adaptive probabilities
+export function getAdaptivePuzzleRange(playerRating: number, recentResults: Completion[]): [number, number] {
+  const [minProb, maxProb] = getAdaptiveProbabilities(recentResults);
+
+  // Use existing getPuzzleRangeProb with adaptive probabilities
+  return getPuzzleRangeProb(playerRating, minProb, maxProb);
 }
 
 async function getPuzzleDatabase(name: string): Promise<PuzzleDatabaseInfo> {

@@ -19,7 +19,7 @@ import {
 } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import { logger } from "@/utils/logger";
-import { getPuzzleRangeProb, PROGRESSIVE_MAX_PROB, PROGRESSIVE_MIN_PROB, PUZZLE_DEBUG_LOGS } from "@/utils/puzzles";
+import { getAdaptivePuzzleRange, PUZZLE_DEBUG_LOGS } from "@/utils/puzzles";
 import { AddPuzzle, PuzzleControls, PuzzleSettings, PuzzleStatistics } from "./components";
 import { usePuzzleDatabase, usePuzzleSession } from "./hooks";
 import PuzzleBoard from "./PuzzleBoard";
@@ -107,8 +107,12 @@ function Puzzles({ id }: { id: string }) {
   };
 
   const calculateProgressiveRange = (): [number, number] => {
-    // Use Elo-based progressive range calculation
-    const range = getPuzzleRangeProb(playerRating, PROGRESSIVE_MIN_PROB, PROGRESSIVE_MAX_PROB);
+    const completedResults = puzzles
+      .filter((puzzle) => puzzle.completion !== "incomplete")
+      .map((puzzle) => puzzle.completion)
+      .slice(-10);
+
+    const range = getAdaptivePuzzleRange(playerRating, completedResults);
 
     // Clamp to database bounds
     let [min, max] = range;
@@ -116,8 +120,9 @@ function Puzzles({ id }: { id: string }) {
     max = Math.max(minRating, Math.min(max, maxRating));
 
     PUZZLE_DEBUG_LOGS &&
-      logger.debug("Progressive range calculation:", {
+      logger.debug("Adaptive range calculation:", {
         playerRating,
+        recentResults: completedResults,
         originalRange: range,
         clampedRange: [min, max],
         dbBounds: [minRating, maxRating],
