@@ -49,7 +49,7 @@ import { practices } from "@/features/learn/constants/practices";
 import { activeTabAtom, sessionsAtom, tabsAtom } from "@/state/atoms";
 import { useUserStatsStore } from "@/state/userStatsStore";
 import { type Achievement, getAchievements } from "@/utils/achievements";
-import { type ChessComGame, fetchLastChessComGames, getChesscomGame } from "@/utils/chess.com/api";
+import { type ChessComGame, fetchLastChessComGames } from "@/utils/chess.com/api";
 import { type DailyGoal, getDailyGoals } from "@/utils/dailyGoals";
 import { type GameRecord, getRecentGames } from "@/utils/gameRecords";
 import { fetchLastLichessGames } from "@/utils/lichess/api";
@@ -283,9 +283,48 @@ export default function DashboardPage() {
             tag: "Lessons",
             difficulty: "All",
             onClick: () => {
-              const uuid = genID();
-              setTabs((prev: Tab[]) => [...prev, { value: uuid, name: "Analyze", type: "analysis" }]);
-              setActiveTab(uuid);
+              const headersForAnalysis = {
+                id: 0,
+                event: "Local Game",
+                site: "Pawn Appetit",
+                date: new Date(last.timestamp).toLocaleDateString().replace(/\//g, "."),
+                white: last.white.name ?? (last.white.engine ? `Engine (${last.white.engine})` : "White"),
+                black: last.black.name ?? (last.black.engine ? `Engine (${last.black.engine})` : "Black"),
+                result: last.result as Outcome,
+                fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                time_control: last.timeControl,
+                variant: last.variant,
+              };
+
+              let pgn = "";
+              if (last.moves && last.moves.length > 0) {
+                const movesPairs = [];
+                for (let i = 0; i < last.moves.length; i += 2) {
+                  const moveNumber = Math.floor(i / 2) + 1;
+                  const whiteMove = last.moves[i];
+                  const blackMove = last.moves[i + 1];
+                  
+                  if (blackMove) {
+                    movesPairs.push(`${moveNumber}. ${whiteMove} ${blackMove}`);
+                  } else {
+                    movesPairs.push(`${moveNumber}. ${whiteMove}`);
+                  }
+                }
+                pgn = movesPairs.join(" ") + " " + last.result;
+              } else {
+                pgn = last.result;
+              }
+
+              createTab({
+                tab: {
+                  name: `${headersForAnalysis.white} - ${headersForAnalysis.black}`,
+                  type: "analysis",
+                },
+                setTabs,
+                setActiveTab,
+                pgn,
+                headers: headersForAnalysis,
+              });
               navigate({ to: "/boards" });
             },
           });
@@ -667,16 +706,48 @@ export default function DashboardPage() {
                                 size="xs"
                                 variant="light"
                                 onClick={() => {
-                                  const uuid = genID();
-                                  setTabs((prev: Tab[]) => [
-                                    ...prev,
-                                    {
-                                      value: uuid,
-                                      name: t("Tab.AnalysisBoard.Title"),
+                                  const headersForAnalysis = {
+                                    id: 0,
+                                    event: "Local Game",
+                                    site: "Pawn Appetit",
+                                    date: new Date(g.timestamp).toLocaleDateString().replace(/\//g, "."),
+                                    white: g.white.name ?? (g.white.engine ? `Engine (${g.white.engine})` : "White"),
+                                    black: g.black.name ?? (g.black.engine ? `Engine (${g.black.engine})` : "Black"),
+                                    result: g.result as Outcome,
+                                    fen: g.fen,
+                                    time_control: g.timeControl,
+                                    variant: g.variant,
+                                  };
+
+                                  let pgn = "";
+                                  if (g.moves && g.moves.length > 0) {
+                                    const movesPairs = [];
+                                    for (let i = 0; i < g.moves.length; i += 2) {
+                                      const moveNumber = Math.floor(i / 2) + 1;
+                                      const whiteMove = g.moves[i];
+                                      const blackMove = g.moves[i + 1];
+                                      
+                                      if (blackMove) {
+                                        movesPairs.push(`${moveNumber}. ${whiteMove} ${blackMove}`);
+                                      } else {
+                                        movesPairs.push(`${moveNumber}. ${whiteMove}`);
+                                      }
+                                    }
+                                    pgn = movesPairs.join(" ") + " " + g.result;
+                                  } else {
+                                    pgn = g.result;
+                                  }
+
+                                  createTab({
+                                    tab: {
+                                      name: `${headersForAnalysis.white} - ${headersForAnalysis.black}`,
                                       type: "analysis",
                                     },
-                                  ]);
-                                  setActiveTab(uuid);
+                                    setTabs,
+                                    setActiveTab,
+                                    pgn,
+                                    headers: headersForAnalysis,
+                                  });
                                   navigate({ to: "/boards" });
                                 }}
                               >
