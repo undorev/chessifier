@@ -11,6 +11,21 @@
         "lineWidth": 120,
         "lineEnding": "lf"
     },
+    "overrides": [
+        {
+            "includes": [
+                "src/translations/**"
+            ],
+            "formatter": {
+                "lineWidth": 185
+            },
+            "javascript": {
+                "formatter": {
+                    "quoteProperties": "preserve"
+                }
+            }
+        }
+    ],
     "linter": {
         "rules": {
             "style": {
