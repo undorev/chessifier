@@ -327,8 +327,7 @@ export const en_US = {
     "Engines.Add.ImageFile": "Image file",
     "Engines.Add.ImageFile.Desc": "Click to select the image file (recommended size: 60x60)",
     "Engines.Remove.Title": "Remove Engine",
-    "Engines.Remove.Message":
-      "Are you sure you want to remove this engine from Pawn Appétit?",
+    "Engines.Remove.Message": "Are you sure you want to remove this engine from Pawn Appétit?",
 
     "Databases.Title": "Your Databases",
     "Databases.Card.Games": "Games",
@@ -465,8 +464,7 @@ export const en_US = {
     "Settings.OpeningReport.MinGames.Desc": "Minimum number of games in each position for it to be considered",
     "Settings.Anarchy.Desc": "Fun options",
     "Settings.Anarchy.EnPassant": "Forced En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Forces you to play En Passant, if it's a legal move.",
+    "Settings.Anarchy.EnPassant.Desc": "Forces you to play En Passant, if it's a legal move.",
     "Settings.Appearance.Desc": "Customize the look of the app",
     "Settings.Appearance.Theme": "Theme",
     "Settings.Appearance.Theme.Desc": "Overall color scheme",
@@ -506,13 +504,19 @@ export const en_US = {
     "PgnInput.MaxDepth": "Max Depth",
     "PgnInput.TotalMoves": "Total Moves",
 
-    "Puzzle.JumpToNextPuzzleImmediately": "Jump to next puzzle immediately",
+    "Puzzle.JumpToNext": "Jump to next puzzle",
+    "Puzzle.JumpToNextOff": "Off",
+    "Puzzle.JumpToNextOnSuccess": "On success",
+    "Puzzle.JumpToNextOnSuccessAndFailure": "On success and failure",
+    "Puzzle.PlayerRating": "Player Rating",
+    "Puzzle.MaxRating": "Max Rating",
+    "Puzzle.NewMax": "New Max",
     "Puzzle.Rating": "Puzzle Rating",
     "Puzzle.AverageSuccessRating": "Average Success Rating",
     "Puzzle.AverageFailRating": "Average Fail Rating",
     "Puzzle.SelectDatabase": "Select database",
     "Puzzle.RatingRange": "Rating Range",
-    "Puzzle.Progressive": "Progressive",
+    "Puzzle.Progressive": "Adaptive",
     "Puzzle.HideRating": "Hide Rating",
     "Puzzle.InOrder": "In Order",
 
@@ -521,6 +525,7 @@ export const en_US = {
     "Puzzle.ClearSession": "Clear Session",
     "Puzzle.ShowingSolution": "Showing Solution",
     "Puzzle.ViewSolution": "View Solution",
+    "Puzzle.LoadingRatingRange": "Loading rating range...",
     "Puzzle.EnterTitle": "Enter Puzzle Title",
 
     "GameNotation.ShowMoves": "Show moves",

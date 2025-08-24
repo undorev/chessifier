@@ -11,7 +11,7 @@ import { getDefaultPuzzleDatabases } from "@/utils/db";
 import { formatBytes, formatNumber } from "@/utils/format";
 import { getPuzzleDatabases } from "@/utils/puzzles";
 
-function AddPuzzle({
+export function AddPuzzle({
   puzzleDbs,
   opened,
   setOpened,
@@ -37,7 +37,7 @@ function AddPuzzle({
               databaseId={i}
               key={i}
               setPuzzleDbs={setPuzzleDbs}
-              initInstalled={puzzleDbs.some((e) => e.title === db.title)}
+              initInstalled={puzzleDbs.some((e) => e.title === `${db.title}.db3`)}
               files={files}
             />
           ))}

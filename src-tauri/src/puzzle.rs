@@ -151,6 +151,34 @@ pub fn get_puzzle(file: String, min_rating: u16, max_rating: u16, random: bool) 
     }
 }
 
+/// Gets the minimum and maximum rating range from a puzzle database
+///
+/// This function queries the database to find the lowest and highest puzzle ratings.
+///
+/// # Arguments
+/// * `file` - Path to the puzzle database
+///
+/// # Returns
+/// * `Ok((min_rating, max_rating))` with the rating range
+/// * `Err(Error)` if there was a problem accessing the database
+#[tauri::command]
+#[specta::specta]
+pub fn get_puzzle_rating_range(file: String) -> Result<(u16, u16), Error> {
+    let mut db = diesel::SqliteConnection::establish(&file)?;
+    
+    let min_rating = puzzles::table
+        .select(diesel::dsl::min(puzzles::rating))
+        .first::<Option<i32>>(&mut db)?
+        .unwrap_or(0) as u16;
+    
+    let max_rating = puzzles::table
+        .select(diesel::dsl::max(puzzles::rating))
+        .first::<Option<i32>>(&mut db)?
+        .unwrap_or(0) as u16;
+    
+    Ok((min_rating, max_rating))
+}
+
 /// Information about a puzzle database
 #[derive(Serialize, Type)]
 #[serde(rename_all = "camelCase")]

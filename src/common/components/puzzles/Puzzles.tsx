@@ -1,79 +1,33 @@
-import {
-  ActionIcon,
-  Button,
-  Center,
-  Checkbox,
-  Divider,
-  Group,
-  Input,
-  Paper,
-  Portal,
-  RangeSlider,
-  ScrollArea,
-  Select,
-  Stack,
-  Switch,
-  Text,
-  Tooltip,
-} from "@mantine/core";
-import { useSessionStorage } from "@mantine/hooks";
-import { IconPlus, IconX, IconZoomCheck } from "@tabler/icons-react";
+import { Divider, Paper, Portal, ScrollArea, Stack } from "@mantine/core";
 import { useLoaderData } from "@tanstack/react-router";
 import { readDir } from "@tauri-apps/plugin-fs";
-import { Chess, makeUci, parseUci } from "chessops";
-import { INITIAL_BOARD_FEN, parseFen } from "chessops/fen";
-import { parseSan } from "chessops/san";
-import { useAtom, useSetAtom } from "jotai";
-import { useContext, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useAtom } from "jotai";
+import { useContext, useState } from "react";
 import useSWR from "swr";
 import { useStore } from "zustand";
-import { commands, type PuzzleDatabaseInfo, type Token } from "@/bindings";
 import ChallengeHistory from "@/common/components/ChallengeHistory";
 import GameNotation from "@/common/components/GameNotation";
 import MoveControls from "@/common/components/MoveControls";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
-import { type Directory, type FileMetadata, processEntriesRecursively } from "@/features/files/components/file";
+import { processEntriesRecursively } from "@/features/files/components/file";
 import {
-  activeTabAtom,
-  currentPuzzleAtom,
   hidePuzzleRatingAtom,
   inOrderPuzzlesAtom,
   jumpToNextPuzzleAtom,
+  puzzlePlayerRatingAtom,
   progressivePuzzlesAtom,
-  puzzleRatingRangeAtom,
-  selectedPuzzleDbAtom,
-  tabsAtom,
 } from "@/state/atoms";
-import { getPgnHeaders } from "@/utils/chess";
 import { positionFromFen } from "@/utils/chessops";
-import { type Completion, getPuzzleDatabases, type Puzzle } from "@/utils/puzzles";
-import { createTab } from "@/utils/tabs";
-import { defaultTree } from "@/utils/treeReducer";
-import { unwrap } from "@/utils/unwrap";
-import AddPuzzle from "./AddPuzzle";
+import { logger } from "@/utils/logger";
+import { getAdaptivePuzzleRange, PUZZLE_DEBUG_LOGS } from "@/utils/puzzles";
+import { AddPuzzle, PuzzleControls, PuzzleSettings, PuzzleStatistics } from "./components";
+import { usePuzzleDatabase, usePuzzleSession } from "./hooks";
 import PuzzleBoard from "./PuzzleBoard";
-
-type CachedPuzzle = {
-  puzzle?: Puzzle;
-  tokens: Token[];
-  rating: number;
-  index: number;
-};
-type PuzzleCacheEntry = {
-  minRating: number;
-  maxRating: number;
-  random: boolean;
-  counter: number;
-  puzzles: CachedPuzzle[];
-};
-const PuzzleDbFromPgnCache = new Map<string, PuzzleCacheEntry>();
 
 const useFileDirectory = (dir: string) => {
   const { data, error, isLoading, mutate } = useSWR("file-directory", async () => {
     const entries = await readDir(dir);
     const allEntries = processEntriesRecursively(dir, entries);
-
     return allEntries;
   });
   return {
@@ -85,205 +39,116 @@ const useFileDirectory = (dir: string) => {
 };
 
 function Puzzles({ id }: { id: string }) {
-  const { t } = useTranslation();
   const store = useContext(TreeStateContext)!;
-  const setFen = useStore(store, (s) => s.setFen);
-  const goToStart = useStore(store, (s) => s.goToStart);
   const reset = useStore(store, (s) => s.reset);
-  const makeMove = useStore(store, (s) => s.makeMove);
-  const [puzzles, setPuzzles] = useSessionStorage<Puzzle[]>({
-    key: `${id}-puzzles`,
-    defaultValue: [],
-  });
-  const [currentPuzzle, setCurrentPuzzle] = useAtom(currentPuzzleAtom);
-
-  const [puzzleDbs, setPuzzleDbs] = useState<PuzzleDatabaseInfo[]>([]);
-  const [selectedDb, setSelectedDb] = useAtom(selectedPuzzleDbAtom);
 
   const { documentDir } = useLoaderData({ from: "/boards" });
   const { files } = useFileDirectory(documentDir);
 
-  useEffect(() => {
-    if (files) {
-      getPuzzleDatabases(files as (FileMetadata | Directory)[]).then((databases) => {
-        setPuzzleDbs(databases);
-      });
-    }
-  }, [files]);
-  const [ratingRange, setRatingRange] = useAtom(puzzleRatingRangeAtom);
+  // Custom hooks for state management
+  const {
+    puzzleDbs,
+    setPuzzleDbs,
+    selectedDb,
+    setSelectedDb,
+    ratingRange,
+    setRatingRange,
+    dbRatingRange,
+    minRating,
+    maxRating,
+    generatePuzzle: generatePuzzleFromDb,
+    clearPuzzleCache,
+  } = usePuzzleDatabase(files);
 
-  const [jumpToNextPuzzleImmediately, setJumpToNextPuzzleImmediately] = useAtom(jumpToNextPuzzleAtom);
+  const { puzzles, currentPuzzle, changeCompletion, addPuzzle, clearSession, selectPuzzle } = usePuzzleSession(id);
 
-  const wonPuzzles = puzzles.filter((puzzle) => puzzle.completion === "correct");
-  const lostPuzzles = puzzles.filter((puzzle) => puzzle.completion === "incorrect");
-  const averageWonRating = wonPuzzles.reduce((acc, puzzle) => acc + puzzle.rating, 0) / wonPuzzles.length;
-  const averageLostRating = lostPuzzles.reduce((acc, puzzle) => acc + puzzle.rating, 0) / lostPuzzles.length;
-
-  function setPuzzle(puzzle: { fen: string; moves: string[] }) {
-    setFen(puzzle.fen);
-    if (puzzle.moves.length % 2 === 0) {
-      console.log("Setting puzzle. Puzzle has even moves. Player must play second");
-      makeMove({ payload: parseUci(puzzle.moves[0])! });
-    }
-  }
-
-  async function generatePuzzleFromPgn(db: string, minRating: number, maxRating: number, random: boolean) {
-    let localPuzzleDb = PuzzleDbFromPgnCache.get(db);
-    const resetCache = localPuzzleDb
-      ? localPuzzleDb.minRating !== minRating ||
-        localPuzzleDb.maxRating !== maxRating ||
-        localPuzzleDb.random !== random ||
-        localPuzzleDb.counter >= localPuzzleDb.puzzles.length
-      : false;
-    if (!localPuzzleDb || resetCache) {
-      const count = unwrap(await commands.countPgnGames(db));
-      const games = unwrap(await commands.readGames(db, 0, count - 1));
-      const puzzles = await Promise.all(
-        games.map(async (game, i) => {
-          const tokens = unwrap(await commands.lexPgn(game));
-          const headers = getPgnHeaders(tokens);
-          const rating = headers.white_elo || 1500;
-          return { rating, index: i, tokens };
-        }),
-      );
-      localPuzzleDb = {
-        counter: 0,
-        minRating,
-        maxRating,
-        random,
-        puzzles: puzzles.filter((p) => p.rating >= minRating && p.rating <= maxRating),
-      };
-      PuzzleDbFromPgnCache.set(db, localPuzzleDb);
-    }
-    const possiblePuzzles = localPuzzleDb.puzzles;
-    if (possiblePuzzles.length === 0) return null;
-    const selectedGame = random
-      ? possiblePuzzles[Math.floor(Math.random() * possiblePuzzles.length)]
-      : possiblePuzzles[localPuzzleDb.counter % possiblePuzzles.length];
-    localPuzzleDb.counter++;
-    if (!selectedGame.puzzle) {
-      const headers = getPgnHeaders(selectedGame.tokens);
-      const puzzleFen = headers.fen.trim() || INITIAL_BOARD_FEN;
-      const [pos, error] = positionFromFen(puzzleFen);
-      if (error) {
-        console.error("generatePuzzleFromPgn: error parsing positionFromFen", error);
-        return null;
-      }
-
-      const parsedMoves = selectedGame.tokens
-        .filter((t) => t.type === "San")
-        .map((t) => t.value)
-        .map((san) => {
-          if (pos) {
-            const move = parseSan(pos, san);
-            const uciMove = move ? makeUci(move) : null;
-            if (move) {
-              pos.play(move);
-            }
-            return uciMove;
-          }
-          return null;
-        });
-
-      const moves = parsedMoves.filter((move) => move !== null);
-      parsedMoves.length !== moves.length &&
-        console.warn("Some moves could not be parsed from SAN to UCI. This needs to be fixed.");
-
-      selectedGame.puzzle = {
-        fen: puzzleFen,
-        moves,
-        rating: selectedGame.rating,
-        rating_deviation: 0,
-        popularity: 0,
-        nb_plays: 0,
-        completion: "incomplete",
-      };
-    }
-
-    return selectedGame.puzzle;
-  }
-
-  async function generatePuzzle(db: string) {
-    let range = ratingRange;
-    if (progressive) {
-      // Find the last successfully completed puzzle rating
-      const lastSuccessfulRating = wonPuzzles.length > 0 
-        ? wonPuzzles[wonPuzzles.length - 1].rating 
-        : ratingRange[0];
-      
-      // Get current puzzle completion status
-      const currentPuzzleCompletion = puzzles?.[currentPuzzle]?.completion;
-      const currentRating = puzzles?.[currentPuzzle]?.rating;
-      
-      if (currentPuzzleCompletion === "correct" && currentRating) {
-        // Increase difficulty after successful completion
-        range = [currentRating + 50, currentRating + 100];
-        setRatingRange([currentRating + 50, currentRating + 100]);
-      } else if (currentPuzzleCompletion === "incorrect" && currentRating) {
-        // Decrease difficulty slightly after failure, or stay at last successful level
-        const targetRating = Math.max(lastSuccessfulRating, currentRating - 100);
-        range = [targetRating, targetRating + 50];
-        setRatingRange([targetRating, targetRating + 50]);
-      } else if (currentRating) {
-        // For incomplete puzzles, stay at the same level
-        range = [currentRating, currentRating + 50];
-        setRatingRange([currentRating, currentRating + 50]);
-      } else {
-        // If no current rating, use last successful rating or default range
-        range = [lastSuccessfulRating, lastSuccessfulRating + 50];
-        setRatingRange([lastSuccessfulRating, lastSuccessfulRating + 50]);
-      }
-    }
-
-    // Find the database info to check its type
-    const dbInfo = puzzleDbs.find((p) => p.path === db);
-    if (!dbInfo) return;
-
-    let puzzle: Puzzle;
-    if (dbInfo.path.endsWith(".db3")) {
-      // Handle .db3 database puzzles
-      const res = await commands.getPuzzle(db, range[0], range[1], !inOrder);
-      const dbPuzzle = unwrap(res);
-      puzzle = {
-        ...dbPuzzle,
-        moves: dbPuzzle.moves.split(" "),
-        completion: "incomplete",
-      };
-    } else {
-      const dbPuzzle = await generatePuzzleFromPgn(db, range[0], range[1], !inOrder);
-      if (!dbPuzzle) {
-        throw new Error("Unable to generate a puzzle from local file within the requested range");
-      }
-
-      puzzle = dbPuzzle;
-    }
-
-    setPuzzles((puzzles) => {
-      return [...puzzles, puzzle];
-    });
-    setCurrentPuzzle(puzzles.length);
-    setPuzzle(puzzle);
-  }
-
-  function changeCompletion(completion: Completion) {
-    setPuzzles((puzzles) => {
-      puzzles[currentPuzzle].completion = completion;
-      return [...puzzles];
-    });
-  }
-
+  // Local state
   const [addOpened, setAddOpened] = useState(false);
-  const [showingSolution, setShowingSolution] = useState(false);
-
   const [progressive, setProgressive] = useAtom(progressivePuzzlesAtom);
   const [hideRating, setHideRating] = useAtom(hidePuzzleRatingAtom);
   const [inOrder, setInOrder] = useAtom(inOrderPuzzlesAtom);
+  const [jumpToNext, setJumpToNext] = useAtom(jumpToNextPuzzleAtom);
+  const [playerRating] = useAtom(puzzlePlayerRatingAtom);
 
-  const [, setTabs] = useAtom(tabsAtom);
-  const setActiveTab = useSetAtom(activeTabAtom);
+  // Computed values
+  const currentPuzzleData = puzzles?.[currentPuzzle];
+  const turnToMove = currentPuzzleData ? (positionFromFen(currentPuzzleData?.fen)[0]?.turn ?? null) : null;
 
-  const turnToMove =
-    puzzles?.[currentPuzzle] !== undefined ? positionFromFen(puzzles?.[currentPuzzle]?.fen)[0]?.turn : null;
+  // Event handlers
+  const handleGeneratePuzzle = async () => {
+    if (!selectedDb) return;
+
+    let range = ratingRange;
+    if (progressive && minRating !== maxRating) {
+      range = calculateProgressiveRange();
+    }
+
+    PUZZLE_DEBUG_LOGS &&
+      logger.debug("Generating puzzle:", {
+        db: selectedDb,
+        range,
+        progressive,
+        inOrder,
+        playerRating,
+      });
+
+    try {
+      const puzzle = await generatePuzzleFromDb(selectedDb, range, inOrder);
+      PUZZLE_DEBUG_LOGS &&
+        logger.debug("Generated puzzle:", {
+          fen: puzzle.fen,
+          rating: puzzle.rating,
+          moves: puzzle.moves,
+        });
+      addPuzzle(puzzle);
+    } catch (error) {
+      logger.error("Failed to generate puzzle:", error);
+    }
+  };
+
+  const calculateProgressiveRange = (): [number, number] => {
+    const completedResults = puzzles
+      .filter((puzzle) => puzzle.completion !== "incomplete")
+      .map((puzzle) => puzzle.completion)
+      .slice(-10);
+
+    const range = getAdaptivePuzzleRange(playerRating, completedResults);
+
+    // Clamp to database bounds
+    let [min, max] = range;
+    min = Math.max(minRating, Math.min(min, maxRating));
+    max = Math.max(minRating, Math.min(max, maxRating));
+
+    PUZZLE_DEBUG_LOGS &&
+      logger.debug("Adaptive range calculation:", {
+        playerRating,
+        recentResults: completedResults,
+        originalRange: range,
+        clampedRange: [min, max],
+        dbBounds: [minRating, maxRating],
+      });
+
+    setRatingRange([min, max]);
+    return [min, max];
+  };
+
+  const handleClearSession = () => {
+    PUZZLE_DEBUG_LOGS && logger.debug("Clearing puzzle session");
+    clearSession();
+    if (selectedDb) {
+      clearPuzzleCache(selectedDb);
+    }
+    reset();
+  };
+
+  const handleDatabaseChange = (value: string | null) => {
+    PUZZLE_DEBUG_LOGS && logger.debug("Database changed:", value);
+    setSelectedDb(value);
+  };
+
+  const handleAddDatabase = () => {
+    setAddOpened(true);
+  };
 
   return (
     <>
@@ -293,10 +158,12 @@ function Puzzles({ id }: { id: string }) {
           puzzles={puzzles}
           currentPuzzle={currentPuzzle}
           changeCompletion={changeCompletion}
-          generatePuzzle={generatePuzzle}
+          generatePuzzle={handleGeneratePuzzle}
           db={selectedDb}
+          jumpToNext={jumpToNext}
         />
       </Portal>
+
       <Portal target="#topRight" style={{ height: "100%" }}>
         <Paper h="100%" withBorder p="md">
           <AddPuzzle
@@ -306,161 +173,43 @@ function Puzzles({ id }: { id: string }) {
             setPuzzleDbs={setPuzzleDbs}
             files={files}
           />
-          <Group grow>
-            <div>
-              <Text size="sm" c="dimmed">
-                {t("Puzzle.Rating")}
-              </Text>
-              <Text fw={500} size="xl">
-                {puzzles?.[currentPuzzle]?.completion === "incomplete"
-                  ? hideRating
-                    ? "?"
-                    : puzzles?.[currentPuzzle]?.rating
-                  : puzzles?.[currentPuzzle]?.rating}
-              </Text>
-            </div>
-            {averageWonRating && (
-              <div>
-                <Text size="sm" c="dimmed">
-                  {t("Puzzle.AverageSuccessRating")}
-                </Text>
-                <Text fw={500} size="xl">
-                  {averageWonRating.toFixed(0)}
-                </Text>
-              </div>
-            )}
-            {averageLostRating && (
-              <div>
-                <Text size="sm" c="dimmed">
-                  {t("Puzzle.AverageFailRating")}
-                </Text>
-                <Text fw={500} size="xl">
-                  {averageLostRating.toFixed(0)}
-                </Text>
-              </div>
-            )}
-            <Select
-              data={puzzleDbs
-                .map((p) => ({
-                  label: p.title.split(".db3")[0],
-                  value: p.path,
-                }))
-                .concat({ label: `+ ${t("Common.AddNew")}`, value: "add" })}
-              value={selectedDb}
-              clearable={false}
-              placeholder={t("Puzzle.SelectDatabase")}
-              onChange={(v) => {
-                if (v === "add") {
-                  setAddOpened(true);
-                } else {
-                  setSelectedDb(v);
-                }
-              }}
-            />
-          </Group>
-          <Divider my="sm" />
-          <Group>
-            <Input.Wrapper label={t("Puzzle.RatingRange")} flex={1}>
-              <RangeSlider min={600} max={2800} value={ratingRange} onChange={setRatingRange} disabled={progressive} />
-            </Input.Wrapper>
-            <Input.Wrapper label={t("Puzzle.Progressive")}>
-              <Center>
-                <Checkbox checked={progressive} onChange={(event) => setProgressive(event.currentTarget.checked)} />
-              </Center>
-            </Input.Wrapper>
-            <Input.Wrapper label={t("Puzzle.HideRating")}>
-              <Center>
-                <Checkbox checked={hideRating} onChange={(event) => setHideRating(event.currentTarget.checked)} />
-              </Center>
-            </Input.Wrapper>
-            <Input.Wrapper label={t("Puzzle.InOrder")}>
-              <Center>
-                <Checkbox checked={inOrder} onChange={(event) => setInOrder(event.currentTarget.checked)} />
-              </Center>
-            </Input.Wrapper>
-          </Group>
-          <Divider my="sm" />
-          <Group justify="space-between">
-            {turnToMove && (
-              <Text fz="1.75rem">{turnToMove === "white" ? t("Fen.BlackToMove") : t("Fen.WhiteToMove")}</Text>
-            )}
-            <Group>
-              <Switch
-                defaultChecked
-                onChange={(event) => setJumpToNextPuzzleImmediately(event.currentTarget.checked)}
-                checked={jumpToNextPuzzleImmediately}
-                label={t("Puzzle.JumpToNextPuzzleImmediately")}
-              />
 
-              <Tooltip label={t("Puzzle.NewPuzzle")}>
-                <ActionIcon disabled={!selectedDb} onClick={() => generatePuzzle(selectedDb!)}>
-                  <IconPlus />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip label={t("Puzzle.AnalyzePosition")}>
-                <ActionIcon
-                  disabled={!selectedDb}
-                  onClick={() =>
-                    createTab({
-                      tab: {
-                        name: "Puzzle Analysis",
-                        type: "analysis",
-                      },
-                      setTabs,
-                      setActiveTab,
-                      pgn: puzzles?.[currentPuzzle]?.moves.join(" "),
-                      headers: {
-                        ...defaultTree().headers,
-                        fen: puzzles?.[currentPuzzle]?.fen,
-                        orientation:
-                          Chess.fromSetup(parseFen(puzzles?.[currentPuzzle]?.fen).unwrap()).unwrap().turn === "white"
-                            ? "black"
-                            : "white",
-                      },
-                    })
-                  }
-                >
-                  <IconZoomCheck />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip label={t("Puzzle.ClearSession")}>
-                <ActionIcon
-                  onClick={() => {
-                    setPuzzles([]);
-                    reset();
-                  }}
-                >
-                  <IconX />
-                </ActionIcon>
-              </Tooltip>
-            </Group>
-          </Group>
+          <PuzzleSettings
+            puzzleDbs={puzzleDbs}
+            selectedDb={selectedDb}
+            onDatabaseChange={handleDatabaseChange}
+            onAddDatabase={handleAddDatabase}
+            ratingRange={ratingRange}
+            onRatingRangeChange={setRatingRange}
+            minRating={minRating}
+            maxRating={maxRating}
+            dbRatingRange={dbRatingRange}
+            progressive={progressive}
+            onProgressiveChange={setProgressive}
+            hideRating={hideRating}
+            onHideRatingChange={setHideRating}
+            inOrder={inOrder}
+            onInOrderChange={setInOrder}
+          />
+          <Divider my="sm" />
 
-          <Button
-            mt="sm"
-            variant="light"
-            onClick={async () => {
-              setShowingSolution(true);
-              const curPuzzle = puzzles?.[currentPuzzle];
-              if (curPuzzle.completion === "incomplete") {
-                changeCompletion("incorrect");
-              }
-              goToStart();
-              for (let i = 0; i < curPuzzle.moves.length; i++) {
-                makeMove({
-                  payload: parseUci(curPuzzle.moves[i])!,
-                  mainline: true,
-                });
-                await new Promise((r) => setTimeout(r, 500));
-              }
-              setShowingSolution(false);
-            }}
-            disabled={puzzles.length === 0 || showingSolution}
-          >
-            {showingSolution ? t("Puzzle.ShowingSolution") : t("Puzzle.ViewSolution")}
-          </Button>
+          <PuzzleControls
+            selectedDb={selectedDb}
+            onGeneratePuzzle={handleGeneratePuzzle}
+            onClearSession={handleClearSession}
+            changeCompletion={changeCompletion}
+            currentPuzzle={currentPuzzleData}
+            puzzles={puzzles}
+            jumpToNext={jumpToNext}
+            onJumpToNextChange={setJumpToNext}
+            turnToMove={turnToMove}
+          />
+          <Divider my="sm" />
+
+          <PuzzleStatistics currentPuzzle={currentPuzzleData} />
         </Paper>
       </Portal>
+
       <Portal target="#bottomRight" style={{ height: "100%" }}>
         <Stack h="100%" gap="xs">
           <Paper withBorder p="md" mih="5rem">
@@ -471,10 +220,7 @@ function Puzzles({ id }: { id: string }) {
                   label: p.rating.toString(),
                 }))}
                 current={currentPuzzle}
-                select={(i) => {
-                  setCurrentPuzzle(i);
-                  setPuzzle(puzzles?.[i]);
-                }}
+                select={selectPuzzle}
               />
             </ScrollArea>
           </Paper>
