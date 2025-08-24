@@ -216,8 +216,7 @@ export const pl_PL = {
     "Engines.Add.ImageFile": "Plik graficzny",
     "Engines.Add.ImageFile.Desc": "Kliknij, aby wybrać plik graficzny (zalecany rozmiar: 60x60)",
     "Engines.Remove.Title": "Usuń silnik",
-    "Engines.Remove.Message":
-      "Czy na pewno chcesz usunąć ten silnik z Pawn Appétit?",
+    "Engines.Remove.Message": "Czy na pewno chcesz usunąć ten silnik z Pawn Appétit?",
 
     "Databases.Title": "Twoje bazy danych",
     "Databases.Card.Games": "Gry",
@@ -308,8 +307,7 @@ export const pl_PL = {
     "Settings.OpeningReport.MinGames.Desc": "Minimalna liczba gier w każdej pozycji, aby była brana pod uwagę",
     "Settings.Anarchy.Desc": "Zabawne opcje",
     "Settings.Anarchy.EnPassant": "Wymuszony En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Zmusi cię do zagrania En Passant, jeśli jest to legalny ruch.",
+    "Settings.Anarchy.EnPassant.Desc": "Zmusi cię do zagrania En Passant, jeśli jest to legalny ruch.",
     "Settings.Appearance.Desc": "Dostosuj wygląd aplikacji",
     "Settings.Appearance.Theme": "Motyw",
     "Settings.Appearance.Theme.Desc": "Ogólny schemat kolorów",

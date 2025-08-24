@@ -309,8 +309,7 @@ export const it_IT = {
     "Engines.Add.ImageFile": "File immagine",
     "Engines.Add.ImageFile.Desc": "Clicca per selezionare il file immagine (dimensione consigliata: 60x60)",
     "Engines.Remove.Title": "Rimuovi Motore",
-    "Engines.Remove.Message":
-      "Sei sicuro di voler rimuovere questo motore da Pawn Appétit?",
+    "Engines.Remove.Message": "Sei sicuro di voler rimuovere questo motore da Pawn Appétit?",
 
     "Databases.Title": "Database",
     "Databases.Card.Games": "Partite",
@@ -427,8 +426,7 @@ export const it_IT = {
     "Settings.OpeningReport.MinGames.Desc": "Numero minimo di partite in ogni posizione affinché sia considerata",
     "Settings.Anarchy.Desc": "Opzioni divertenti",
     "Settings.Anarchy.EnPassant": "En Passant Forzato",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Ti obbliga a giocare En Passant, se è una mossa legale.",
+    "Settings.Anarchy.EnPassant.Desc": "Ti obbliga a giocare En Passant, se è una mossa legale.",
     "Settings.Appearance.Desc": "Personalizza l'aspetto dell'app",
     "Settings.Appearance.Theme": "Tema",
     "Settings.Appearance.Theme.Desc": "Schema di colori generale",

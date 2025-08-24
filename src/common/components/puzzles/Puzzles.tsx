@@ -14,8 +14,8 @@ import {
   hidePuzzleRatingAtom,
   inOrderPuzzlesAtom,
   jumpToNextPuzzleAtom,
-  puzzlePlayerRatingAtom,
   progressivePuzzlesAtom,
+  puzzlePlayerRatingAtom,
 } from "@/state/atoms";
 import { positionFromFen } from "@/utils/chessops";
 import { logger } from "@/utils/logger";

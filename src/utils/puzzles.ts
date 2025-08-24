@@ -89,10 +89,7 @@ export function getPuzzleRangeProb(
 
 // Calculate adaptive probabilities based on recent performance
 export function getAdaptiveProbabilities(recentResults: Completion[]): [number, number] {
-  const consecutiveFailures = recentResults
-    .slice()
-    .reverse()
-    .indexOf("correct");
+  const consecutiveFailures = recentResults.slice().reverse().indexOf("correct");
 
   const failureCount = consecutiveFailures === -1 ? recentResults.length : consecutiveFailures;
 

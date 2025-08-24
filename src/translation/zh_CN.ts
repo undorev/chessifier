@@ -300,8 +300,7 @@ export const zh_CN = {
     "Settings.OpeningReport.MinGames.Desc": "每个局面中被考虑的最小对局数",
     "Settings.Anarchy.Desc": "有趣的选项",
     "Settings.Anarchy.EnPassant": "强制 En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "如果 En Passant 是合法的着法，强制走出这一着",
+    "Settings.Anarchy.EnPassant.Desc": "如果 En Passant 是合法的着法，强制走出这一着",
     "Settings.Appearance.Desc": "自定义应用程序的外观",
     "Settings.Appearance.Theme": "主题",
     "Settings.Appearance.Theme.Desc": "总体的颜色主题",

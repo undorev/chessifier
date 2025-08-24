@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Box,
   Card,
-  Center,
   Group,
   Image,
   Loader,

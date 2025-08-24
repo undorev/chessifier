@@ -13,8 +13,9 @@ import {
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useHotkeys } from "@mantine/hooks";
-import { IconDotsVertical } from "@tabler/icons-react";
+import { IconExternalLink, IconFilter, IconFilterFilled } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
+import { invoke } from "@tauri-apps/api/core";
 import dayjs from "dayjs";
 import { useAtom, useSetAtom } from "jotai";
 import { DataTable } from "mantine-datatable";
@@ -200,7 +201,7 @@ function GameTable() {
             </Collapse>
           </Box>
           <ActionIcon style={{ flexGrow: 0 }} onClick={() => toggleOpenedSettings()}>
-            <IconDotsVertical size="1rem" />
+            {openedSettings ? <IconFilterFilled size="1rem" /> : <IconFilter size="1rem" />}
           </ActionIcon>
         </Flex>
       }
@@ -265,7 +266,15 @@ function GameTable() {
             },
             { accessor: "ply_count", title: t("GameTable.Plies"), sortable: true },
             { accessor: "event", title: t("GameTable.Event") },
-            { accessor: "site", title: t("GameTable.Site") },
+            {
+              accessor: "site",
+              title: t("GameTable.Site"),
+              render: ({ site }) => (
+                <ActionIcon onClick={() => invoke("open_external_link", { url: site })}>
+                  <IconExternalLink size="1rem" />
+                </ActionIcon>
+              ),
+            },
           ]}
           rowClassName={(_, i) => (i === selectedGame ? classes.selected : "")}
           noRecordsText={t("Common.NoGamesFound")}

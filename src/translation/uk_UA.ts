@@ -215,8 +215,7 @@ export const uk_UA = {
     "Engines.Add.ImageFile": "Файл зображення",
     "Engines.Add.ImageFile.Desc": "Натисніть для вибору файлу зображення (рекомендовано: 60x60)",
     "Engines.Remove.Title": "Видалити движок",
-    "Engines.Remove.Message":
-      "Ви впевнені, що хочете видалити цей движок із Pawn Appétit?",
+    "Engines.Remove.Message": "Ви впевнені, що хочете видалити цей движок із Pawn Appétit?",
 
     "Databases.Title": "Бази даних",
     "Databases.Card.Games": "Ігри",
@@ -305,8 +304,7 @@ export const uk_UA = {
     "Settings.OpeningReport.MinGames.Desc": "Мінімальна кількість ігор для кожної позиції, щоб бути врахованою",
     "Settings.Anarchy.Desc": "Веселі опції",
     "Settings.Anarchy.EnPassant": "Примусовий En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Змушує робити хід En Passant, якщо це легальний хід.",
+    "Settings.Anarchy.EnPassant.Desc": "Змушує робити хід En Passant, якщо це легальний хід.",
     "Settings.Appearance.Desc": "Налаштувати зовнішній вигляд програми",
     "Settings.Appearance.Theme": "Тема",
     "Settings.Appearance.Theme.Desc": "Загальна кольорова схема",

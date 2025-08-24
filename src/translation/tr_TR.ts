@@ -213,8 +213,7 @@ export const tr_TR = {
     "Engines.Add.ImageFile": "Görsel dosyası",
     "Engines.Add.ImageFile.Desc": "Görsel dosyası seçmek için tıklayın (önerilen boyut: 60x60)",
     "Engines.Remove.Title": "Motor Kaldır",
-    "Engines.Remove.Message":
-      "Bu motoru Pawn Appétit'tan kaldırmak istediğinize emin misiniz?",
+    "Engines.Remove.Message": "Bu motoru Pawn Appétit'tan kaldırmak istediğinize emin misiniz?",
 
     "Databases.Title": "Veritabanlarınız",
     "Databases.Card.Games": "Oyunlar",
@@ -304,8 +303,7 @@ export const tr_TR = {
     "Settings.OpeningReport.MinGames.Desc": "Pozisyonun göz önünde bulundurulması için gereken en az oyun",
     "Settings.Anarchy.Desc": "Eğlence ayarları",
     "Settings.Anarchy.EnPassant": "Zorunlu En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Eğer oynayabiliyorsan En Passant oynamak zorundasın",
+    "Settings.Anarchy.EnPassant.Desc": "Eğer oynayabiliyorsan En Passant oynamak zorundasın",
     "Settings.Appearance.Desc": "Uygulamanın görünüşünü düzenleyin",
     "Settings.Appearance.Theme": "Tema",
     "Settings.Appearance.Theme.Desc": "Genel renk şeması",

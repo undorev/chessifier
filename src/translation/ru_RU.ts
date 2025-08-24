@@ -227,8 +227,7 @@ export const ru_RU = {
     "Engines.Add.ImageFile": "Файл изображения",
     "Engines.Add.ImageFile.Desc": "Нажмите для выбора файла изображения (рекомендуется: 60x60)",
     "Engines.Remove.Title": "Удалить движок",
-    "Engines.Remove.Message":
-      "Вы уверены, что хотите удалить этот движок из Pawn Appétit?",
+    "Engines.Remove.Message": "Вы уверены, что хотите удалить этот движок из Pawn Appétit?",
 
     "Databases.Title": "Базы данных",
     "Databases.Card.Games": "Игры",
@@ -344,8 +343,7 @@ export const ru_RU = {
     "Settings.OpeningReport.MinGames.Desc": "Минимальное количество игр для каждой позиции, чтобы быть учтённой",
     "Settings.Anarchy.Desc": "Весёлые опции",
     "Settings.Anarchy.EnPassant": "Принудительный En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Заставляет делать ход En Passant, если это легальный ход.",
+    "Settings.Anarchy.EnPassant.Desc": "Заставляет делать ход En Passant, если это легальный ход.",
     "Settings.Appearance.Desc": "Настроить внешний вид приложения",
     "Settings.Appearance.Theme": "Тема",
     "Settings.Appearance.Theme.Desc": "Общая цветовая схема",

@@ -62,6 +62,7 @@ export const en_US = {
     "Common.Loading": "Loading...",
     "Common.Continue": "Continue",
     "Common.Review": "Review",
+    "Common.NoGameSelected": "No game selected",
 
     "GoMode.Time": "Time",
     "GoMode.Depth": "Depth",

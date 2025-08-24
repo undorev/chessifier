@@ -375,7 +375,8 @@ async fn main() {
             check_package_manager_available,
             install_package,
             check_package_installed,
-            find_executable_path
+            find_executable_path,
+            open_external_link
         ))
         .events(tauri_specta::collect_events!(
             BestMovesPayload,
@@ -462,4 +463,12 @@ fn is_bmi2_compatible() -> bool {
 #[specta::specta]
 fn memory_size() -> u64 {
     sysinfo::System::new_all().total_memory() / (1024 * 1024)
+}
+
+#[tauri::command]
+#[specta::specta]
+async fn open_external_link(app: AppHandle, url: String) -> Result<(), String> {
+    tauri_plugin_opener::OpenerExt::opener(&app)
+        .open_url(url, None::<String>)
+        .map_err(|e| format!("Failed to open external link: {}", e))
 }

@@ -508,6 +508,14 @@ async findExecutablePath(executableName: string) : Promise<Result<string | null,
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async openExternalLink(url: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("open_external_link", { url }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 

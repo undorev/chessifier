@@ -216,8 +216,7 @@ export const nb_NO = {
     "Engines.Add.ImageFile": "Bildefil",
     "Engines.Add.ImageFile.Desc": "Klikk for å velge bildefilen (anbefalt størrelse: 60x60)",
     "Engines.Remove.Title": "Fjern computer",
-    "Engines.Remove.Message":
-      "Er du sikker på at du vil fjerne denne computeren fra Pawn Appétit?",
+    "Engines.Remove.Message": "Er du sikker på at du vil fjerne denne computeren fra Pawn Appétit?",
 
     "Databases.Title": "Dine databaser",
     "Databases.Card.Games": "Partier",
@@ -305,8 +304,7 @@ export const nb_NO = {
     "Settings.OpeningReport.MinGames.Desc": "Minimum antall partier i hver posisjon for at den skal tas med",
     "Settings.Anarchy.Desc": "Morsome valg",
     "Settings.Anarchy.EnPassant": "Forced En Passant",
-    "Settings.Anarchy.EnPassant.Desc":
-      "Tvinger deg til å spille En Passant, hvis det er ett lovlig trekk.",
+    "Settings.Anarchy.EnPassant.Desc": "Tvinger deg til å spille En Passant, hvis det er ett lovlig trekk.",
     "Settings.Appearance.Desc": "Tilpass hvordan appen ser ut",
     "Settings.Appearance.Theme": "Tema",
     "Settings.Appearance.Theme.Desc": "Generell fargemodus",

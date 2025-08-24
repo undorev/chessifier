@@ -87,6 +87,10 @@ export type LichessAccount = {
     puzzle?: LichessPerf;
     classical?: LichessPerf;
     rapid?: LichessPerf;
+    racer?: {
+      runs: number;
+      score: number;
+    };
     storm?: {
       runs: number;
       score: number;
@@ -381,7 +385,7 @@ export async function downloadLichess(
   setProgress: (progress: number) => void,
   token?: string,
 ) {
-  let url = `${baseURL}/games/user/${player}?perfType=ultraBullet,bullet,blitz,rapid,classical,correspondence&rated=true`;
+  let url = `${baseURL}/games/user/${player}`;
   if (timestamp) {
     url += `&since=${timestamp}`;
   }
