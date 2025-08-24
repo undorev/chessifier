@@ -185,28 +185,30 @@ export function createDateFormatter(
   },
   storage?: Storage,
 ) {
-  return (value: unknown, lng?: string): string => {
+  return (value: unknown, lng?: string, options?: { timeZone?: string }): string => {
     if (!(value instanceof Date)) return String(value);
 
     try {
       const mode = storage?.getItem("dateFormatMode") || "intl";
 
       if (mode === "intl") {
-        const options: Intl.DateTimeFormatOptions = {
+        const formatOptions: Intl.DateTimeFormatOptions = {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
           hour12: false,
+          ...(options?.timeZone && { timeZone: options.timeZone }),
         };
 
-        return new Intl.DateTimeFormat("en-CA", options).format(value);
+        return new Intl.DateTimeFormat("en-CA", formatOptions).format(value);
       }
 
-      const options: Intl.DateTimeFormatOptions = {
+      const formatOptions: Intl.DateTimeFormatOptions = {
         dateStyle: "short",
+        ...(options?.timeZone && { timeZone: options.timeZone }),
       };
 
-      return new Intl.DateTimeFormat(lng?.replace("_", "-"), options).format(value);
+      return new Intl.DateTimeFormat(lng?.replace("_", "-"), formatOptions).format(value);
     } catch {
       // Fallback to simple date formatting if localStorage or Intl.DateTimeFormat fails
       return value.toLocaleDateString(lng?.replace("_", "-"));
@@ -221,26 +223,27 @@ export function createDatetimeFormatter(
   },
   storage?: Storage,
 ) {
-  return (value: unknown, lng?: string): string => {
+  return (value: unknown, lng?: string, options?: { timeZone?: string }): string => {
     if (!(value instanceof Date)) return String(value);
 
     try {
       const mode = storage?.getItem("dateFormatMode") || "intl";
 
-      const options: Intl.DateTimeFormatOptions = {
+      const formatOptions: Intl.DateTimeFormatOptions = {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
+        ...(options?.timeZone && { timeZone: options.timeZone }),
       };
       if (mode === "intl") {
         // YYYY-MM-DD HH:mm
-        return new Intl.DateTimeFormat("en-CA", options).format(value);
+        return new Intl.DateTimeFormat("en-CA", formatOptions).format(value);
       }
 
-      return new Intl.DateTimeFormat(lng?.replace("_", "-"), options).format(value);
+      return new Intl.DateTimeFormat(lng?.replace("_", "-"), formatOptions).format(value);
     } catch {
       // Fallback to simple date formatting if localStorage or Intl.DateTimeFormat fails
       return value.toLocaleDateString(lng?.replace("_", "-"));

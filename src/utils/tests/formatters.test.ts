@@ -242,7 +242,7 @@ test("createDateFormatter formats dates correctly", () => {
 
   // Test default mode (no storage provided) - should default to intl
   const defaultDateFormatter = createDateFormatter(mockI18n);
-  const defaultResult = defaultDateFormatter(testDate, "en");
+  const defaultResult = defaultDateFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof defaultResult).toBe("string");
   expect(defaultResult).toBe("2025-08-23"); // International format (default)
 
@@ -251,7 +251,7 @@ test("createDateFormatter formats dates correctly", () => {
     getItem: (key: string) => (key === "dateFormatMode" ? "locale" : null),
   };
   const localeDateFormatter = createDateFormatter(mockI18n, mockLocaleStorage as Storage);
-  const localeResult = localeDateFormatter(testDate, "en");
+  const localeResult = localeDateFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof localeResult).toBe("string");
   expect(localeResult).toBe("8/23/25"); // Locale format
 
@@ -260,17 +260,17 @@ test("createDateFormatter formats dates correctly", () => {
     getItem: (key: string) => (key === "dateFormatMode" ? "intl" : null),
   };
   const intlDateFormatter = createDateFormatter(mockI18n, mockIntlStorage as Storage);
-  const intlResult = intlDateFormatter(testDate, "en");
+  const intlResult = intlDateFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof intlResult).toBe("string");
   expect(intlResult).toBe("2025-08-23"); // International format
 });
 
 test("createDatetimeFormatter formats datetimes correctly", () => {
-  const testDate = new Date("2025-08-23T17:55:00Z");
+  const testDate = new Date("2025-08-23T13:55:00Z");
 
   // Test default mode (no storage provided) - should default to intl
   const defaultDatetimeFormatter = createDatetimeFormatter(mockI18n);
-  const defaultResult = defaultDatetimeFormatter(testDate, "en");
+  const defaultResult = defaultDatetimeFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof defaultResult).toBe("string");
   expect(defaultResult).toBe("2025-08-23, 13:55"); // International format (default)
 
@@ -279,7 +279,7 @@ test("createDatetimeFormatter formats datetimes correctly", () => {
     getItem: (key: string) => (key === "dateFormatMode" ? "locale" : null),
   };
   const localeDatetimeFormatter = createDatetimeFormatter(mockI18n, mockLocaleStorage as Storage);
-  const localeResult = localeDatetimeFormatter(testDate, "en");
+  const localeResult = localeDatetimeFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof localeResult).toBe("string");
   expect(localeResult).toBe("08/23/2025, 13:55"); // Locale format
 
@@ -288,7 +288,7 @@ test("createDatetimeFormatter formats datetimes correctly", () => {
     getItem: (key: string) => (key === "dateFormatMode" ? "intl" : null),
   };
   const intlDatetimeFormatter = createDatetimeFormatter(mockI18n, mockIntlStorage as Storage);
-  const intlResult = intlDatetimeFormatter(testDate, "en");
+  const intlResult = intlDatetimeFormatter(testDate, "en", { timeZone: "UTC" });
   expect(typeof intlResult).toBe("string");
   expect(intlResult).toBe("2025-08-23, 13:55"); // International format
 });
