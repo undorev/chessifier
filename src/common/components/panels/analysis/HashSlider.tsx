@@ -1,11 +1,12 @@
 import { rem, Slider } from "@mantine/core";
 import { IconGripVertical } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import useSWRImmutable from "swr/immutable";
 import { commands } from "@/bindings";
-import { formatBytes } from "@/utils/format";
 
 export default function HashSlider(props: { value: number; setValue: (v: number) => void; color?: string }) {
+  const { t } = useTranslation();
   const [tempValue, setTempValue] = useState(Math.log2(props.value));
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function HashSlider(props: { value: number; setValue: (v: number)
       value={tempValue}
       onChange={setTempValue}
       onChangeEnd={(v) => props.setValue(2 ** v)}
-      label={(v) => formatBytes(2 ** v * 1024 * 1024)}
+      label={(v) => t("Units.Bytes", { bytes: 2 ** v * 1024 * 1024, decimals: 0 })}
       thumbChildren={<IconGripVertical style={{ width: rem(20), height: rem(20) }} stroke={1.5} />}
       styles={(theme) => ({
         mark: {

@@ -14,6 +14,7 @@ export const INITIAL_SCORE: Score = {
 
 const CP_CEILING = 1000;
 
+// This function is kept for backward compatibility (used in chess.ts)
 export function formatScore(score: ScoreValue, precision = 2): string {
   let scoreText = match(score.type)
     .with("cp", () => Math.abs(score.value / 100).toFixed(precision))

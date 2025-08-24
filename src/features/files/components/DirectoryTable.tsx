@@ -3,7 +3,6 @@ import { IconChevronRight, IconEye, IconTarget, IconTrash } from "@tabler/icons-
 import { useNavigate } from "@tanstack/react-router";
 import { remove } from "@tauri-apps/plugin-fs";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import Fuse from "fuse.js";
 import { useAtom, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
@@ -263,7 +262,14 @@ function Table({
           width: 200,
           render: (row) => {
             if (row.type === "directory") return null;
-            return <Box ml={20 * depth}>{dayjs(row.lastModified * 1000).format("DD MMM YYYY HH:mm")}</Box>;
+            return (
+              <Box ml={20 * depth}>
+                {t("{{date, datetimeformat}}", {
+                  date: new Date(row.lastModified * 1000),
+                  interpolation: { escapeValue: false },
+                })}
+              </Box>
+            );
           },
         },
       ]}

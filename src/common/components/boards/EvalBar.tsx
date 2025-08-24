@@ -1,10 +1,12 @@
 import { Box, Text, Tooltip, useMantineTheme } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import type { Color } from "chessground/types";
 import type { ScoreValue } from "@/bindings";
-import { formatScore, getWinChance } from "@/utils/score";
+import { getWinChance } from "@/utils/score";
 
 function EvalBar({ score, orientation }: { score: ScoreValue | null; orientation: Color }) {
   const theme = useMantineTheme();
+  const { t } = useTranslation();
 
   let ScoreBars = null;
   if (score) {
@@ -22,7 +24,7 @@ function EvalBar({ score, orientation }: { score: ScoreValue | null; orientation
         }}
       >
         <Text fz="xs" c={theme.colors.gray[2]} ta="center" py={3} mt={orientation === "black" ? "auto" : undefined}>
-          {score.value <= 0 && formatScore(score, 1).replace(/\+|-/, "")}
+          {score.value <= 0 && t("Units.Score", { score, precision: 1 }).replace(/\+|-/, "")}
         </Text>
       </Box>,
       <Box
@@ -36,7 +38,7 @@ function EvalBar({ score, orientation }: { score: ScoreValue | null; orientation
         }}
       >
         <Text fz="xs" py={3} c={theme.colors.dark[8]} ta="center" mt={orientation === "white" ? "auto" : undefined}>
-          {score.value > 0 && formatScore(score, 1).slice(1)}
+          {score.value > 0 && t("Units.Score", { score, precision: 1 }).slice(1)}
         </Text>
       </Box>,
     ];
@@ -50,7 +52,7 @@ function EvalBar({ score, orientation }: { score: ScoreValue | null; orientation
     <Tooltip
       position="right"
       color={score && score.value < 0 ? "dark" : undefined}
-      label={score ? formatScore(score) : undefined}
+      label={score ? t("Units.Score", { score }) : undefined}
       disabled={!score}
     >
       <Box

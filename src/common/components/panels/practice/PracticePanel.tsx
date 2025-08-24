@@ -15,7 +15,7 @@ import {
 import { useHotkeys, useToggle } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { IconArrowRight } from "@tabler/icons-react";
-import dayjs from "dayjs";
+
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -159,7 +159,11 @@ function PracticePanel() {
                       <Text>
                         {t("Board.Practice.PracticedAll1")}
                         <br />
-                        {t("Board.Practice.PracticedAll2")} {dayjs(stats.nextDue).format("MMM D, HH:mm")}
+                        {t("Board.Practice.PracticedAll2")}{" "}
+                        {t("{{date, datetimeformat}}", {
+                          date: stats.nextDue ? new Date(stats.nextDue) : undefined,
+                          interpolation: { escapeValue: false },
+                        })}
                       </Text>
                     )}
                     <Button onClick={() => setPositionsOpen(true)}>{t("Board.Practice.ShowAll")}</Button>

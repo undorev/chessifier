@@ -12,7 +12,6 @@ import { TreeStateContext } from "@/common/components/TreeStateContext";
 import { currentTabAtom, missingMovesAtom } from "@/state/atoms";
 import { keyMapAtom } from "@/state/keybindings";
 import { parsePGN } from "@/utils/chess";
-import { formatNumber } from "@/utils/format";
 import { getTreeStats } from "@/utils/repertoire";
 import { saveToFile } from "@/utils/tabs";
 import { getNodeAtPath } from "@/utils/treeReducer";
@@ -169,7 +168,7 @@ function GameSelectorAccordion({
       <Accordion>
         <Accordion.Item value="game">
           <Accordion.Control>
-            {formatNumber(gameNumber + 1)}. {currentName}
+            {t("Units.Count", { count: gameNumber + 1 })}. {currentName}
           </Accordion.Control>
           <Accordion.Panel>
             <Box h="10rem">

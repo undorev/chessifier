@@ -36,7 +36,6 @@ import OpenFolderButton from "@/common/components/OpenFolderButton";
 import { referenceDbAtom } from "@/state/atoms";
 import { useActiveDatabaseViewStore } from "@/state/store/database";
 import { getDatabases, type SuccessDatabaseInfo } from "@/utils/db";
-import { formatBytes, formatNumber } from "@/utils/format";
 import { unwrap } from "@/utils/unwrap";
 import AddDatabase from "./components/AddDatabase";
 import { PlayerSearchInput } from "./components/PlayerSearchInput";
@@ -238,11 +237,12 @@ export default function DatabasesPage() {
                           {[
                             {
                               label: t("Databases.Card.Games"),
-                              value: item.type === "success" ? formatNumber(item.game_count) : "???",
+                              value: item.type === "success" ? t("Units.Count", { count: item.game_count }) : "???",
                             },
                             {
                               label: t("Databases.Card.Storage"),
-                              value: item.type === "success" ? formatBytes(item.storage_size ?? 0) : "???",
+                              value:
+                                item.type === "success" ? t("Units.Bytes", { bytes: item.storage_size ?? 0 }) : "???",
                             },
                           ]?.map((stat) => (
                             <div key={stat.label}>
@@ -314,7 +314,7 @@ export default function DatabasesPage() {
                           {t("Databases.Card.Games")}
                         </Text>
                         <Text fw={700} size="lg">
-                          {formatNumber(selectedDatabase.game_count)}
+                          {t("Units.Count", { count: selectedDatabase.game_count })}
                         </Text>
                       </Stack>
                       <Stack gap={0} justify="center" ta="center">
@@ -322,7 +322,7 @@ export default function DatabasesPage() {
                           {t("Databases.Card.Players")}
                         </Text>
                         <Text fw={700} size="lg">
-                          {formatNumber(selectedDatabase.player_count)}
+                          {t("Units.Count", { count: selectedDatabase.player_count })}
                         </Text>
                       </Stack>
                       <Stack gap={0} justify="center" ta="center">
@@ -330,7 +330,7 @@ export default function DatabasesPage() {
                           {t("Databases.Settings.Events")}
                         </Text>
                         <Text fw={700} size="lg">
-                          {formatNumber(selectedDatabase.event_count)}
+                          {t("Units.Count", { count: selectedDatabase.event_count })}
                         </Text>
                       </Stack>
                     </Group>
