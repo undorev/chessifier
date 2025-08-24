@@ -2,7 +2,7 @@ import { ActionIcon, Badge, Card, Center, Divider, Group, Modal, Stack, Text, To
 import { IconCloud } from "@tabler/icons-react";
 import { BaseDirectory, exists } from "@tauri-apps/plugin-fs";
 import * as Flags from "mantine-flagpack";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import useSWR from "swr/immutable";
 import { commands, events } from "@/bindings";
 import ProgressButton from "@/common/components/ProgressButton";
@@ -22,6 +22,7 @@ function FideInfo({
   setOpened: (opened: boolean) => void;
   name: string;
 }) {
+  const id = useId();
   const [fileExists, setFileExists] = useState<boolean>(false);
   const {
     data: player,
@@ -71,7 +72,7 @@ function FideInfo({
         <Stack>
           No FIDE database installed
           <ProgressButton
-            id="fide_db"
+            id={id}
             initInstalled={false}
             progressEvent={events.downloadProgress}
             onClick={() => commands.downloadFideDb()}

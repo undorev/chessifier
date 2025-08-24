@@ -92,8 +92,8 @@ function DatabasePanel() {
   const fen = useStore(store, (s) => s.currentNode().fen);
   const referenceDatabase = useAtomValue(referenceDbAtom);
   const [debouncedFen] = useDebouncedValue(fen, 50);
-  const [lichessOptions, setLichessOptions] = useAtom(lichessOptionsAtom);
-  const [masterOptions, setMasterOptions] = useAtom(masterOptionsAtom);
+  const [lichessOptions] = useAtom(lichessOptionsAtom);
+  const [masterOptions] = useAtom(masterOptionsAtom);
   const [localOptions, setLocalOptions] = useAtom(currentLocalOptionsAtom);
   const [db, setDb] = useAtom(currentDbTypeAtom);
 
@@ -101,7 +101,7 @@ function DatabasePanel() {
     if (db === "local") {
       setLocalOptions((q) => ({ ...q, fen: debouncedFen }));
     }
-  }, [debouncedFen, setLocalOptions, setMasterOptions, setLichessOptions, db]);
+  }, [debouncedFen, setLocalOptions, db]);
 
   useEffect(() => {
     if (db === "local") {

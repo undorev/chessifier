@@ -9,7 +9,7 @@ export default function LinesSlider(props: { value: number; setValue: (v: number
       color={props.color || theme.primaryColor}
       data={["1", "2", "3", "4", "5"]}
       value={props.value.toString()}
-      onChange={(v) => props.setValue(Number.parseInt(v))}
+      onChange={(v) => props.setValue(Number.parseInt(v, 10))}
     />
   );
 }

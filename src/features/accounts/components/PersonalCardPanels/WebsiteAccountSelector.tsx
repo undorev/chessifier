@@ -35,11 +35,11 @@ const WebsiteAccountSelector = ({
 
   useEffect(() => {
     onWebsiteChange(website);
-  }, [website]);
+  }, [website, onWebsiteChange]);
 
   useEffect(() => {
     onAccountChange(account);
-  }, [account]);
+  }, [account, onAccountChange]);
 
   const accounts = ["All accounts"].concat(
     sessions

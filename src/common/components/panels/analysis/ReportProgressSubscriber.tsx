@@ -27,7 +27,7 @@ function ReportProgressSubscriber({ id }: Props) {
     return () => {
       unlisten.then((f) => f());
     };
-  }, [id]);
+  }, [id, setCompleted, setInProgress, setProgress]);
 
   return <></>;
 }

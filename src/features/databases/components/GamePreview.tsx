@@ -1,6 +1,6 @@
-import { Box, Group, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import useSWRImmutable from "swr/immutable";
 import { useStore } from "zustand";
 import { Chessground } from "@/chessground/Chessground";
@@ -22,7 +22,7 @@ function GamePreviewWrapper({
   hideControls?: boolean;
   showOpening?: boolean;
 }) {
-  const { data: parsedGame, isLoading } = useSWRImmutable([pgn, headers?.fen], async ([pgn, fen]) => {
+  const { data: parsedGame } = useSWRImmutable([pgn, headers?.fen], async ([pgn, fen]) => {
     return await parsePGN(pgn, fen);
   });
 

@@ -35,7 +35,7 @@ function EvalListener() {
     useShallow((s) => getVariationLine(s.root, s.position, is960)),
   );
 
-  const [pos, error] = positionFromFen(fen);
+  const [pos] = positionFromFen(fen);
   if (pos) {
     for (const uci of moves) {
       const move = parseUci(uci);
@@ -157,6 +157,7 @@ function EngineListener({
     JSON.stringify(searchingMoves),
     engine.name,
     setEngineVariation,
+    setProgress,
   ]);
 
   const getBestMoves = useMemo(

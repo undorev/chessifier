@@ -42,7 +42,7 @@ function TournamentCard({ tournament, file }: { tournament: Event; file: string 
 
   const { data: games, isLoading } = useSWRImmutable(
     ["tournament-games", file, tournament.id],
-    async ([key, file, id]) => {
+    async ([_key, file, id]) => {
       const games = await getTournamentGames(file, id);
       return games.data;
     },
@@ -203,7 +203,7 @@ function TournamentCard({ tournament, file }: { tournament: Event; file: string 
                   accessor: "rank",
                   title: "#",
                   width: "2.5rem",
-                  render: (player, index) => (
+                  render: (_player, index) => (
                     <Text size="sm" fw={500}>
                       {index + 1}
                     </Text>

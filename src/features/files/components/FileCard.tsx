@@ -35,7 +35,7 @@ function FileCard({
 
   useEffect(() => {
     setPage(0);
-  }, [selected]);
+  }, []);
 
   useEffect(() => {
     async function loadGames() {

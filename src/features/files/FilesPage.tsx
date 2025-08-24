@@ -44,7 +44,7 @@ function FilesPage() {
 
   useEffect(() => {
     setGames(new Map());
-  }, [selected]);
+  }, []);
 
   return (
     <Stack h="100%">

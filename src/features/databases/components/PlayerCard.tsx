@@ -5,7 +5,7 @@ import PersonalPlayerCard from "@/features/accounts/components/PersonalCard";
 import { unwrap } from "@/utils/unwrap";
 
 function PlayerCard({ player, file }: { player: Player; file: string }) {
-  const { data: info, isLoading } = useSWRImmutable(["player-game-info", file, player.id], async ([key, file, id]) => {
+  const { data: info, isLoading } = useSWRImmutable(["player-game-info", file, player.id], async ([_key, file, id]) => {
     const games = await commands.getPlayersGameInfo(file, id);
     return unwrap(games);
   });

@@ -48,13 +48,13 @@ function parseTimeControl(timeControl: string): TimeControl {
     const seconds = match[2];
     const increment = match[3];
     const timeControlField: TimeControlField = {
-      seconds: Number.parseInt(seconds) * 1000,
+      seconds: Number.parseInt(seconds, 10) * 1000,
     };
     if (increment) {
-      timeControlField.increment = Number.parseInt(increment) * 1000;
+      timeControlField.increment = Number.parseInt(increment, 10) * 1000;
     }
     if (moves) {
-      timeControlField.moves = Number.parseInt(moves);
+      timeControlField.moves = Number.parseInt(moves, 10);
     }
     timeControlFields.push(timeControlField);
   }

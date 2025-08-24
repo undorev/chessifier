@@ -37,7 +37,7 @@ function OpeningsTable({ openings, loading }: { openings: Opening[]; loading: bo
       highlightOnHover
       records={openings}
       fetching={loading || openings === null}
-      rowStyle={(game, i) => {
+      rowStyle={(_game, i) => {
         if (i === openings.length - 1)
           return {
             fontWeight: 700,

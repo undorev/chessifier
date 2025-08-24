@@ -2,7 +2,7 @@ import { ActionIcon, Checkbox, Group, type MantineColor, Stack, Text, Tooltip } 
 import { IconPlayerStopFilled, IconSettings } from "@tabler/icons-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
-import React, { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { GoMode } from "@/bindings";
 import GoModeInput from "@/common/components/GoModeInput";

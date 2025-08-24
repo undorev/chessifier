@@ -279,7 +279,7 @@ export async function getBestMoves(
   }
   const data = await getCloudEvaluation(
     makeFen(pos.toSetup()),
-    Number.parseInt(options.extraOptions.find((o) => o.name === "MultiPV")?.value ?? "1"),
+    Number.parseInt(options.extraOptions.find((o) => o.name === "MultiPV")?.value ?? "1", 10),
   );
   return [
     100,
@@ -382,7 +382,7 @@ export async function downloadLichess(
   player: string,
   timestamp: number | null,
   games: number,
-  setProgress: (progress: number) => void,
+  _setProgress: (progress: number) => void,
   token?: string,
 ) {
   let url = `${baseURL}/games/user/${player}`;

@@ -48,7 +48,7 @@ export function Chessground(props: Config & { setBoardFen?: (fen: string) => voi
       });
       setApi(chessgroundApi);
     }
-  }, [api, props, ref]);
+  }, [api, props, moveMethod]);
 
   useEffect(() => {
     api?.set({

@@ -1,4 +1,3 @@
-import { ActionIcon, Autocomplete, Input, Textarea, TextInput } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { getMatches } from "@tauri-apps/plugin-cli";
@@ -11,7 +10,6 @@ import {
   activeTabAtom,
   fontSizeAtom,
   pieceSetAtom,
-  primaryColorAtom,
   spellCheckAtom,
   storedDocumentDirAtom,
   tabsAtom,
@@ -70,7 +68,6 @@ declare module "@tanstack/react-router" {
 }
 
 export default function App() {
-  const primaryColor = useAtomValue(primaryColorAtom);
   const pieceSet = useAtomValue(pieceSetAtom);
   const [, setTabs] = useAtom(tabsAtom);
   const [, setActiveTab] = useAtom(activeTabAtom);

@@ -1,5 +1,4 @@
 import { BaseDirectory, readTextFile, remove, writeTextFile } from "@tauri-apps/plugin-fs";
-import { warn } from "@tauri-apps/plugin-log";
 import type {
   AsyncStorage,
   AsyncStringStorage,
@@ -7,6 +6,7 @@ import type {
   SyncStringStorage,
 } from "jotai/vanilla/utils/atomWithStorage";
 import type { z } from "zod";
+import { logger } from "@/utils/logger";
 
 const options = { baseDir: BaseDirectory.AppData };
 export const fileStorage: AsyncStringStorage = {
@@ -14,6 +14,7 @@ export const fileStorage: AsyncStringStorage = {
     try {
       return await readTextFile(key, options);
     } catch (error) {
+      logger.error("Error getting item", { key, error });
       return null;
     }
   },
@@ -35,7 +36,7 @@ export function createZodStorage<Value>(schema: z.ZodType<Value>, storage: SyncS
       try {
         return schema.parse(JSON.parse(storedValue));
       } catch {
-        warn(`Invalid value for ${key}: ${storedValue}`);
+        logger.warn("Invalid value for", { key, storedValue });
         this.setItem(key, initialValue);
         return initialValue;
       }
@@ -64,11 +65,11 @@ export function createAsyncZodStorage<Value>(
         if (res.success) {
           return res.data;
         }
-        warn(`Invalid value for ${key}: ${storedValue}\n${res.error}`);
+        logger.warn("Invalid value for", { key, storedValue, error: res.error });
         await this.setItem(key, initialValue);
         return initialValue;
       } catch (error) {
-        warn(`Error getting ${key}: ${error}`);
+        logger.error("Error getting", { key, error });
         return initialValue;
       }
     },
