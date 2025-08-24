@@ -109,29 +109,30 @@ export default function DashboardPage() {
     handle: "",
     rating: 0,
   };
-  let ratingHistory: { blitz?: number; rapid?: number; bullet?: number } = {};
+  let ratingHistory: { classical?: number; rapid?: number; blitz?: number; bullet?: number } = {};
   if (mainSession?.lichess?.account) {
     const acc = mainSession.lichess.account;
     user = {
       name: acc.username,
       handle: `@${acc.username}`,
-      rating: acc.perfs?.blitz?.rating ?? acc.perfs?.rapid?.rating ?? 0,
+      rating: acc.perfs?.classical?.rating ?? acc.perfs?.rapid?.rating ?? acc.perfs?.blitz?.rating ?? 0,
     };
-    const blitz = acc.perfs?.blitz?.rating;
+    const classical = acc.perfs?.classical?.rating;
     const rapid = acc.perfs?.rapid?.rating;
+    const blitz = acc.perfs?.blitz?.rating;
     const bullet = acc.perfs?.bullet?.rating;
-    ratingHistory = { blitz, rapid, bullet };
+    ratingHistory = { classical, rapid, blitz, bullet };
   } else if (mainSession?.chessCom?.stats) {
     const stats = mainSession.chessCom.stats;
     user = {
       name: mainSession.chessCom.username,
       handle: `@${mainSession.chessCom.username}`,
-      rating: stats.chess_blitz?.last?.rating ?? stats.chess_rapid?.last?.rating ?? 0,
+      rating: stats.chess_rapid?.last?.rating ?? stats.chess_blitz?.last?.rating ?? 0,
     };
-    const blitz = stats.chess_blitz?.last?.rating;
     const rapid = stats.chess_rapid?.last?.rating;
+    const blitz = stats.chess_blitz?.last?.rating;
     const bullet = stats.chess_bullet?.last?.rating;
-    ratingHistory = { blitz, rapid, bullet };
+    ratingHistory = { rapid, blitz, bullet };
   }
 
   const lichessUsernames = [...new Set(sessions.map((s) => s.lichess?.username).filter(Boolean) as string[])];
@@ -303,7 +304,7 @@ export default function DashboardPage() {
                   const moveNumber = Math.floor(i / 2) + 1;
                   const whiteMove = last.moves[i];
                   const blackMove = last.moves[i + 1];
-                  
+
                   if (blackMove) {
                     movesPairs.push(`${moveNumber}. ${whiteMove} ${blackMove}`);
                   } else {
@@ -571,13 +572,13 @@ export default function DashboardPage() {
             </Group>
             <Divider my="md" />
             <Group justify="space-between">
-              {ratingHistory.blitz && (
+              {ratingHistory.classical && (
                 <Stack gap={2} p="md" align="center">
-                  <Text size="xs" c="yellow.6">
-                    Blitz
+                  <Text size="xs" c="teal.6">
+                    Classical
                   </Text>
                   <Text fw={700} fz="xl">
-                    {ratingHistory.blitz}
+                    {ratingHistory.classical}
                   </Text>
                 </Stack>
               )}
@@ -588,6 +589,16 @@ export default function DashboardPage() {
                   </Text>
                   <Text fw={700} fz="xl">
                     {ratingHistory.rapid}
+                  </Text>
+                </Stack>
+              )}
+              {ratingHistory.blitz && (
+                <Stack gap={2} p="md" align="center">
+                  <Text size="xs" c="yellow.6">
+                    Blitz
+                  </Text>
+                  <Text fw={700} fz="xl">
+                    {ratingHistory.blitz}
                   </Text>
                 </Stack>
               )}
@@ -726,7 +737,7 @@ export default function DashboardPage() {
                                       const moveNumber = Math.floor(i / 2) + 1;
                                       const whiteMove = g.moves[i];
                                       const blackMove = g.moves[i + 1];
-                                      
+
                                       if (blackMove) {
                                         movesPairs.push(`${moveNumber}. ${whiteMove} ${blackMove}`);
                                       } else {
