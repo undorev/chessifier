@@ -33,8 +33,6 @@ import {
 } from "@/state/atoms";
 import { chessopsError, positionFromFen, swapMove } from "@/utils/chessops";
 import type { Engine } from "@/utils/engines";
-import { formatNodes } from "@/utils/format";
-import { formatScore } from "@/utils/score";
 import AnalysisRow from "./AnalysisRow";
 import * as classes from "./BestMoves.css";
 import EngineSettingsForm, { type Settings } from "./EngineSettingsForm";
@@ -298,9 +296,9 @@ function EngineTop({
   progress: number;
   error: any;
 }) {
+  const { t } = useTranslation();
   const isComputed = engineVariations && engineVariations.length > 0;
   const depth = isComputed ? engineVariations[0].depth : 0;
-  const nps = isComputed ? formatNodes(engineVariations[0].nps) : 0;
 
   return (
     <Group justify="space-between">
@@ -311,7 +309,7 @@ function EngineTop({
         {enabled && !isGameOver && !error && !engineVariations && <Code fz="xs">Loading...</Code>}
         {progress < 100 && enabled && !isGameOver && engineVariations && engineVariations.length > 0 && (
           <Tooltip label={"How fast the engine is running"}>
-            <Code fz="xs">{nps} nodes/s</Code>
+            <Code fz="xs">{t("Units.Nodes", { nodes: isComputed ? engineVariations[0].nps : 0 })}</Code>
           </Tooltip>
         )}
       </Group>
@@ -323,7 +321,7 @@ function EngineTop({
                 Eval
               </Text>
               <Text fw="bold" fz="md">
-                {formatScore(engineVariations[0].score.value, 1) ?? 0}
+                {t("Units.Score", { score: engineVariations[0].score.value, precision: 1 }) ?? 0}
               </Text>
             </Stack>
             <Stack align="center" gap={0}>

@@ -17,7 +17,6 @@ import {
   referenceDbAtom,
 } from "@/state/atoms";
 import { type Opening, searchPosition } from "@/utils/db";
-import { formatNumber } from "@/utils/format";
 import { convertToNormalized, getLichessGames, getMasterGames } from "@/utils/lichess/api";
 import type { LichessGamesOptions, MasterGamesOptions } from "@/utils/lichess/explorer";
 import DatabaseLoader from "./DatabaseLoader";
@@ -155,7 +154,7 @@ function DatabasePanel() {
         {tabType !== "options" && (
           <Text>
             {t("Board.Database.Matches", {
-              matches: formatNumber(Math.max(grandTotal || 0, openingData?.games.length || 0)),
+              matches: Math.max(grandTotal || 0, openingData?.games.length || 0),
             })}
           </Text>
         )}

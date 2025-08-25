@@ -258,7 +258,16 @@ function GameTable() {
                 </div>
               ),
             },
-            { accessor: "date", sortable: true, title: t("GameTable.Date") },
+            {
+              accessor: "date",
+              sortable: true,
+              title: t("GameTable.Date"),
+              render: ({ date }) =>
+                t("{{date, dateformat}}", {
+                  date: date ? new Date(date) : undefined,
+                  interpolation: { escapeValue: false },
+                }),
+            },
             {
               accessor: "result",
               title: t("Outcome.Outcome"),

@@ -1,6 +1,6 @@
 import { Box, Progress, Text } from "@mantine/core";
+import { useTranslation } from "react-i18next";
 import type { Score } from "@/bindings";
-import { formatScore } from "@/utils/score";
 import * as classes from "./ScoreBubble.css";
 
 function ScoreBubble({
@@ -14,6 +14,7 @@ function ScoreBubble({
   evalDisplay?: "cp" | "wdl";
   setEvalDisplay?: (display: "cp" | "wdl") => void;
 }) {
+  const { t } = useTranslation();
   if (evalDisplay === "wdl" && score.wdl) {
     const [w, d, l] = score.wdl;
     return (
@@ -79,7 +80,7 @@ function ScoreBubble({
           fontFamily: theme.fontFamilyMonospace,
         })}
       >
-        {formatScore(score.value)}
+        {t("Units.Score", { score: score.value })}
       </Text>
     </Box>
   );

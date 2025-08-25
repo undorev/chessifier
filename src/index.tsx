@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import i18n from "i18next";
 import { createRoot } from "react-dom/client";
 import { initReactI18next } from "react-i18next";
@@ -19,6 +17,17 @@ import { ru_RU } from "./translation/ru_RU";
 import { tr_TR } from "./translation/tr_TR";
 import { uk_UA } from "./translation/uk_UA";
 import { zh_CN } from "./translation/zh_CN";
+import {
+  createBytesFormatter,
+  createBytesLongFormatter,
+  createNodesFormatter,
+  createNodesLongFormatter,
+  createDurationFormatter,
+  createDurationLongFormatter,
+  createScoreFormatter,
+  createDateFormatter,
+  createDatetimeFormatter,
+} from "./utils/format";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -41,7 +50,16 @@ i18n.use(initReactI18next).init({
   fallbackLng: "en",
 });
 
-dayjs.extend(customParseFormat);
+// Add custom formatters
+i18n.services.formatter?.add("bytes", createBytesFormatter(i18n));
+i18n.services.formatter?.add("bytesLong", createBytesLongFormatter(i18n));
+i18n.services.formatter?.add("nodes", createNodesFormatter(i18n));
+i18n.services.formatter?.add("nodesLong", createNodesLongFormatter(i18n));
+i18n.services.formatter?.add("duration", createDurationFormatter(i18n));
+i18n.services.formatter?.add("durationLong", createDurationLongFormatter(i18n));
+i18n.services.formatter?.add("score", createScoreFormatter(i18n));
+i18n.services.formatter?.add("dateformat", createDateFormatter(i18n, localStorage));
+i18n.services.formatter?.add("datetimeformat", createDatetimeFormatter(i18n, localStorage));
 
 const container = document.getElementById("app");
 const root = createRoot(container!);

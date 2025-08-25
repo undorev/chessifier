@@ -2,14 +2,15 @@ import { Group, Progress, Text } from "@mantine/core";
 import { useAtom } from "jotai";
 import { DataTable } from "mantine-datatable";
 import { memo, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { useStore } from "zustand";
 import { TreeStateContext } from "@/common/components/TreeStateContext";
 import { moveNotationTypeAtom } from "@/state/atoms";
 import { addPieceSymbol } from "@/utils/annotation";
 import type { Opening } from "@/utils/db";
-import { formatNumber } from "@/utils/format";
 
 function OpeningsTable({ openings, loading }: { openings: Opening[]; loading: boolean }) {
+  const { t } = useTranslation();
   const store = useContext(TreeStateContext)!;
   const makeMove = useStore(store, (s) => s.makeMove);
   const [moveNotationType] = useAtom(moveNotationTypeAtom);
@@ -71,7 +72,7 @@ function OpeningsTable({ openings, loading }: { openings: Opening[]; loading: bo
               <Group>
                 {move !== "Total" && <Text fz="sm">{percentage.toFixed(0)}%</Text>}
                 <Text fz="sm" flex={1} ta="right">
-                  {formatNumber(total)}
+                  {t("Units.Count", { count: total })}
                 </Text>
               </Group>
             );

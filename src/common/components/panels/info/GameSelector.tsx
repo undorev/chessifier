@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import { commands } from "@/bindings";
 import { fontSizeAtom } from "@/state/atoms";
 import { parsePGN } from "@/utils/chess";
-import { formatNumber } from "@/utils/format";
 import { getGameName } from "@/utils/treeReducer";
 import { unwrap } from "@/utils/unwrap";
 import * as classes from "./GameSelector.css";
@@ -141,7 +140,7 @@ function GameRow({
           }}
           flex={1}
         >
-          {formatNumber(index + 1)}. {game}
+          {t("Units.Count", { count: index + 1 })}. {game}
         </Text>
         {deleteGame && (
           <Group>

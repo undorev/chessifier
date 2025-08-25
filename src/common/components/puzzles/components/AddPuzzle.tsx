@@ -8,7 +8,6 @@ import { commands, events, type PuzzleDatabaseInfo } from "@/bindings";
 import ProgressButton from "@/common/components/ProgressButton";
 import type { Directory, FileMetadata } from "@/features/files/components/file";
 import { getDefaultPuzzleDatabases } from "@/utils/db";
-import { formatBytes, formatNumber } from "@/utils/format";
 import { getPuzzleDatabases } from "@/utils/puzzles";
 
 export function AddPuzzle({
@@ -95,13 +94,13 @@ function PuzzleDbCard({
               <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                 {t("Common.Size").toUpperCase()}
               </Text>
-              <Text size="xs">{formatBytes(puzzleDb.storageSize)}</Text>
+              <Text size="xs">{t("Units.Bytes", { bytes: puzzleDb.storageSize })}</Text>
             </Stack>
             <Stack gap={0} align="center">
               <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                 {t("Files.FileType.Puzzle").toUpperCase()}
               </Text>
-              <Text size="xs">{formatNumber(puzzleDb.puzzleCount)}</Text>
+              <Text size="xs">{t("Units.Count", { count: puzzleDb.puzzleCount })}</Text>
             </Stack>
           </Group>
           <ProgressButton

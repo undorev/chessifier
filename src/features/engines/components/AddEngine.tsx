@@ -25,7 +25,6 @@ import ProgressButton from "@/common/components/ProgressButton";
 import { enginesAtom } from "@/state/atoms";
 import { type LocalEngine, type RemoteEngine, requiredEngineSettings, useDefaultEngines } from "@/utils/engines";
 import { usePlatform } from "@/utils/files";
-import { formatBytes } from "@/utils/format";
 import { unwrap } from "@/utils/unwrap";
 import EngineForm from "./EngineForm";
 
@@ -136,7 +135,7 @@ function CloudCard({ engine }: { engine: RemoteEngine }) {
       <Group wrap="nowrap" gap={0} grow>
         <Box p="md" flex={1}>
           <Text tt="uppercase" c="dimmed" fw={700} size="xs">
-            ENGINE
+            {t("Common.Engine")}
           </Text>
           <Text fw="bold">{engine.name}</Text>
           <Text size="xs" c="dimmed" mb="xs">
@@ -282,7 +281,7 @@ function EngineCard({ engine, engineId }: { engine: LocalEngine; engineId: numbe
       case "package":
         return engine.packageCommand || "Install via package manager";
       default:
-        return formatBytes(engine.downloadSize ?? 0);
+        return t("Units.Bytes", { bytes: engine.downloadSize ?? 0 });
     }
   };
 
@@ -317,7 +316,7 @@ function EngineCard({ engine, engineId }: { engine: LocalEngine; engineId: numbe
         )}
         <Box p="md" flex={1}>
           <Text tt="uppercase" c="dimmed" fw={700} size="xs">
-            ENGINE
+            {t("Common.Engine")}
           </Text>
           <Text fw="bold" mb="xs">
             {engine.name} {engine.version}

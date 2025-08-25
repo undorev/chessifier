@@ -10,7 +10,6 @@ import { reportTypeAtom } from "@/state/atoms";
 import { ANNOTATION_INFO } from "@/utils/annotation";
 import { positionFromFen } from "@/utils/chessops";
 import { skipWhile, takeWhile } from "@/utils/misc";
-import { formatScore } from "@/utils/score";
 import { type ListNode, type TreeNode, treeIteratorMainLine } from "@/utils/treeReducer";
 import * as classes from "./EvalChart.css";
 import { TreeStateContext } from "./TreeStateContext";
@@ -65,7 +64,7 @@ function EvalChart(props: EvalChartProps) {
   function getEvalText(node: TreeNode, type: "cp" | "wdl"): string {
     if (node.score) {
       if (type === "cp") {
-        return `${t("Board.Analysis.Advantage")}: ${formatScore(node.score.value)}`;
+        return `${t("Board.Analysis.Advantage")}: ${t("Units.Score", { score: node.score.value })}`;
       }
       if (type === "wdl" && node.score.wdl) {
         return `

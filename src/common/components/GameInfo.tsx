@@ -198,7 +198,7 @@ function GameInfo({
               />
             )}
             <DateInput
-              w="4.5rem"
+              w="4.6rem"
               variant="unstyled"
               valueFormat="YYYY.MM.DD"
               placeholder="????.??.??"

@@ -25,7 +25,7 @@ import { commands, type DatabaseInfo, events } from "@/bindings";
 import FileInput from "@/common/components/FileInput";
 import ProgressButton from "@/common/components/ProgressButton";
 import { getDatabases, type SuccessDatabaseInfo, useDefaultDatabases } from "@/utils/db";
-import { capitalize, formatBytes, formatNumber } from "@/utils/format";
+import { capitalize } from "@/utils/format";
 import { unwrap } from "@/utils/unwrap";
 
 function AddDatabase({
@@ -196,19 +196,19 @@ function DatabaseCard({
               <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                 {t("Common.Size")}
               </Text>
-              <Text size="xs">{formatBytes(database.storage_size ?? 0)}</Text>
+              <Text size="xs">{t("Units.Bytes", { bytes: database.storage_size ?? 0 })}</Text>
             </Stack>
             <Stack gap={0} align="center">
               <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                 {t("Databases.Card.Games")}
               </Text>
-              <Text size="xs">{formatNumber(database.game_count)}</Text>
+              <Text size="xs">{t("Units.Count", { count: database.game_count })}</Text>
             </Stack>
             <Stack gap={0} align="center">
               <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                 {t("Databases.Card.Players")}
               </Text>
-              <Text size="xs">{formatNumber(database.player_count)}</Text>
+              <Text size="xs">{t("Units.Count", { count: database.player_count })}</Text>
             </Stack>
           </Group>
           <ProgressButton
