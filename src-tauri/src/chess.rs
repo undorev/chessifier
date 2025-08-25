@@ -38,11 +38,11 @@ use crate::{
 
 // Constants for timing and rate limiting
 const ENGINE_INIT_TIMEOUT: Duration = Duration::from_secs(10);
-const TICK_DURATION: Duration = Duration::from_millis(10); // Reduced for near-real-time processing
+const TICK_DURATION: Duration = Duration::from_millis(20); // Increased from 10ms to reduce polling frequency
 const MIN_EVENT_INTERVAL: Duration = Duration::from_millis(50); // Target ≤50ms latency
-const MAX_EVENT_INTERVAL: Duration = Duration::from_millis(100); // Reduced maximum interval
+const MAX_EVENT_INTERVAL: Duration = Duration::from_millis(150); // Increased base timeout threshold
 const ENGINE_STOP_DELAY: Duration = Duration::from_millis(50);
-const EVENTS_PER_SECOND: u32 = 20; // Increased for more frequent updates
+const EVENTS_PER_SECOND: u32 = 15; // Reduced from 20 to prevent spam
 
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -704,12 +704,17 @@ async fn engine_communication_loop(
     let rate_limiter = RateLimiter::direct(Quota::per_second(nonzero!(EVENTS_PER_SECOND)));
     let mut last_best_moves_payload: Option<BestMovesPayload> = None;
     let mut first_result_sent = false;
+    let mut timeout_count = 0;
+    let mut last_timeout_emit = Instant::now();
 
     let result = async {
         loop {
             match timeout(TICK_DURATION, reader.next_line()).await {
                 Ok(Ok(Some(line))) => {
                     debug!("Raw engine output: {}", line);
+                    
+                    // Reset timeout counter on successful read
+                    timeout_count = 0;
                     
                     let mut proc = process.lock().await;
                     proc.logs.push(EngineLog::Engine(line.clone()));
@@ -741,10 +746,20 @@ async fn engine_communication_loop(
                                 moves: proc.options.moves.clone(),
                                 progress: 100.0,
                             };
-                            
-                            if let Err(e) = payload.emit(&app) {
-                                warn!("Failed to emit final bestmove payload: {}", e);
+
+                            info!("Emitting final bestmove payload for engine {} on tab {}", id, tab);
+
+                            match payload.emit(&app) {
+                                Ok(_) => {
+                                    debug!("Successfully emitted bestmove payload");
+                                    tokio::time::sleep(Duration::from_millis(30)).await;
+                                }
+                                Err(e) => {
+                                    error!("Failed to emit final bestmove payload: {:?}", e);
+                                }
                             }
+
+                            info!("Analysis complete, cleaning up engine process");
                             
                             proc.last_progress = 100.0;
                             proc.running = false;
@@ -763,19 +778,39 @@ async fn engine_communication_loop(
                     break;
                 }
                 Err(_) => {
-                    // Timeout - check for pending events to emit with more frequent checks
+                    timeout_count += 1;
+                    
+                    // Only consider emitting timeout payloads if we have pending data
+                    // and enough time has passed since the last timeout emission
                     if let Some(ref payload) = last_best_moves_payload {
+                        let now = Instant::now();
+                        let time_since_last_emit = now.duration_since(last_timeout_emit);
+                        
+                        // Use exponential backoff for timeout intervals to reduce spam
+                        let timeout_threshold = if timeout_count < 10 {
+                            MAX_EVENT_INTERVAL
+                        } else if timeout_count < 50 {
+                            Duration::from_millis(200) // 200ms after initial period
+                        } else {
+                            Duration::from_millis(500) // 500ms for long periods of no activity
+                        };
+                        
                         let proc = process.lock().await;
-                        let should_emit_timeout = proc.last_event_sent.map_or(true, |t| t.elapsed() >= MAX_EVENT_INTERVAL);
-                        drop(proc);
+                        let should_emit_timeout = proc.last_event_sent.map_or(
+                            time_since_last_emit >= timeout_threshold,
+                            |t| t.elapsed() >= timeout_threshold
+                        );
                         
                         if should_emit_timeout {
-                            debug!("Emitting timeout payload after {}ms interval", MAX_EVENT_INTERVAL.as_millis());
+                            trace!("Emitting timeout payload after {}ms (timeout_count: {})", 
+                                   timeout_threshold.as_millis(), timeout_count);
+                            
                             if let Err(e) = payload.emit(&app) {
                                 warn!("Failed to emit timeout payload: {}", e);
                             } else {
                                 let mut proc = process.lock().await;
-                                proc.last_event_sent = Some(Instant::now());
+                                proc.last_event_sent = Some(now);
+                                last_timeout_emit = now;
                             }
                             
                             last_best_moves_payload = None;
@@ -844,15 +879,20 @@ async fn handle_info_message(
                     debug!("Emitting first analysis result: depth={}, multipv={}", cur_depth, multipv);
                     true
                 } else if cur_depth > proc.last_depth {
-                    // Only emit if we've progressed to a new depth to ensure sequential emission
+                    // Always emit when we progress to a new depth
                     debug!("Depth progression detected: {} -> {}", proc.last_depth, cur_depth);
                     true
                 } else if proc.last_event_sent.map_or(false, |t| t.elapsed() >= MIN_EVENT_INTERVAL) && rate_limiter.check().is_ok() {
                     debug!("Emitting update for same depth due to time interval: depth={}", cur_depth);
                     true
                 } else {
-                    trace!("Storing payload for later emission: depth={}", cur_depth);
-                    *last_best_moves_payload = Some(payload.clone());
+                    // Only store payload for timeout emission if it represents meaningful progress
+                    // (new depth or significant time has passed since last event)
+                    if cur_depth > proc.last_depth || 
+                       proc.last_event_sent.map_or(true, |t| t.elapsed() >= Duration::from_millis(200)) {
+                        trace!("Storing meaningful payload for potential timeout emission: depth={}", cur_depth);
+                        *last_best_moves_payload = Some(payload.clone());
+                    }
                     false
                 };
                 
@@ -891,7 +931,14 @@ fn calculate_progress(go_mode: &GoMode, depth: u32, nodes: u32, elapsed: Duratio
         GoMode::Nodes(target_nodes) => {
             (nodes as f64 / *target_nodes as f64) * 100.0
         }
-        GoMode::PlayersTime(_) | GoMode::Infinite => 99.99,
+        GoMode::PlayersTime(_) => {
+            (depth as f64 / 20.0).min(0.99) * 100.0 // Assume ~20 depth target
+        }
+        GoMode::Infinite => {
+            // Use time-based estimation for infinite analysis
+            let time_factor = (elapsed.as_secs() as f64 / 30.0).min(0.99); // 30 second estimation
+            time_factor * 100.0
+        }
     }
 }
 
