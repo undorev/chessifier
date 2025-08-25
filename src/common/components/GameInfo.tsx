@@ -233,7 +233,7 @@ function GameInfo({
             onChange={(n) =>
               setHeaders({
                 ...headers,
-                white_elo: Number.parseInt(n.currentTarget.value),
+                white_elo: Number.parseInt(n.currentTarget.value, 10),
               })
             }
             disabled={disabled}
@@ -263,7 +263,7 @@ function GameInfo({
             onChange={(n) =>
               setHeaders({
                 ...headers,
-                black_elo: Number.parseInt(n.currentTarget.value),
+                black_elo: Number.parseInt(n.currentTarget.value, 10),
               })
             }
             disabled={disabled}

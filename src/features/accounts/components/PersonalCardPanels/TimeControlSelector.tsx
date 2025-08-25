@@ -34,13 +34,13 @@ const TimeControlSelector = ({ onTimeControlChange, website, allowAll }: TimeCon
 
   useEffect(() => {
     onTimeControlChange(timeControl);
-  }, [timeControl]);
+  }, [timeControl, onTimeControlChange]);
 
   useEffect(() => {
     if (!timeControls.some((control) => control.value === timeControl)) {
       setTimeControl(defaultTimeControl);
     }
-  }, [website, timeControls]);
+  }, [timeControl, timeControls, defaultTimeControl]);
 
   return (
     <Select

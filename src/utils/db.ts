@@ -18,7 +18,23 @@ export type SuccessDatabaseInfo = Extract<DatabaseInfo, { type: "success" }>;
 
 export type Sides = "WhiteBlack" | "BlackWhite" | "Any";
 
-const DATABASES: any[] = [
+export type DownloadableDatabase = {
+  title: string;
+  game_count: number;
+  player_count: number;
+  storage_size: number;
+  downloadLink: string;
+};
+// TODO: These two types should follow the same format (camelCase vs snake_case)
+export type DownloadablePuzzleDatabase = {
+  title: string;
+  description: string;
+  puzzleCount: number;
+  storageSize: number;
+  downloadLink: string;
+};
+
+const DATABASES: DownloadableDatabase[] = [
   {
     title: "Caissabase 2024",
     game_count: 5404926,
@@ -49,7 +65,7 @@ const DATABASES: any[] = [
   },
 ];
 
-const PUZZLE_DATABASES: any[] = [
+const PUZZLE_DATABASES: DownloadablePuzzleDatabase[] = [
   {
     title: "Lichess Puzzles",
     description: "A collection of all puzzles from Lichess.org",

@@ -5,6 +5,7 @@ import {
   Group,
   Image,
   Kbd,
+  type MantineColorScheme,
   Menu,
   Text,
   UnstyledButton,
@@ -81,10 +82,10 @@ const Icons = {
 };
 
 function getActions(
-  navigate: any,
-  colorScheme: any,
-  handleQuickThemeChange: any,
-  t: any,
+  navigate: ReturnType<typeof useNavigate>,
+  colorScheme: MantineColorScheme,
+  handleQuickThemeChange: (value: string) => void,
+  t: (key: string) => string,
 ): (SpotlightActionGroupData | SpotlightActionData)[] {
   const themeActions = [];
 
@@ -160,7 +161,7 @@ function TopBar({ menuActions }: { menuActions: MenuGroup[] }) {
   const isNative = useAtomValue(nativeBarAtom);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
+  const { colorScheme } = useMantineColorScheme();
   const osColorScheme = useColorScheme();
   const { availableThemes, autoDetectEnabled, setTheme } = useTheme();
   const { toggleAutoDetection } = useThemeDetection();

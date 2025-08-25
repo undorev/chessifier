@@ -48,7 +48,7 @@ export async function getBestMoves(
   return [
     100,
     moves
-      .slice(0, Number.parseInt(options.extraOptions.find((o) => o.name === "MultiPV")?.value ?? "1"))
+      .slice(0, Number.parseInt(options.extraOptions.find((o) => o.name === "MultiPV")?.value ?? "1", 10))
       .map((m, i) => ({
         score: { value: chessDBevalToScore(m.score), wdl: null },
         nodes: 0,

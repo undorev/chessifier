@@ -6,7 +6,7 @@ import { chessgroundMove } from "chessops/compat";
 import { makeFen } from "chessops/fen";
 import { parseSan } from "chessops/san";
 import { useAtom, useAtomValue } from "jotai";
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStore } from "zustand";
 import type { Score } from "@/bindings";
 import { Chessground } from "@/chessground/Chessground";
@@ -61,7 +61,7 @@ function AnalysisRow({
     };
   }, [reset]);
 
-  useEffect(() => reset(), [open]);
+  useEffect(() => reset(), [reset]);
 
   const [evalDisplay, setEvalDisplay] = useAtom(scoreTypeFamily(engine));
 

@@ -1,5 +1,4 @@
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/styles/theme";
 
 export const variationBorder = style({
   borderLeft: "2px solid #404040",

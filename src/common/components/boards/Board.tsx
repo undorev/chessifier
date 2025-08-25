@@ -59,6 +59,7 @@ import { chessboard } from "@/styles/Chessboard.css";
 import { ANNOTATION_INFO, isBasicAnnotation } from "@/utils/annotation";
 import { getMaterialDiff, getVariationLine } from "@/utils/chess";
 import { chessopsError, forceEnPassant, positionFromFen } from "@/utils/chessops";
+import { logger } from "@/utils/logger";
 import { arrowColors } from "../panels/analysis/BestMoves";
 import AnnotationHint from "./AnnotationHint";
 import Clock from "./Clock";
@@ -113,7 +114,6 @@ function Board({
     store,
     useShallow((s) => getVariationLine(s.root, s.position)),
   );
-  const position = useStore(store, (s) => s.position);
   const headers = useStore(store, (s) => s.headers);
   const currentNode = useStore(store, (s) => s.currentNode());
 
@@ -172,10 +172,11 @@ function Board({
 
     domtoimage.toBlob(refChildNode).then(async (blob) => {
       if (blob == null) return;
-      let documentsDirPath: any;
+      let documentsDirPath: string;
       try {
         documentsDirPath = await documentDir();
       } catch (e) {
+        logger.error("Error getting document directory", e);
         documentsDirPath = await homeDir();
       }
 

@@ -288,9 +288,9 @@ function EngineCard({ engine, engineId }: { engine: LocalEngine; engineId: numbe
   const getInstallActionLabel = () => {
     switch (engine.installMethod) {
       case "brew":
-        return t("Common.Install") + " (Brew)";
+        return `${t("Common.Install")} (Brew)`;
       case "package":
-        return t("Common.Install") + " (Package)";
+        return `${t("Common.Install")} (Package)`;
       default:
         return t("Common.Install");
     }

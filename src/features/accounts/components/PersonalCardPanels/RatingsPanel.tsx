@@ -44,7 +44,6 @@ function RatingsPanel({ playerName, info }: RatingsPanelProps) {
   const [timeRange, setTimeRange] = useState({ start: 0, end: 0 });
 
   const dates = useMemo(() => {
-    const timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime();
     return Array.from(
       new Set([

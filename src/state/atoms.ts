@@ -82,7 +82,7 @@ export const storedDocumentDirAtom = atomWithStorage<string>("document-dir", "",
 
 export const fontSizeAtom = atomWithStorage(
   "font-size",
-  Number.parseInt(document.documentElement.style.fontSize) || 100,
+  Number.parseInt(document.documentElement.style.fontSize, 10) || 100,
 );
 
 export const moveNotationTypeAtom = atomWithStorage<"letters" | "symbols">("letters", "symbols");

@@ -199,7 +199,7 @@ function Table({
       });
       navigate({ to: "/boards" });
     },
-    [selected, setActiveTab, setTabs, navigate],
+    [setActiveTab, setTabs, navigate],
   );
 
   return (

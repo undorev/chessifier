@@ -145,7 +145,7 @@ export async function downloadChessCom(player: string, timestamp: number | null)
   });
   const filteredArchives = archives.archives.filter((archive) => {
     const [year, month] = archive.split("/").slice(-2);
-    const archiveDate = new Date(Number.parseInt(year), Number.parseInt(month) - 1);
+    const archiveDate = new Date(Number.parseInt(year, 10), Number.parseInt(month, 10) - 1);
     return archiveDate >= approximateDate;
   });
 

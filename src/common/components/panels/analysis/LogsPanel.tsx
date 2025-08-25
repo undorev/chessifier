@@ -29,7 +29,7 @@ export default function LogsPanel() {
         behavior: "smooth",
       });
     }
-  }, [data?.length, mutate]);
+  }, []);
 
   const [filter, setFilter] = useState<"gui" | "engine" | "all">("all");
   const filteredData = useMemo(

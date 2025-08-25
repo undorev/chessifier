@@ -74,7 +74,7 @@ function BoardAnalysis() {
         store,
       });
     }
-  }, [setCurrentTab, currentTab, documentDir, store]);
+  }, [setCurrentTab, currentTab, documentDir, store, setStoreSave]);
 
   const reloadBoard = useCallback(async () => {
     if (currentTab != null) {
@@ -84,7 +84,7 @@ function BoardAnalysis() {
         setStoreState(state);
       }
     }
-  }, [store]);
+  }, [currentTab, setStoreState]);
 
   useEffect(() => {
     if (currentTab?.source?.type === "file" && autoSave && dirty) {

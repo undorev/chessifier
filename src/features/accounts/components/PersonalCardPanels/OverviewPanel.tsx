@@ -1,4 +1,4 @@
-import { Stack, Text, useMantineColorScheme, useMantineTheme } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
@@ -165,7 +165,7 @@ function DateChart({ dataPerMonth }: { dataPerMonth: { name: string; count: numb
         data={data}
         onClick={(e) => {
           // @ts-expect-error
-          const year = Number.parseInt(e.activePayload?.[0]?.payload?.name);
+          const year = Number.parseInt(e.activePayload?.[0]?.payload?.name, 10);
           if (year) {
             setSelectedYear((prev) => (prev === year ? null : year));
           }

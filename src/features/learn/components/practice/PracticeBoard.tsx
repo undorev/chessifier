@@ -110,7 +110,7 @@ function PracticeBoard({
       console.error("Engine move failed:", error);
       engineThinkingRef.current = false;
     }
-  }, [pos, engineColor, currentFen, engine, turn]);
+  }, [pos, engineColor, currentFen, engine]);
 
   useEffect(() => {
     const unlisten = events.bestMovesPayload.listen(({ payload }) => {
@@ -161,7 +161,7 @@ function PracticeBoard({
       }, 100);
       return () => clearTimeout(timeout);
     }
-  }, [isEngineTurn, requestEngineMove, engine, engineColor, turn]);
+  }, [isEngineTurn, requestEngineMove, engine]);
 
   useEffect(() => {
     return () => {

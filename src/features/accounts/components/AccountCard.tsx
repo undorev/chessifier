@@ -160,7 +160,7 @@ export function AccountCard({
     return () => {
       unlisten.then((f) => f());
     };
-  }, [setDatabases]);
+  }, [setDatabases, type, title]);
 
   const downloadedGames = database?.type === "success" ? database.game_count : 0;
   const percentage = total === 0 || downloadedGames === 0 ? "0" : ((downloadedGames / total) * 100).toFixed(2);

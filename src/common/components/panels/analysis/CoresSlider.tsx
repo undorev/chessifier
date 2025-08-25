@@ -9,7 +9,7 @@ export default function CoresSlider(props: { value: number; setValue: (v: number
       size="xs"
       color={props.color || theme.primaryColor}
       value={props.value.toString()}
-      onChange={(v) => props.setValue(Number.parseInt(v))}
+      onChange={(v) => props.setValue(Number.parseInt(v, 10))}
       data={values.map((v) => v.toString())}
     />
   );

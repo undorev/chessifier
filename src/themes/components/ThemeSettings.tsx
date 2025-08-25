@@ -5,7 +5,6 @@ import {
   Center,
   Group,
   Modal,
-  rem,
   SegmentedControl,
   Stack,
   Text,

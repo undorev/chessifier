@@ -1,4 +1,5 @@
 import { Box } from "@mantine/core";
+import { useId } from "@mantine/hooks";
 import type { Color, Square } from "chessops";
 import type { JSX } from "react";
 import { ANNOTATION_INFO, type Annotation } from "@/utils/annotation";
@@ -13,6 +14,7 @@ export default function AnnotationHint({
   annotation: Annotation;
   orientation: Color;
 }) {
+  const shadowFilterId = useId();
   const { file, rank } = squareToCoordinates(square, orientation);
   const color = ANNOTATION_INFO[annotation]?.color || "gray";
 
@@ -45,7 +47,7 @@ export default function AnnotationHint({
             <svg viewBox="0 0 100 100">
               <title>{annotation}</title>
               <defs>
-                <filter id="shadow">
+                <filter id={shadowFilterId}>
                   <feDropShadow dx="0" dy="1" floodOpacity="0.3" stdDeviation="0" />
                 </filter>
               </defs>
